@@ -1,5 +1,6 @@
 package com.just.donate.flow;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,5 +24,13 @@ public class Organisation {
 
     public void addAccount(String name) {
         accounts.add(new Account(name));
+    }
+
+    public void addEarmarking(String earmarking) {
+        accounts.forEach(account -> account.addEarmarking(earmarking));
+    }
+
+    public BigDecimal totalBalance() {
+        return accounts.stream().map(Account::totalBalance).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

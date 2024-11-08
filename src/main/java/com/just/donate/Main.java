@@ -1,17 +1,28 @@
 package com.just.donate;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
+import com.just.donate.flow.Organisation;
+
+import java.math.BigDecimal;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+        Organisation organisation = new Organisation("Just Donate");
+
+        organisation.addAccount("Paypal");
+        organisation.addAccount("Bank");
+
+        organisation.addEarmarking("School");
+        organisation.addEarmarking("Hospital");
+
+        organisation.getAccounts().forEach(account -> {
+            account.donate("Alice", BigDecimal.valueOf(100));
+            account.donate("Bob", BigDecimal.valueOf(200), "School");
+            account.donate("Charlie", BigDecimal.valueOf(300), "Hospital");
+        });
+
+        System.out.println("Total balance: " + organisation.totalBalance());
+
     }
 }
