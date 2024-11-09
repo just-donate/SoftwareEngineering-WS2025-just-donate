@@ -1,4 +1,4 @@
 package com.just.donate.flow;
 
-public class UnboundDonationQueue {
+public class UnboundDonationQueue extends DonationQueue {
 }

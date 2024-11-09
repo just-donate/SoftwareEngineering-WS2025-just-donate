@@ -24,4 +24,15 @@ public class Organisation {
     public void addAccount(String name) {
         accounts.add(new Account(name));
     }
+
+    public void addAccount(Account account) {
+        accounts.add(account);
+    }
+
+    public void printQueues() {
+        for (Account account : this.accounts) {
+            System.out.println("==== Account: " + account.getName());
+            account.printQueues();
+        }
+    }
 }

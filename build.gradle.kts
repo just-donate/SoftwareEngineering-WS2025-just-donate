@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    application
 }
 
 group = "com.just.donate"
@@ -16,4 +17,12 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
+application {
+    mainClass.set("com.just.donate.Main")
 }
