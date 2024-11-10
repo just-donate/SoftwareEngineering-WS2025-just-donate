@@ -22,8 +22,19 @@ public class Organisation {
         return accounts;
     }
 
+    public Account getAccount(String name) {
+        return accounts.stream()
+                .filter(account -> account.getName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+    }
+
     public void addAccount(String name) {
         accounts.add(new Account(name));
+    }
+
+    public void addAccount(Account account) {
+        accounts.add(account);
     }
 
     public void addEarmarking(String earmarking) {
@@ -32,5 +43,9 @@ public class Organisation {
 
     public BigDecimal totalBalance() {
         return accounts.stream().map(Account::totalBalance).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal totalEarmarkedBalance(String earmarking) {
+        return accounts.stream().map(a -> a.totalEarmarkedBalance(earmarking)).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

@@ -5,11 +5,22 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a single donation. A donation can be split into multiple parts, e.g. for different purposes.
+ * The donation is always made by a donor and has a date when it was made.
+ */
 public class Donation {
 
     private final String donor;
     private final LocalDateTime donationDate;
     private final List<DonationPart> parts;
+
+    protected Donation(String donor, BigDecimal amount, LocalDateTime donationDate) {
+        this.donor = donor;
+        this.parts = new ArrayList<>();
+        this.parts.add(new DonationPart(amount));
+        this.donationDate = donationDate;
+    }
 
     public Donation(String donor, BigDecimal amount) {
         this.donor = donor;
