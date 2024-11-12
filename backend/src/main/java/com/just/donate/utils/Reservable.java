@@ -15,6 +15,10 @@ public class Reservable<R extends Splittable<R, S>, S, C> {
     public boolean isReserved() {
         return context.isPresent();
     }
+    
+    public boolean isReservedBy(C context) {
+        return this.context.map(c -> c.equals(context)).orElse(false);
+    }
 
     public void reserve(C context) {
         this.context = Optional.of(context);

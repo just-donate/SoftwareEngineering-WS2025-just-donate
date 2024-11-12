@@ -41,7 +41,7 @@ public class Expense {
             throw new IllegalStateException("Donation part already used to pay this expense");
         }
 
-        return donationPart.spendOn(this);
+        return null; // donationPart.spendOn(this);
     }
 
     public boolean isPaid() {

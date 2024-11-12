@@ -5,8 +5,7 @@ import com.just.donate.utils.Splittable;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static com.just.donate.utils.Utils.less;
-import static com.just.donate.utils.Utils.lessOrEqual;
+import static com.just.donate.utils.Utils.*;
 
 /**
  * Represents a part of a donation that can be spent on an expense. It is mainly used to keep track of the amount
@@ -15,40 +14,30 @@ import static com.just.donate.utils.Utils.lessOrEqual;
 public class DonationPart implements Splittable<DonationPart, BigDecimal> {
 
     private final BigDecimal amount;
-    private boolean spent;
 
     protected DonationPart(BigDecimal amount) {
         this.amount = amount;
-        this.spent = false;
     }
 
     public BigDecimal getAmount() {
         return amount;
     }
 
-    /**
-     * Check if the donation part has been spent on an expense. If it has, it cannot be spent again and
-     * is part of the expense that it was spent on.
-     * @return True if the donation part has been spent, false otherwise.
-     */
-    public boolean isSpent() {
-        return spent;
-    }
-
     @Override
-    public Split<DonationPart> splitOf(BigDecimal bigDecimal) {
-        if (less(bigDecimal, amount)) {
+    public Split<DonationPart, BigDecimal> splitOf(BigDecimal bigDecimal) {
+        if (equal(amount, BigDecimal.ZERO)) {
+            return new Split<>(Optional.empty(), Optional.of(this), Optional.empty());
+        } else if (less(bigDecimal, amount)) {
             BigDecimal remainingAmount = amount.subtract(bigDecimal);
-            return Split.withRemaining(new DonationPart(bigDecimal), new DonationPart(remainingAmount));
+            return new Split<>(Optional.of(new DonationPart(bigDecimal)), Optional.of(new DonationPart(remainingAmount)), Optional.empty());
         } else if (bigDecimal.equals(amount)) {
-            return Split.noRemaining(this);
+            return new Split<>(Optional.of(this), Optional.empty(), Optional.empty());
+        } else if (greater(bigDecimal, amount)) {
+            BigDecimal notPaid = bigDecimal.subtract(amount);
+            return new Split<>(Optional.of(this), Optional.empty(), Optional.of(notPaid));
         } else {
-            throw new IllegalStateException("More split of than available!");
+            throw new IllegalStateException("Should not happen?");
         }
     }
 
-    @Override
-    public boolean canSplit(BigDecimal bigDecimal) {
-        return lessOrEqual(BigDecimal.ZERO, bigDecimal) && lessOrEqual(bigDecimal, amount);
-    }
 }

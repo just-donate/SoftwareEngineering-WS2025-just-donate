@@ -1,36 +1,27 @@
 package com.just.donate.utils;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.vavr.collection.List;
 
 public class ReservableQueue<T extends Splittable<T, S>, S, C> {
 
-    private int size = 0;
-    private List<Reservable<T, S, C>> queue = new ArrayList<>();
+    private List<Reservable<T, S, C>> queue = List.empty();
 
     public void add(T value) {
-        queue.add(new Reservable<>(value));
-        size++;
+        queue = queue.append(new Reservable<>(value));
     }
 
-    public T pollUnreserved() {
-        Reservable<T, S, C> polled = null;
-        for (Reservable<T, S, C> reservable : queue) {
-            if (!reservable.isReserved()) {
-                polled = reservable;
-                break;
-            }
-        }
-        if (polled != null) {
-            queue.remove(polled);
-            size--;
-            return polled.getValue();
-        } else {
-            return null;
-        }
+    public void addValues(List<T> values) {
+        queue = queue.appendAll(values.map(Reservable::new));
     }
 
-    public T pollUnreserved(S split) {}
+    public void addAll(List<Reservable<T, S, C>> values, C addedTo) {
+        return;
+    }
+
+    public S reserve(S s) {
+        // TODO
+        return null;
+    }
 
 
 

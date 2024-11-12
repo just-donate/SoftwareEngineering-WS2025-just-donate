@@ -1,0 +1,68 @@
+import org.codehaus.groovy.runtime.GStringImpl
+
+plugins {
+    id 'java'
+    id 'scala'
+    id 'application'
+}
+
+group = "com.just.donate"
+version = "1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    scalaMajorVersion = '3'
+    scalaVersion = "${scalaMajorVersion}.0.2" as GStringImpl
+}
+
+dependencies {
+    implementation "org.scala-lang:scala3-library_3:${scalaVersion}"
+
+    implementation 'org.http4s:http4s-dsl_3:1.0.0-M43'
+    implementation 'org.http4s:http4s-ember-server_3:1.0.0-M43'
+    implementation 'org.http4s:http4s-ember-client_3:1.0.0-M43'
+    implementation 'org.http4s:http4s-circe_3:1.0.0-M43'
+    implementation 'org.typelevel:log4cats-slf4j_3:2.7.0'
+    implementation 'org.typelevel:log4cats-core_3:2.7.0'
+
+    implementation "io.vavr:vavr:0.10.4"
+
+    testImplementation "org.scalatest:scalatest_${scalaMajorVersion}:3.2.10"
+    testImplementation platform("org.junit:junit-bom:5.10.0")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+}
+
+application {
+    mainClass = 'com.just.donate.Hello' // Replace with your actual main class
+}
+
+sourceSets {
+    main {
+        scala {
+            srcDirs = ['src/main/scala']
+        }
+        java {
+            srcDirs = ['src/main/java']
+        }
+    }
+    test {
+        scala {
+            srcDirs = ['src/test/scala']
+        }
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+// Optional: Scala compiler options
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.additionalParameters = ['-deprecation', '-feature']
+}

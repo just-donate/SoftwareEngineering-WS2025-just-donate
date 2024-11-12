@@ -19,5 +19,9 @@ public class Utils {
     public static boolean greaterOrEqual(BigDecimal a, BigDecimal b) {
         return a.compareTo(b) >= 0;
     }
+    
+    public static boolean equal(BigDecimal a, BigDecimal b) {
+        return a.compareTo(b) == 0;
+    }
 
 }

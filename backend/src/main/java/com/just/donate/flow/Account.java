@@ -93,14 +93,14 @@ public class Account {
 
         if (expense.isBound()) {
             // Can we cover with only expenses from this bound queue?
-            if (less(expense.getAmount(), getBoundQueue(expense.getEarmarking()).totalBalance())) {
-                getBoundQueue(expense.getEarmarking()).spendGoMinus(expense);
+            if (less(expense.getAmount(), getBoundQueue(expense.getEarmarking()).get().totalBalance())) {
+                getBoundQueue(expense.getEarmarking()).get().spendGoMinus(expense);
                 return true;
             } else {
                 // We need to check if we can cover the expense with donations from upstream accounts
                 BigDecimal upstreamBalance = getUpstreamBalance(expense.getEarmarking());
                 if (less(expense.getAmount(), upstreamBalance)) {
-                    getBoundQueue(expense.getEarmarking()).spendGoMinus(expense);
+                    getBoundQueue(expense.getEarmarking()).get().spendGoMinus(expense);
                     return true;
                 } else {
                     spendUnbound(expense);
@@ -156,6 +156,6 @@ public class Account {
     }
 
     protected BigDecimal totalEarmarkedBalance(String earmarking) {
-        return getBoundQueue(earmarking).totalBalance();
+        return getBoundQueue(earmarking).get().totalBalance();
     }
 }
