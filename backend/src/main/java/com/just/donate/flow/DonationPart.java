@@ -15,7 +15,7 @@ public class DonationPart implements Splittable<DonationPart, BigDecimal> {
 
     private final BigDecimal amount;
 
-    protected DonationPart(BigDecimal amount) {
+    public DonationPart(BigDecimal amount) {
         this.amount = amount;
     }
 
@@ -38,6 +38,11 @@ public class DonationPart implements Splittable<DonationPart, BigDecimal> {
         } else {
             throw new IllegalStateException("Should not happen?");
         }
+    }
+    
+    @Override
+    public String toString() {
+        return amount.toString();
     }
 
 }

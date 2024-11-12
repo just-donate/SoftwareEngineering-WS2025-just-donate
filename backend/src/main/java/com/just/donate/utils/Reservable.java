@@ -45,4 +45,11 @@ public class Reservable<R extends Splittable<R, S>, S, C> {
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
+    
+    @Override
+    public String toString() {
+        return context
+                .map(c -> String.format("%s(%s)", c, value))
+                .orElseGet(value::toString);
+    }
 }

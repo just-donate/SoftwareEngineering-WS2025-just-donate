@@ -7,17 +7,16 @@ public class ReservableQueue<T extends Splittable<T, S>, S, C> {
 
     private List<Reservable<T, S, C>> queue = List.empty();
 
-    public ReservableQueue() {
-
-    }
-
-
     public void add(T value) {
         queue = queue.append(new Reservable<>(value));
     }
 
     public void addValues(List<T> values) {
         queue = queue.appendAll(values.map(Reservable::new));
+    }
+
+    protected List<Reservable<T, S, C>> getQueue() {
+        return queue;
     }
 
     public void addAll(List<Reservable<T, S, C>> values, C addedTo) {
@@ -28,6 +27,18 @@ public class ReservableQueue<T extends Splittable<T, S>, S, C> {
             return r;
         });
         queue = queue.appendAll(values);
+    }
+
+    public T poll() {
+        return queue.head().getValue();
+    }
+
+    public boolean isEmpty() {
+        return queue.isEmpty();
+    }
+
+    public boolean isFullyReserved() {
+        return queue.forAll(Reservable::isReserved);
     }
 
     public S reserve(S s, C context) {
@@ -60,7 +71,7 @@ public class ReservableQueue<T extends Splittable<T, S>, S, C> {
             // Reserve the part that is split off
             Reservable<T, S, C> splitOf = new Reservable<>(split.getSplit().get());
             splitOf.reserve(context);
-            return new Tuple2<>(null, values.tail().prepend(splitOf).prepend(new Reservable<>(split.getRemain().get())));
+            return new Tuple2<>(null, values.tail().prepend(new Reservable<>(split.getRemain().get())).prepend(splitOf));
         }
 
         // s = value, then we split the whole value off, remain is empty and open is empty
@@ -78,6 +89,12 @@ public class ReservableQueue<T extends Splittable<T, S>, S, C> {
         }
 
         throw new IllegalStateException("Should not happen?");
+    }
+
+    @Override
+    public String toString() {
+        return "[" + queue.map(Reservable::toString).zipWithIndex()
+                .map(t -> String.format("%d: %s", t._2 + 1, t._1)).mkString(", ") + "]";
     }
 
 
