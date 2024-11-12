@@ -33,6 +33,23 @@ public interface Splittable<T, S> {
         public Optional<S> getOpen() {
             return this.open;
         }
+        
+        public boolean fullRemain() {
+            return split.isEmpty() && remain.isPresent() && open.isEmpty();
+        }
+        
+        public boolean someSplit() {
+            return split.isPresent() && remain.isPresent() && open.isEmpty();
+        }
+        
+        public boolean fullSplit() {
+            return split.isPresent() && remain.isEmpty() && open.isEmpty();
+        }
+        
+        public boolean fullOpenSplit() {
+            return split.isPresent() && remain.isEmpty() && open.isPresent();
+        }
+        
     }
 
     public Split<T, S> splitOf(S s);

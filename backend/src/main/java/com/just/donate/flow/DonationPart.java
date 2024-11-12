@@ -25,14 +25,14 @@ public class DonationPart implements Splittable<DonationPart, BigDecimal> {
 
     @Override
     public Split<DonationPart, BigDecimal> splitOf(BigDecimal bigDecimal) {
-        if (equal(amount, BigDecimal.ZERO)) {
+        if (equal(bigDecimal, BigDecimal.ZERO)) {
             return new Split<>(Optional.empty(), Optional.of(this), Optional.empty());
         } else if (less(bigDecimal, amount)) {
             BigDecimal remainingAmount = amount.subtract(bigDecimal);
             return new Split<>(Optional.of(new DonationPart(bigDecimal)), Optional.of(new DonationPart(remainingAmount)), Optional.empty());
         } else if (bigDecimal.equals(amount)) {
             return new Split<>(Optional.of(this), Optional.empty(), Optional.empty());
-        } else if (greater(bigDecimal, amount)) {
+        } else if (greater(bigDecimal, amount) && greater(amount, BigDecimal.ZERO)) {
             BigDecimal notPaid = bigDecimal.subtract(amount);
             return new Split<>(Optional.of(this), Optional.empty(), Optional.of(notPaid));
         } else {
