@@ -4,6 +4,7 @@ import com.just.donate.flow.DonationPart;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,8 +12,8 @@ public class ReservableQueueTest {
 
     @Test
     public void testAddAndReserveExactAmount() {
-        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>();
-        queue.add(new DonationPart(BigDecimal.valueOf(100)));
+        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>("MainAccount");
+        queue.add(new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now()));
 
         BigDecimal amountRemaining = queue.reserve(BigDecimal.valueOf(100), "ContextA");
         assertNull(amountRemaining);
@@ -26,8 +27,8 @@ public class ReservableQueueTest {
 
     @Test
     public void testReserveLessThanAvailableAmount() {
-        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>();
-        queue.add(new DonationPart(BigDecimal.valueOf(100)));
+        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>("MainAccount");
+        queue.add(new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now()));
 
         BigDecimal amountRemaining = queue.reserve(BigDecimal.valueOf(40), "ContextA");
         assertNull(amountRemaining);
@@ -46,8 +47,8 @@ public class ReservableQueueTest {
 
     @Test
     public void testReserveMoreThanAvailableAmount() {
-        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>();
-        queue.add(new DonationPart(BigDecimal.valueOf(50)));
+        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>("MainAccount");
+        queue.add(new DonationPart(BigDecimal.valueOf(50), LocalDateTime.now()));
 
         BigDecimal amountRemaining = queue.reserve(BigDecimal.valueOf(100), "ContextA");
         assertEquals(BigDecimal.valueOf(50), amountRemaining);
@@ -61,9 +62,9 @@ public class ReservableQueueTest {
 
     @Test
     public void testMultipleReservesDifferentContexts() {
-        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>();
-        queue.add(new DonationPart(BigDecimal.valueOf(100)));
-        queue.add(new DonationPart(BigDecimal.valueOf(50)));
+        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>("MainAccount");
+        queue.add(new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now()));
+        queue.add(new DonationPart(BigDecimal.valueOf(50), LocalDateTime.now()));
 
         BigDecimal amountRemaining1 = queue.reserve(BigDecimal.valueOf(80), "ContextA");
         assertNull(amountRemaining1);
@@ -91,8 +92,8 @@ public class ReservableQueueTest {
 
     @Test
     public void testReserveAlreadyReservedItem() {
-        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>();
-        queue.add(new DonationPart(BigDecimal.valueOf(100)));
+        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>("MainAccount");
+        queue.add(new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now()));
 
         queue.reserve(BigDecimal.valueOf(100), "ContextA");
 
@@ -107,9 +108,9 @@ public class ReservableQueueTest {
 
     @Test
     public void testReserveWithSplittingAcrossMultipleItems() {
-        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>();
-        queue.add(new DonationPart(BigDecimal.valueOf(60)));
-        queue.add(new DonationPart(BigDecimal.valueOf(40)));
+        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>("MainAccount");
+        queue.add(new DonationPart(BigDecimal.valueOf(60), LocalDateTime.now()));
+        queue.add(new DonationPart(BigDecimal.valueOf(40), LocalDateTime.now()));
 
         BigDecimal amountRemaining = queue.reserve(BigDecimal.valueOf(80), "ContextA");
         assertNull(amountRemaining);
@@ -131,9 +132,9 @@ public class ReservableQueueTest {
 
     @Test
     public void testInsufficientResources() {
-        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>();
-        queue.add(new DonationPart(BigDecimal.valueOf(30)));
-        queue.add(new DonationPart(BigDecimal.valueOf(20)));
+        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>("MainAccount");
+        queue.add(new DonationPart(BigDecimal.valueOf(30), LocalDateTime.now()));
+        queue.add(new DonationPart(BigDecimal.valueOf(20), LocalDateTime.now()));
 
         BigDecimal amountRemaining = queue.reserve(BigDecimal.valueOf(100), "ContextA");
         assertEquals(BigDecimal.valueOf(50), amountRemaining);
@@ -146,7 +147,7 @@ public class ReservableQueueTest {
 
     @Test
     public void testNoAvailableResources() {
-        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>();
+        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>("MainAccount");
 
         BigDecimal amountRemaining = queue.reserve(BigDecimal.valueOf(50), "ContextA");
         assertEquals(BigDecimal.valueOf(50), amountRemaining);
@@ -155,10 +156,10 @@ public class ReservableQueueTest {
 
     @Test
     public void testAddingAfterReserving() {
-        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>();
+        ReservableQueue<DonationPart, BigDecimal, String> queue = new ReservableQueue<>("MainAccount");
         queue.reserve(BigDecimal.valueOf(50), "ContextA"); // Should have no effect
 
-        queue.add(new DonationPart(BigDecimal.valueOf(100)));
+        queue.add(new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now()));
         BigDecimal amountRemaining = queue.reserve(BigDecimal.valueOf(50), "ContextA");
         assertNull(amountRemaining);
 

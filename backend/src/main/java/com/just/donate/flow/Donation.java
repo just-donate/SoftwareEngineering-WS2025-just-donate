@@ -18,15 +18,15 @@ public class Donation {
     protected Donation(String donor, BigDecimal amount, LocalDateTime donationDate) {
         this.donor = donor;
         this.parts = new ArrayList<>();
-        this.parts.add(new DonationPart(amount));
+        this.parts.add(new DonationPart(amount, donationDate));
         this.donationDate = donationDate;
     }
 
     public Donation(String donor, BigDecimal amount) {
         this.donor = donor;
         this.parts = new ArrayList<>();
-        this.parts.add(new DonationPart(amount));
         this.donationDate = LocalDateTime.now();
+        this.parts.add(new DonationPart(amount, this.donationDate));
     }
 
     public String getDonor() {

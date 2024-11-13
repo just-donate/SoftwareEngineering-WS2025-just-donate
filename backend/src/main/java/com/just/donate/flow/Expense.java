@@ -10,7 +10,7 @@ import static com.just.donate.utils.Utils.lessOrEqual;
 public class Expense {
 
     private final String description;
-    private final BigDecimal amount;
+    private BigDecimal amount;
     private final List<DonationPart> paidBy;
     private final Optional<String> earMarking;
 
@@ -36,12 +36,13 @@ public class Expense {
         return amount;
     }
 
-    public Optional<DonationPart> payWith(DonationPart donationPart) {
+    public void payWith(DonationPart donationPart) {
         if (paidBy.contains(donationPart)) {
             throw new IllegalStateException("Donation part already used to pay this expense");
         }
 
-        return null; // donationPart.spendOn(this);
+        amount = amount.subtract(donationPart.getAmount());
+        paidBy.add(donationPart);
     }
 
     public boolean isPaid() {

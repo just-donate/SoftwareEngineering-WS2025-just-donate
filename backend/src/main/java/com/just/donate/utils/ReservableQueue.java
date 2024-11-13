@@ -2,35 +2,92 @@ package com.just.donate.utils;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
+import io.vavr.control.Option;
 
 public class ReservableQueue<T extends Splittable<T, S>, S, C> {
 
     private List<Reservable<T, S, C>> queue = List.empty();
+    private final C context;
+
+    public ReservableQueue(C context) {
+        this.context = context;
+    }
 
     public void add(T value) {
         queue = queue.append(new Reservable<>(value));
     }
 
-    public void addValues(List<T> values) {
-        queue = queue.appendAll(values.map(Reservable::new));
+    public void add(Reservable<T, S, C> value) {
+        if (value.isReservedBy(this.context)) {
+            value.release();
+        }
+        queue = queue.append(value);
     }
 
-    protected List<Reservable<T, S, C>> getQueue() {
+    public List<Reservable<T, S, C>> getQueue() {
         return queue;
     }
 
-    public void addAll(List<Reservable<T, S, C>> values, C addedTo) {
-        values = values.map(r -> {
-            if (r.isReservedBy(addedTo)) {
-                r.release();
-            }
-            return r;
-        });
-        queue = queue.appendAll(values);
+    public Option<T> pollUnreserved() {
+        Reservable<T, S, C> head = queue.find(r -> !r.isReserved()).getOrNull();
+        if (head == null) {
+            return Option.none();
+        } else {
+            queue = queue.remove(head);
+            return Option.some(head.getValue());
+        }
     }
 
-    public T poll() {
-        return queue.head().getValue();
+    /**
+     * Poll amount s from unreserved Reservables from the queue, split with s if necessary.
+     *
+     * @param s The amount to poll
+     * @return The polled value and the remaining amount s which is not covered by the polled values.
+     */
+    public Tuple2<List<T>, S> pollUnreserved(S s) {
+        Option<Reservable<T, S, C>> peeked = queue.find(r -> !r.isReserved());
+
+        // If there are no unreserved values, return the original split value
+        if (peeked.isEmpty()) {
+            return new Tuple2<>(List.empty(), s);
+        }
+
+        T head = peeked.get().getValue();
+        Splittable.Split<T, S> split = head.splitOf(s);
+
+        // s = 0, nothing was split of, s must be 0, we just return it
+        if (split.fullRemain()) {
+            return new Tuple2<>(List.of(head), s);
+        }
+
+        // s < value, then we split off s, remain is the remaining value and open is empty
+        if (split.someSplit()) {
+            queue = queue.replace(peeked.get(), new Reservable<>(split.getRemain().get()));
+            return new Tuple2<>(List.of(split.getSplit().get()), s);
+        }
+
+        // s = value, then we split the whole value off, remain is empty and open is empty
+        if (split.fullSplit()) {
+            queue = queue.remove(peeked.get());
+            return new Tuple2<>(List.of(split.getSplit().get()), s);
+        }
+
+        // s > value, then we split the whole value off, remain is empty and open is the remaining value
+        if (split.fullOpenSplit()) {
+            queue = queue.remove(peeked.get());
+            Tuple2<List<T>, S> polled = pollUnreserved(split.getOpen().get());
+            return new Tuple2<>(polled._1.prepend(split.getSplit().get()), polled._2);
+        }
+
+        throw new IllegalStateException("Should not happen?");
+    }
+
+    public Option<T> peekUnreserved() {
+        return queue.find(r -> !r.isReserved()).map(Reservable::getValue);
+    }
+
+    public boolean hasUnreserved() {
+        return queue.exists(r -> !r.isReserved());
     }
 
     public boolean isEmpty() {

@@ -4,6 +4,7 @@ import com.just.donate.utils.Splittable;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,19 +12,19 @@ class DonationPartTest {
 
     @Test
     void testBasisDonationPart() {
-        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100));
+        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now());
         assertEquals(donationPart.getAmount(), BigDecimal.valueOf(100));
 
-        DonationPart donationPart2 = new DonationPart(BigDecimal.valueOf(0));
+        DonationPart donationPart2 = new DonationPart(BigDecimal.valueOf(0), LocalDateTime.now());
         assertEquals(donationPart2.getAmount(), BigDecimal.valueOf(0));
 
-        DonationPart donationPart3 = new DonationPart(BigDecimal.valueOf(-100));
+        DonationPart donationPart3 = new DonationPart(BigDecimal.valueOf(-100), LocalDateTime.now());
         assertEquals(donationPart3.getAmount(), BigDecimal.valueOf(-100));
     }
 
     @Test
     void testSplitNothingOf() {
-        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100));
+        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now());
         Splittable.Split<DonationPart, BigDecimal> split = donationPart.splitOf(BigDecimal.valueOf(0));
 
         assertTrue(split.getSplit().isEmpty());
@@ -35,7 +36,7 @@ class DonationPartTest {
 
     @Test
     void splitALittleOf() {
-        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100));
+        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now());
         Splittable.Split<DonationPart, BigDecimal> split = donationPart.splitOf(BigDecimal.valueOf(50));
 
         assertTrue(split.getSplit().isPresent());
@@ -48,7 +49,7 @@ class DonationPartTest {
 
     @Test
     void testSplitOfExact() {
-        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100));
+        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now());
         Splittable.Split<DonationPart, BigDecimal> split = donationPart.splitOf(BigDecimal.valueOf(100));
 
         assertTrue(split.getSplit().isPresent());
@@ -60,7 +61,7 @@ class DonationPartTest {
 
     @Test
     void testSplitOfMore() {
-        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100));
+        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(100), LocalDateTime.now());
         Splittable.Split<DonationPart, BigDecimal> split = donationPart.splitOf(BigDecimal.valueOf(150));
 
         assertTrue(split.getSplit().isPresent());
@@ -72,7 +73,7 @@ class DonationPartTest {
 
     @Test
     void testSplitEmpty() {
-        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(0));
+        DonationPart donationPart = new DonationPart(BigDecimal.valueOf(0), LocalDateTime.now());
         assertThrows(IllegalStateException.class, () -> donationPart.splitOf(BigDecimal.valueOf(100)));
     }
 

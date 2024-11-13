@@ -21,7 +21,7 @@ public class Account {
     public Account(String name) {
         this.name = name;
         this.boundDonations = new ArrayList<>();
-        this.unboundDonations = new DonationQueue();
+        this.unboundDonations = new DonationQueue(this);
         this.incomingFlow = new ArrayList<>();
         this.outgoingFlow = new ArrayList<>();
     }
@@ -56,75 +56,96 @@ public class Account {
         account.addIncomingFlow(this);
     }
 
+    /**
+     * Donate to this specific account of an organisation. The donation is time-stamped with the current time and 
+     * linked to the donor.
+     * 
+     * @param donor The donor of the donation.
+     * @param amount The amount of the donation.
+     */
     public void donate(String donor, BigDecimal amount) {
         Donation donation = new Donation(donor, amount);
-        unboundDonations.add(donation);
+        unboundDonations.addAll(donation.getParts());
     }
 
+    /**
+     * Donate to this specific account of an organisation. The donation is time-stamped with the current time and
+     * linked to the donor. The donation is earmarked for a specific purpose.
+     * 
+     * @param donor The donor of the donation.
+     * @param amount The amount of the donation.
+     * @param boundTo The earmarking of the donation.
+     * @return True if the donation was successful, false otherwise. A donation can fail if the 
+     * earmarking does not exist.
+     */
     public boolean donate(String donor, BigDecimal amount, String boundTo) {
-        Optional<DonationQueue> boundQueue = boundDonations.stream()
-                .filter(bound -> bound._1.equals(boundTo))
-                .map(Tuple2::_2)
-                .findFirst();
+        Optional<DonationQueue> boundQueue = getBoundQueue(boundTo);
 
         if (boundQueue.isPresent()) {
             Donation donation = new Donation(donor, amount);
-            return boundQueue.get().add(donation);
+            boundQueue.get().addAll(donation.getParts());
+            return true;
         } else {
             return false;
         }
     }
 
-    public void addEarmarking(String earmarking) {
-        boundDonations.add(new Tuple2<>(earmarking, new DonationQueue()));
-    }
-
+    /**
+     * Spend the given expense from the donations. If the expense is not fully covered by the donations,
+     * the remaining amount is added to the negative balance, as long as it is covered by the bound donations.
+     * 
+     * @param expense The expense to spend from the donations.
+     */
     protected boolean spend(Expense expense) {
-        // Cases:
+        // If the total balance is less than the expense, we cannot spend it
+        if (less(totalBalance(), expense.getAmount())) {
+            return false;
+        }
+        
+        if (expense.isBound()) {
+            return spendBound(expense);
+        } else {
+            return spendUnbound(expense);
+        }
+    }
+    
+    private boolean spendUnbound(Expense expense) {
         // 1. Expense is unbound, withdraw from unbound donations
         //    - if unbound are not enough, go into minus as long it is covered by bound donations
         //      (we don't need to subtract form bound, as they are reserved and the organization
         //       must cover the expense from unbound later on)
-        // 2. Expense is bound, withdraw from bound donations
-        //    - if bound are not enough, check if up the queue are more and reserve them, go into minus
-        //      as long it is covered by unbound donations
-        // 3. Expense is bound, but not enough bound donations up queue, withdraw from unbound donations.
-        //    - if unbound are not enough, do not go into minus, as an account must be covered, return false
-
-        if (expense.isBound()) {
-            // Can we cover with only expenses from this bound queue?
-            if (less(expense.getAmount(), getBoundQueue(expense.getEarmarking()).get().totalBalance())) {
-                getBoundQueue(expense.getEarmarking()).get().spendGoMinus(expense);
-                return true;
-            } else {
-                // We need to check if we can cover the expense with donations from upstream accounts
-                BigDecimal upstreamBalance = getUpstreamBalance(expense.getEarmarking());
-                if (less(expense.getAmount(), upstreamBalance)) {
-                    getBoundQueue(expense.getEarmarking()).get().spendGoMinus(expense);
-                    return true;
-                } else {
-                    spendUnbound(expense);
-                    return true;
-                }
-            }
-        } else {
-            spendUnbound(expense);
+        // 2. Expense is unbound, but not enough unbound donations, return false
+        
+        Expense remainingExpense = spendUnboundFromAccount(expense);
+        if (remainingExpense.isPaid()) {
             return true;
         }
+        
+        // Now we need to reserve upstream
+        // TODO: Implement this
+        return false;
     }
-
-    /**
-     * Spend the given expense from the unbound donations. If the expense is not fully covered by the donations,
-     * the remaining amount is added to the negative balance, as long as it is covered by the bound donations.
-     * @param expense The expense to spend from the unbound donations.
-     */
-    private void spendUnbound(Expense expense) {
-        if (less(expense.getAmount(), totalBalance())) {
-            throw new IllegalStateException("Expense is bigger than total account balance");
-        }
-
-        unboundDonations.spendGoMinus(expense);
+    
+    private Expense spendUnboundFromAccount(Expense expense) {
+        var polled = this.unboundDonations.getDonationsQueue().pollUnreserved(expense.getAmount());
+        polled._1().forEach(expense::payWith);
+        return expense;
     }
+    
+    private boolean spendBound(Expense expense) {
+        // 1. Expense is bound, withdraw from bound donations
+        //    - if bound are not enough, check if up the queue are more and reserve them, go into minus
+        //      as long it is covered by unbound donations
+        // 2. Expense is bound, but not enough bound donations up queue, withdraw from unbound donations.
+        //    - if unbound are not enough, do not go into minus, as an account must be covered, return false
+        String earmarking = expense.getEarmarking();
+        
+        // TODO: Implement this
+        return false;
+    }
+    
+    
+    
 
     private BigDecimal totalBalanceUnbound() {
         return unboundDonations.totalBalance();
@@ -136,6 +157,10 @@ public class Account {
             balance = balance.add(account.getUpstreamBalance(earmarking));
         }
         return balance;
+    }
+
+    protected void addEarmarking(String earmarking) {
+        boundDonations.add(new Tuple2<>(earmarking, new DonationQueue(this)));
     }
 
     private Optional<DonationQueue> getBoundQueue(String earmarking) {
@@ -156,6 +181,6 @@ public class Account {
     }
 
     protected BigDecimal totalEarmarkedBalance(String earmarking) {
-        return getBoundQueue(earmarking).get().totalBalance();
+        return getBoundQueue(earmarking).map(DonationQueue::totalBalance).orElse(BigDecimal.ZERO);
     }
 }

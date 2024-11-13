@@ -15,7 +15,7 @@ repositories {
 
 ext {
     scalaMajorVersion = '3'
-    scalaVersion = "${scalaMajorVersion}.0.2" as GStringImpl
+    scalaVersion = "${scalaMajorVersion}.3.3" as GStringImpl
 }
 
 dependencies {
@@ -36,7 +36,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'com.just.donate.Hello' // Replace with your actual main class
+    mainClass = 'com.just.donate.Server'
 }
 
 sourceSets {
@@ -62,7 +62,21 @@ tasks.test {
     useJUnitPlatform()
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.just.donate.Server'
+        )
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 // Optional: Scala compiler options
-tasks.withType(ScalaCompile) {
+tasks.withType(ScalaCompile).configureEach {
     scalaCompileOptions.additionalParameters = ['-deprecation', '-feature']
 }
