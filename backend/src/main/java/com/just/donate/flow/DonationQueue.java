@@ -1,53 +1,33 @@
 package com.just.donate.flow;
 
+import com.just.donate.utils.ReservableQueue;
+
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 class DonationQueue {
 
-    private final Queue<DonationPart> donations;
-    private BigDecimal negativeBalance = BigDecimal.ZERO;
-    private final List<Expense> outstandingExpenses;
+    private final ReservableQueue<DonationPart, BigDecimal, Account> donations;
+    private final BigDecimal negativeBalance = BigDecimal.ZERO;
 
-    public DonationQueue() {
-        this.donations = new ArrayDeque<>();
-        this.outstandingExpenses = new ArrayList<>();
+    public DonationQueue(Account account) {
+        this.donations = new ReservableQueue<>(account);
     }
 
-    public boolean add(DonationPart donation) {
-        return donations.add(donation);
+    public void add(DonationPart donation) {
+        donations.add(donation);
     }
-
-    public boolean add(Donation donation) {
-        if (outstandingExpenses.isEmpty()) {
-            return donations.add(new DonationPart(donation.getAmount()));
-        } else {
-            return false;
-        }
+    
+    public void addAll(List<DonationPart> donations) {
+        donations.forEach(this::add);
     }
 
     public BigDecimal totalBalance() {
-        return donations.stream()
-                .map(DonationPart::getAmount)
-                .reduce(negativeBalance, BigDecimal::add);
+        return donations.getQueue().map(r -> r.getValue().getAmount()).foldLeft(BigDecimal.ZERO, BigDecimal::add);
     }
-
-    /**
-     * Spend the given expense from the donation queue. If the expense is not fully covered by the donations,
-     * the remaining amount is added to the negative balance.
-     * @param expense The expense to spend from the donation queue.
-     */
-    protected void spendGoMinus(Expense expense) {
-        while (!expense.isPaid() && !donations.isEmpty()) {
-            DonationPart donationPart = donations.poll();
-            Optional<DonationPart> remaining = expense.payWith(donationPart);
-            if (remaining.isPresent()) {
-                // TODO: this is not really working as it should put the remaining back into the front of the queue
-                this.add(remaining.get());
-                break;
-            }
-        }
-
-
+    
+    public ReservableQueue<DonationPart, BigDecimal, Account> getDonationsQueue() {
+        return donations;
     }
 }

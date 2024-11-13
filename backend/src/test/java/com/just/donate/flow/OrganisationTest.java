@@ -60,9 +60,9 @@ class OrganisationTest {
         assertEquals(new BigDecimal("200.00"), newRoots.totalBalance());
 
         assertEquals(new BigDecimal("200.00"), paypal.totalEarmarkedBalance("Education"));
-//        assertEquals(new BigDecimal("200.00"), newRoots.totalEarmarkedBalance("Education"));
-
-//        assertThrows(IllegalStateException.class, () -> newRoots.totalEarmarkedBalance("Health"));
+        assertEquals(new BigDecimal("200.00"), newRoots.totalEarmarkedBalance("Education"));
+      
+        // assertThrows(IllegalStateException.class, () -> newRoots.totalEarmarkedBalance("Health"));
     }
 
     @Test
