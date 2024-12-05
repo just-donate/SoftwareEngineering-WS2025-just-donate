@@ -1,0 +1,508 @@
+openapi: 3.0.0
+info:
+  title: Just Donate API
+  version: '1.0'
+tags:
+  - name: Organizations
+    description: Operations related to organizations
+  - name: Bank Accounts
+    description: Operations related to bank accounts
+  - name: Donations
+    description: Operations related to donations
+  - name: Notifications
+    description: Operations related to notifications
+paths:
+  /organizations:
+    post:
+      tags:
+        - Organizations
+      summary: Create Organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRequest'
+      responses:
+        '201':
+          description: Organization created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrganizationResponse'
+  /organizations/{organizationId}:
+    get:
+      tags:
+        - Organizations
+      summary: Get Organization
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organization retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+    delete:
+      tags:
+        - Organizations
+      summary: Delete Organization
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Organization deleted successfully
+  /organizations/{organizationId}/bank-accounts:
+    post:
+      tags:
+        - Bank Accounts
+      summary: Create Bank Account
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBankAccountRequest'
+      responses:
+        '201':
+          description: Bank account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBankAccountResponse'
+  /bank-accounts/{accountId}/link-downstream:
+    post:
+      tags:
+        - Bank Accounts
+      summary: Link Downstream Account
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkDownstreamAccountRequest'
+      responses:
+        '200':
+          description: Downstream account linked successfully
+  /bank-accounts/{accountId}/unlink-downstream:
+    post:
+      tags:
+        - Bank Accounts
+      summary: Unlink Downstream Account
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Downstream account unlinked successfully
+  /organizations/{organizationId}/earmarkings:
+    post:
+      tags:
+        - Organizations
+      summary: Create Earmarking
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEarmarkingRequest'
+      responses:
+        '201':
+          description: Earmarking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEarmarkingResponse'
+  /earmarkings/{earmarkingId}:
+    delete:
+      tags:
+        - Organizations
+      summary: Delete Earmarking
+      parameters:
+        - name: earmarkingId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Earmarking deleted successfully
+  /organizations/{organizationId}/donations:
+    post:
+      tags:
+        - Donations
+      summary: Create Donation
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDonationRequest'
+      responses:
+        '201':
+          description: Donation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDonationResponse'
+    get:
+      tags:
+        - Donations
+      summary: Get Donations
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: donorEmail
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Donations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationsResponse'
+  /organizations/{organizationId}/bank-transactions:
+    post:
+      tags:
+        - Bank Accounts
+      summary: Create Bank Transaction
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBankTransactionRequest'
+      responses:
+        '201':
+          description: Bank transaction created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBankTransactionResponse'
+  /organizations/{organizationId}/withdrawals:
+    post:
+      tags:
+        - Organizations
+      summary: Create Withdrawal
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWithdrawalRequest'
+      responses:
+        '201':
+          description: Withdrawal created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateWithdrawalResponse'
+  /organizations/{organizationId}/notifications/send-tracking-link:
+    post:
+      tags:
+        - Notifications
+      summary: Send Tracking Link
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendTrackingLinkRequest'
+      responses:
+        '200':
+          description: Tracking link sent successfully
+  /organizations/{organizationId}/notifications/personal-tracking-link:
+    get:
+      tags:
+        - Notifications
+      summary: Get Personal Tracking Link
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: donorEmail
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Personal tracking link retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalLinkResponse'
+  /organizations/{organizationId}/notifications/send:
+    post:
+      tags:
+        - Notifications
+      summary: Send Notification
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendNotificationRequest'
+      responses:
+        '200':
+          description: Notification sent successfully
+components:
+  schemas:
+    # Organization Schemas
+    CreateOrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+    CreateOrganizationResponse:
+      type: object
+      properties:
+        organizationId:
+          type: string
+      required:
+        - organizationId
+    Organization:
+      type: object
+      properties:
+        organizationId:
+          type: string
+        name:
+          type: string
+      required:
+        - organizationId
+        - name
+    # Bank Account Schemas
+    CreateBankAccountRequest:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+    CreateBankAccountResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+      required:
+        - accountId
+    LinkDownstreamAccountRequest:
+      type: object
+      properties:
+        downstreamAccountId:
+          type: string
+      required:
+        - downstreamAccountId
+    # Earmarking Schemas
+    CreateEarmarkingRequest:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+    CreateEarmarkingResponse:
+      type: object
+      properties:
+        earmarkingId:
+          type: string
+      required:
+        - earmarkingId
+    # Donation Schemas
+    CreateDonationRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        earmarkingId:
+          type: string
+        accountId:
+          type: string
+        donorEmail:
+          type: string
+      required:
+        - amount
+        - earmarkingId
+        - accountId
+        - donorEmail
+    CreateDonationResponse:
+      type: object
+      properties:
+        donationId:
+          type: string
+      required:
+        - donationId
+    Donation:
+      type: object
+      properties:
+        donationId:
+          type: string
+        amount:
+          type: number
+          format: double
+        earmarkingId:
+          type: string
+        accountId:
+          type: string
+        donorEmail:
+          type: string
+        transactionDate:
+          type: string
+          format: date-time
+      required:
+        - donationId
+        - amount
+        - donorEmail
+    DonationsResponse:
+      type: object
+      properties:
+        donations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Donation'
+      required:
+        - donations
+    # Bank Transaction Schemas
+    CreateBankTransactionRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        accountIdFrom:
+          type: string
+        accountIdTo:
+          type: string
+        transactionDate:
+          type: string
+          format: date-time
+      required:
+        - amount
+        - accountIdFrom
+        - accountIdTo
+        - transactionDate
+    CreateBankTransactionResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+      required:
+        - transactionId
+    # Withdrawal Schemas
+    CreateWithdrawalRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        earmarkingId:
+          type: string
+        accountId:
+          type: string
+      required:
+        - amount
+        - earmarkingId
+        - accountId
+    CreateWithdrawalResponse:
+      type: object
+      properties:
+        withdrawalId:
+          type: string
+      required:
+        - withdrawalId
+    # Notification Schemas
+    SendTrackingLinkRequest:
+      type: object
+      properties:
+        donorEmail:
+          type: string
+      required:
+        - donorEmail
+    PersonalLinkResponse:
+      type: object
+      properties:
+        personalLink:
+          type: string
+      required:
+        - personalLink
+    SendNotificationRequest:
+      type: object
+      properties:
+        donorEmail:
+          type: string
+        message:
+          type: string
+      required:
+        - donorEmail
+        - message
