@@ -1,14 +1,13 @@
 package com.just.donate.flow;
 
-import com.just.donate.flow.Account;
-import com.just.donate.flow.Organisation;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class OrganisationTest {
+class OrganisationDonateTest {
 
     Organisation newRoots() {
         Organisation newRoots = new Organisation("New Roots");
@@ -49,7 +48,6 @@ class OrganisationTest {
 
     @Test
     void testBoundDonationAffectsTotalBalance() {
-        // TODO @AntonKluge fix this test I commented out the line below where an error was thrown
         Organisation newRoots = newRoots();
         Account paypal = newRoots.getAccount("Paypal");
 
@@ -61,7 +59,8 @@ class OrganisationTest {
 
         assertEquals(new BigDecimal("200.00"), paypal.totalEarmarkedBalance("Education"));
         assertEquals(new BigDecimal("200.00"), newRoots.totalEarmarkedBalance("Education"));
-      
+
+        // TODO @AntonKluge fix this test I commented out the line below where an error was thrown
         // assertThrows(IllegalStateException.class, () -> newRoots.totalEarmarkedBalance("Health"));
     }
 

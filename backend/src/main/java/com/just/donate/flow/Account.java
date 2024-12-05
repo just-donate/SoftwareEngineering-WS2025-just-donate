@@ -169,6 +169,14 @@ public class Account {
                 .map(Tuple2::_2)
                 .findFirst();
     }
+    
+    DonationQueue getUnboundDonations() {
+        return unboundDonations;
+    }
+    
+    List<Tuple2<String, DonationQueue>> getBoundDonations() {
+        return boundDonations;
+    }
 
     private BigDecimal totalBalanceBound() {
         return boundDonations.stream()
