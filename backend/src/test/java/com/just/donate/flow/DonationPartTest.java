@@ -1,6 +1,5 @@
 package com.just.donate.flow;
 
-import com.just.donate.utils.Splittable;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
