@@ -1,170 +1,93 @@
 package com.just.donate.utils
 
-import io.vavr.Tuple2
-import io.vavr.collection.List
-import io.vavr.control.Option
+case class  ReservableQueue[T <: Splittable[T, S], S, C](
+  context: C,
+  queue: Seq[Reservable[T, S, C]] = Seq.empty[Reservable[T, S, C]]
+):
 
-/**
- * A queue of reservable items that can be split based on a split value.
- *
- * @param T The type of the items in the queue, which must extend Splittable[T, S].
- * @param S The type used to split the items.
- * @param C The type of the context used for reservation.
- * @param context The context associated with this queue.
- */
-class ReservableQueue[T <: Splittable[T, S], S, C](val context: C):
+  def add(value: T): ReservableQueue[T, S, C] = add(new Reservable(value))
 
-  private var queue: List[Reservable[T, S, C]] = List.empty()
+  def add(value: Reservable[T, S, C]): ReservableQueue[T, S, C] =
+    val toAdd = if value.isReservedBy(this.context) then value.release() else value
+    ReservableQueue(context, queue.appended(toAdd))
 
-  /**
-   * Adds a new value to the queue.
-   *
-   * @param value The value to add.
-   */
-  def add(value: T): Unit =
-    queue = queue.append(new Reservable[T, S, C](value))
+  private def pollUnreserved(inner: Seq[Reservable[T, S, C]]): (Option[T], Seq[Reservable[T, S, C]]) =
+    inner match
+      case Nil => (None, inner)
+      case head :: tail if !head.isReserved => (Some(head.value), tail)
+      case head :: tail =>
+        val (polled, newQueue) = pollUnreserved(tail)
+        (polled, head +: newQueue)
 
-  /**
-   * Adds an existing Reservable to the queue. If the Reservable is reserved by this queue's context, it releases the reservation.
-   *
-   * @param value The Reservable to add.
-   */
-  def add(value: Reservable[T, S, C]): Unit =
-    if value.isReservedBy(this.context) then value.release()
-    queue = queue.append(value)
+  def pollUnreserved(): (Option[T], ReservableQueue[T, S, C]) =
+    val (polled, newQueue) = pollUnreserved(queue)
+    (polled, ReservableQueue(context, newQueue))
 
-  /**
-   * Retrieves the current queue.
-   *
-   * @return The list representing the queue.
-   */
-  def getQueue: List[Reservable[T, S, C]] = queue
+  private def pollUnreserved(s: S, inner: Seq[Reservable[T, S, C]]): (Seq[T], S, Seq[Reservable[T, S, C]]) =
+    inner match
+      case Nil => (Seq.empty, s, inner)
+      case head +: tail if head.isReserved =>
+        val (ts, ss, newQueue) = pollUnreserved(s, tail)
+        (ts, ss, head +: newQueue)
+      case head +: tail =>
+        head.value.splitOf(s) match
+          // Nothing was split of, so we just return the head
+          case Split(None, Some(remain), None) => (Seq.empty, s, Reservable(remain) +: tail)
+          // Some was split off, so we return the split and the remain
+          case Split(Some(split), Some(remain), None) => (Seq(split), s, Reservable(remain) +: tail)
+          // Full split, so we return the split
+          case Split(Some(split), None, None) => (Seq(split), s, tail)
+          // Split of but remaining to split
+          case Split(Some(split), None, Some(open)) =>
+            val (ts, ss, newQueue) = pollUnreserved(open, tail)
+            (split +: ts, ss, newQueue)
+          // Other cases should not happen
+          case _ => throw new IllegalStateException("Should not happen?")
 
-  /**
-   * Polls an unreserved item from the queue.
-   *
-   * @return An Option containing the polled item if available, otherwise none.
-   */
-  def pollUnreserved(): Option[T] =
-    val head = queue.find(r => !r.isReserved).getOrNull
-    if head == null then Option.none()
-    else
-      queue = queue.remove(head)
-      Option.some(head.getValue)
+  def pollUnreserved(s: S): (Seq[T], S, ReservableQueue[T, S, C]) =
+    val (ts, ss, newQueue) = pollUnreserved(s, queue)
+    (ts, ss, ReservableQueue(context, newQueue))
 
-  /**
-   * Polls a specified amount from unreserved Reservables in the queue, splitting them if necessary.
-   *
-   * @param s The amount to poll.
-   * @return A Tuple2 containing the list of polled items and the remaining amount not covered.
-   */
-  def pollUnreserved(s: S): Tuple2[List[T], S] =
-    val peeked = queue.find(r => !r.isReserved)
+  def peekUnreserved: Option[T] =
+    queue.find(r => !r.isReserved).map(_.value)
 
-    if peeked.isEmpty then new Tuple2(List.empty[T], s)
-    else
-      val head = peeked.get().getValue
-      val split = head.splitOf(s)
-
-      if split.fullRemain then new Tuple2(List.of(head), s)
-      else if split.someSplit then
-        queue = queue.replace(peeked.get(), new Reservable(split.getRemain().get()))
-        new Tuple2(List.of(split.getSplit().get()), s)
-      else if split.fullSplit then
-        queue = queue.remove(peeked.get())
-        new Tuple2(List.of(split.getSplit().get()), s)
-      else if split.fullOpenSplit then
-        queue = queue.remove(peeked.get())
-        val polled = pollUnreserved(split.getOpen().get())
-        new Tuple2(polled._1.prepend(split.getSplit().get()), polled._2)
-      else throw new IllegalStateException("Should not happen?")
-
-  /**
-   * Peeks at the first unreserved item in the queue without removing it.
-   *
-   * @return An Option containing the first unreserved item if available, otherwise none.
-   */
-  def peekUnreserved(): Option[T] =
-    queue.find(r => !r.isReserved).map(_.getValue)
-
-  /**
-   * Checks if there are any unreserved items in the queue.
-   *
-   * @return True if there are unreserved items, false otherwise.
-   */
-  def hasUnreserved(): Boolean =
+  def hasUnreserved: Boolean =
     queue.exists(r => !r.isReserved)
 
-  /**
-   * Checks if the queue is empty.
-   *
-   * @return True if the queue is empty, false otherwise.
-   */
-  def isEmpty(): Boolean =
+  def isEmpty: Boolean =
     queue.isEmpty
 
-  /**
-   * Checks if all items in the queue are fully reserved.
-   *
-   * @return True if all items are reserved, false otherwise.
-   */
-  def isFullyReserved(): Boolean =
-    queue.forAll(_.isReserved)
+  def isFullyReserved: Boolean =
+    queue.forall(_.isReserved)
 
-  /**
-   * Reserves a specified amount with the given context.
-   *
-   * @param s The amount to reserve.
-   * @param context The context to reserve with.
-   * @return The remaining amount after reservation.
-   */
-  def reserve(s: S, context: C): S =
-    val res = reserveHelper(s, queue, context)
-    queue = res._2
-    res._1
+  private def reserve(s: S, context: C, inner: Seq[Reservable[T, S, C]]): (S, Seq[Reservable[T, S, C]]) =
+    inner match
+      case Nil => (s, inner)
+      case head +: tail if head.isReserved =>
+        val (ss, newQueue) = reserve(s, context, tail)
+        (ss, head +: newQueue)
+      case head +: tail =>
+        head.value.splitOf(s) match
+          // Nothing was split of, so we just return the head
+          case Split(None, Some(remain), None) => (s, Reservable(remain) +: tail)
+          // Some was split off, so we return the split and the remain
+          case Split(Some(split), Some(remain), None) =>
+            val splitOf = Reservable(split).reserve(context)
+            (s, Reservable(remain) +: splitOf +: tail)
+          // Full split, so we return the split
+          case Split(Some(split), None, None) =>
+            val splitOf = Reservable(split).reserve(context)
+            (s, splitOf +: tail)
+          // Split of but remaining to split
+          case Split(Some(split), None, Some(open)) =>
+            val (remS, remTail) = reserve(open, context, tail)
+            (remS, Reservable(split).reserve(context) +: remTail)
+          // Other cases should not happen
+          case _ => throw new IllegalStateException("Should not happen?")
 
-  /**
-   * Helper method for reserving a specified amount.
-   *
-   * @param s The amount to reserve.
-   * @param values The current list of Reservables.
-   * @param context The context to reserve with.
-   * @return A Tuple2 containing the remaining amount and the updated list of Reservables.
-   */
-  private def reserveHelper(s: S, values: List[Reservable[T, S, C]], context: C): Tuple2[S, List[Reservable[T, S, C]]] =
-    if values.isEmpty then new Tuple2(s, values)
-    else
-      val head = values.head()
+  def reserve(s: S, context: C): (S, ReservableQueue[T, S, C]) =
+    val (ss, newQueue) = reserve(s, context, queue)
+    (ss, ReservableQueue(context, newQueue))
 
-      if head.isReserved then
-        val res = reserveHelper(s, values.tail(), context)
-        new Tuple2(res._1, res._2.prepend(head))
-      else
-        val split = head.getValue.splitOf(s)
-
-        if split.fullRemain then new Tuple2(s, values.tail().prepend(head))
-        else if split.someSplit then
-          val splitOf = new Reservable(split.split.get())
-          splitOf.reserve(context)
-          new Tuple2(
-            null.asInstanceOf[S],
-            values.tail().prepend(new Reservable(split.remain.get())).prepend(splitOf)
-          )
-        else if split.fullSplit then
-          val splitOf = new Reservable(split.split.get())
-          splitOf.reserve(context)
-          new Tuple2(null.asInstanceOf[S], values.tail().prepend(splitOf))
-        else if split.fullOpenSplit then
-          val splitOf = new Reservable(split.split.get())
-          splitOf.reserve(context)
-          val polled = reserveHelper(split.open.get(), values.tail(), context)
-          new Tuple2(polled._1, polled._2.prepend(splitOf))
-        else throw new IllegalStateException("Should not happen?")
-
-  /**
-   * Overrides the default toString method to provide a custom string representation of the queue.
-   *
-   * @return A string representation of the queue.
-   */
   override def toString: String =
-    "[" + queue.map(r => r.toString).zipWithIndex().map { case (str, idx) => s"${idx + 1}: $str" }.mkString(", ") + "]"
+    "[" + queue.map(r => r.toString).zipWithIndex.map((s, i) => s"${i + 1}: $s").mkString(", ") + "]"

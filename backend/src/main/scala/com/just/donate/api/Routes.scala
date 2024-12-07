@@ -1,7 +1,7 @@
 package com.just.donate.api
 
 import cats.effect.*
-import com.just.donate.flow.Organisation
+import com.just.donate.models.Organisation
 import org.http4s.*
 import org.http4s.dsl.io.*
 
