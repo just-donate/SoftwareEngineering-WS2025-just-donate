@@ -1,0 +1,60 @@
+name: Frontend Deployment
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-image:
+    name: Build FE Docker image
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Extract project version
+        id: extract_version
+        run: |
+          cd frontend
+          echo "VERSION=$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push to DockerHub
+        uses: docker/build-push-action@v5
+        with:
+          context: book-network-ui
+          file: docker/frontend/Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest,${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ steps.extract_version.outputs.VERSION }}
+
+  deploy:
+    name: Deploy Frontend
+    runs-on: self-hosted
+    needs: [ build-image ]
+    steps:
+
+      - name: Deploy To GH Pages
+        run: |
+          cd frontend
+          npm install
+          npm run predeploy
+          npm run deploy
+
+#  health-check:
+#    name: UI Health Check
+#    runs-on: self-hosted
+#    needs: [deploy]
+#    steps:
+#      - name: Check the docker container health status
+#        run: |
+#          if ! docker ps -a | grep bsn-ui; then
+#            echo "Container is not running"
+#            exit 1
+#          fi
