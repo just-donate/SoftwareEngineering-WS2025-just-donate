@@ -1,8 +1,8 @@
 [![Backend Pipeline](https://github.com/AntonKluge/SoftwareEngineering-WS2025-just-donate/actions/workflows/backend.yml/badge.svg?branch=ci%2Fpipeline)](https://github.com/AntonKluge/SoftwareEngineering-WS2025-just-donate/actions/workflows/backend.yml)
 
+[![Frontend Pipeline](https://github.com/AntonKluge/SoftwareEngineering-WS2025-just-donate/actions/workflows/frontend.yml/badge.svg?branch=ci%2Fpipeline)](https://github.com/AntonKluge/SoftwareEngineering-WS2025-just-donate/actions/workflows/frontend.yml)
+
 # just-donate
-
-
 
 ## Architecture
 
