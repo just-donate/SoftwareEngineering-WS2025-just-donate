@@ -58,8 +58,8 @@ export default function DonationsPage() {
                     <Badge variant={
                       donation.status === 'received' ? 'default' :
                       donation.status === 'transferred' ? 'secondary' :
-                      donation.status === 'in use' ? 'info' :
-                      'success'
+                      donation.status === 'in use' ? 'default' :
+                      'default'
                     }>
                       {donation.status}
                     </Badge>

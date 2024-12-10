@@ -82,7 +82,7 @@ export const TreeView: React.FC<TreeViewProps> = ({ accounts }) => {
   }, [accounts, nodePositions])
 
   const hierarchy = useMemo(() => {
-    const accountMap = new Map(accounts.map(account => [account.id, account]))
+    // const accountMap = new Map(accounts.map(account => [account.id, account]))
     const rootAccounts = accounts.filter(account => account.parentIds.length === 0)
     
     const buildHierarchy = (currentAccounts: BankAccount[], level: number = 0, processedIds: Set<string> = new Set()): BankAccount[][] => {
