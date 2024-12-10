@@ -36,19 +36,24 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
           node-version: 18
           cache: 'npm'
-      - name: Go to frontend directory
-        run: cd frontend
       - name: Install dependencies
+        working-directory: ./frontend
         run: npm install
       - name: Build
+        working-directory: ./frontend
         run: npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        with:
+          working-directory: ./frontend
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload dist folder
+          working-directory: ./frontend
           path: './dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with: 
+          working-directory: ./frontend
