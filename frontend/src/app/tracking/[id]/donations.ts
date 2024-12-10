@@ -1,7 +1,11 @@
 import { Donation } from "@/types/types";
 
 export function getDonations(id: string): Donation[] | null {
-    return mockDonations;
+    // TODO: remove mockDonations
+    if (id === '1') {
+        return mockDonations;
+    }
+    return null;
     // return fetch(`/api/tracking/${id}`).then(body => body.json()).catch(_ => null);
 }
 

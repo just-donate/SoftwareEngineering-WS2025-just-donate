@@ -3,7 +3,6 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ThemeSwitcher } from './ThemeSwitcher';
-import { themes } from '../../styles/themes';
 import Link from 'next/link';
 
 
