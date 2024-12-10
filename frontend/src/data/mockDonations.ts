@@ -8,6 +8,7 @@ export const mockDonations: Donation[] = [
     ngo: 'Save the Children',
     date: '2023-05-01',
     project: 'Education in Africa',
+    donorEmail: 'donor1@example.com',
     status: [
       { status: 'Donated', date: '2023-05-01', description: 'Donation received' },
       { status: 'Processed', date: '2023-05-03', description: 'Donation processed by NGO' },
@@ -22,6 +23,7 @@ export const mockDonations: Donation[] = [
     ngo: 'Red Cross',
     date: '2023-06-15',
     project: 'Disaster Relief',
+    donorEmail: 'donor1@example.com',
     status: [
       { status: 'Donated', date: '2023-06-15', description: 'Donation received' },
       { status: 'Processed', date: '2023-06-17', description: 'Donation processed by NGO' },

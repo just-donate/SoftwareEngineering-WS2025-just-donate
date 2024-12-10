@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
-import { BankAccount } from '@/types'
+import { BankAccount } from '../../types/types'
 
 interface TreeNodeProps {
   account: BankAccount
