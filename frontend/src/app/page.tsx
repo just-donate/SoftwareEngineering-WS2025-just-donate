@@ -1,12 +1,15 @@
 'use client'
 
-import { DonationList } from '../components/DonationList'
+import { DonationList } from '../components/tracking/DonationList'
 import { mockDonations } from '../data/mockDonations'
-import { Navigation } from '../components/Navigation'
+import { Navigation } from '../components/tracking/Navigation'
 import { useTheme } from '../contexts/ThemeContext'
+
 
 export default function Home() {
   const { theme } = useTheme();
+
+  // route admin to organization backend
 
   return (
     <div className={`min-h-screen ${theme.background}`}>
