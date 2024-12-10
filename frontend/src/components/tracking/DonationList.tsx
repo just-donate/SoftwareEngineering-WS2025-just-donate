@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react';
-import { Donation } from '../types/types';
+import { Donation } from '../../types/types';
 import { DonationItem } from './DonationItem';
 import { DonationDetails } from './DonationDetails';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface DonationListProps {
   donations: Donation[];

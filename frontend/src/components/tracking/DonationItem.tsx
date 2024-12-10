@@ -1,7 +1,7 @@
 'use client'
 
-import { Donation } from '../types/types';
-import { useTheme } from '../contexts/ThemeContext';
+import { Donation } from '../../types/types';
+import { useTheme } from '../../contexts/ThemeContext';
 import { TransitSchematic } from './TransitSchematic';
 
 interface DonationItemProps {

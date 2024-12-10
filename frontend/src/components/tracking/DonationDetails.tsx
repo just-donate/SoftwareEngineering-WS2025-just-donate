@@ -1,6 +1,6 @@
-import { Donation } from '../types/types';
+import { Donation } from '../../types/types';
 import { StatusTimeline } from './StatusTimeline';
-import { customStyles } from '../styles/custom';
+import { customStyles } from '../../styles/custom';
 
 interface DonationDetailsProps {
   donation: Donation;

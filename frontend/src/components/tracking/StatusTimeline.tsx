@@ -1,5 +1,5 @@
-import { DonationStatus } from '../types/types';
-import { useTheme } from '../contexts/ThemeContext';
+import { DonationStatus } from '../../types/types';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface StatusTimelineProps {
   status: DonationStatus[];

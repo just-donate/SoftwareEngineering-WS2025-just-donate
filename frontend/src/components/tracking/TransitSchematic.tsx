@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
-import { DonationStatus } from '../types/types';
+import { useTheme } from '../../contexts/ThemeContext';
+import { DonationStatus } from '../../types/types';
 
 interface TransitSchematicProps {
   status: DonationStatus[];
