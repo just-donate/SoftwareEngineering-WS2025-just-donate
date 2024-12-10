@@ -18,7 +18,7 @@ export default function TrackingPage({
 
   const { theme } = useTheme();
   const [donations, setDonations] = useState<Donation[] | null>(null);
-  const resolvedParams: { id: string } = use(params);
+  const resolvedParams = use(params);
 
   useEffect(() => {
     const donations = getDonations(resolvedParams.id)
