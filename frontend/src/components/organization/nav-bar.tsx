@@ -5,12 +5,12 @@ import { usePathname } from 'next/navigation'
 import { cn } from "@/lib/utils"
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/earmarkings', label: 'Earmarkings' },
-  { href: '/bank-accounts', label: 'Bank Accounts' },
-  { href: '/transactions', label: 'Transactions' },
-  { href: '/donations', label: 'Donations' },
-  { href: '/gallery', label: 'Gallery' },
+  { href: '/organization/dashboard', label: 'Dashboard' },
+  { href: '/organization/earmarkings', label: 'Earmarkings' },
+  { href: '/organization/bank-accounts', label: 'Bank Accounts' },
+  { href: '/organization/transactions', label: 'Transactions' },
+  { href: '/organization/donations', label: 'Donations' },
+  { href: '/organization/gallery', label: 'Gallery' },
 ]
 
 export function NavBar() {

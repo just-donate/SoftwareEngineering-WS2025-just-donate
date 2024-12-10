@@ -15,7 +15,7 @@ export default function LoginPage() {
     e.preventDefault()
     // Here you would typically validate the credentials against your backend
     // For this example, we'll just redirect to the dashboard
-    router.push('/dashboard')
+    router.push('/organization/dashboard')
   }
 
   return (

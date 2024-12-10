@@ -14,7 +14,7 @@ export default function DashboardPage() {
             <CardTitle>Earmarkings</CardTitle>
           </CardHeader>
           <CardContent>
-            <Link href="/earmarkings">
+            <Link href="/organization/earmarkings">
               <Button>Manage Earmarkings</Button>
             </Link>
           </CardContent>
@@ -24,7 +24,7 @@ export default function DashboardPage() {
             <CardTitle>Bank Accounts</CardTitle>
           </CardHeader>
           <CardContent>
-            <Link href="/bank-accounts">
+            <Link href="/organization/bank-accounts">
               <Button>Manage Bank Accounts</Button>
             </Link>
           </CardContent>
@@ -34,7 +34,7 @@ export default function DashboardPage() {
             <CardTitle>Transactions</CardTitle>
           </CardHeader>
           <CardContent>
-            <Link href="/transactions">
+            <Link href="/organization/transactions">
               <Button>Create Transaction</Button>
             </Link>
           </CardContent>
@@ -44,7 +44,7 @@ export default function DashboardPage() {
             <CardTitle>Donations</CardTitle>
           </CardHeader>
           <CardContent>
-            <Link href="/donations">
+            <Link href="/organization/donations">
               <Button>Manage Donations</Button>
             </Link>
           </CardContent>
@@ -54,7 +54,7 @@ export default function DashboardPage() {
             <CardTitle>Gallery</CardTitle>
           </CardHeader>
           <CardContent>
-            <Link href="/gallery">
+            <Link href="/organization/gallery">
               <Button>View Gallery</Button>
             </Link>
           </CardContent>

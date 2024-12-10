@@ -15,9 +15,9 @@ const mockEarmarkings: Earmarking[] = [
 ]
 
 const mockPhotos: Photo[] = [
-  { id: '1', url: '/placeholder.svg?height=200&width=200', earmarkingId: '1', uploadDate: '2023-06-01' },
-  { id: '2', url: '/placeholder.svg?height=200&width=200', earmarkingId: '1', uploadDate: '2023-06-02' },
-  { id: '3', url: '/placeholder.svg?height=200&width=200', earmarkingId: '2', uploadDate: '2023-06-03' },
+  { id: '1', url: 'https://placeholder.pics/svg/200', earmarkingId: '1', uploadDate: '2023-06-01' },
+  { id: '2', url: 'https://placeholder.pics/svg/200', earmarkingId: '1', uploadDate: '2023-06-02' },
+  { id: '3', url: 'https://placeholder.pics/svg/200', earmarkingId: '2', uploadDate: '2023-06-03' },
 ]
 
 export default function GalleryPage() {
