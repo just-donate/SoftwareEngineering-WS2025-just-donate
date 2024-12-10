@@ -1,6 +1,4 @@
-[![Backend Pipeline](https://github.com/AntonKluge/SoftwareEngineering-WS2025-just-donate/actions/workflows/backend.yml/badge.svg?branch=main)](https://github.com/AntonKluge/SoftwareEngineering-WS2025-just-donate/actions/workflows/backend.yml)
-
-[![Frontend Pipeline](https://github.com/AntonKluge/SoftwareEngineering-WS2025-just-donate/actions/workflows/frontend.yml/badge.svg?branch=main)](https://github.com/AntonKluge/SoftwareEngineering-WS2025-just-donate/actions/workflows/frontend.yml)
+[![Backend Pipeline](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/actions/workflows/backend.yml/badge.svg?branch=main)](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/actions/workflows/backend.yml) [![Frontend Pipeline](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/actions/workflows/frontend.yml/badge.svg?branch=main)](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/actions/workflows/frontend.yml)  [![Frontend Deployment](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/actions/workflows/deployment-ci.yml/badge.svg?branch=main)](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/actions/workflows/deployment-ci.yml)
 
 # just-donate
 
