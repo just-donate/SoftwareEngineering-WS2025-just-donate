@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://AntonKluge.github.io/SoftwareEngineering-WS2025-just-donate/",
+  "homepage": "https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "predeploy" : "npm run build",
-    "deploy" : "gh-pages -d dist -r https://github.com/AntonKluge/SoftwareEngineering-WS2025-just-donate.git"
+    "deploy" : "gh-pages -d dist -r git@github.com:just-donate/SoftwareEngineering-WS2025-just-donate.git"
   },
   "dependencies": {
     "react": "^18.3.1",

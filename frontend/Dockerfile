@@ -11,3 +11,5 @@ RUN apk add --no-cache git
 COPY . .
 
 RUN npm run predeploy
+
+CMD ["npm", "run", "dev"]
