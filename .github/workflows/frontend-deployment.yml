@@ -33,19 +33,19 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest,${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ steps.extract_version.outputs.VERSION }}
-
-  deploy:
-    name: Deploy Frontend
-    runs-on: self-hosted
-    needs: [ build-image ]
-    steps:
-
-      - name: Deploy To GH Pages
-        run: |
-          cd frontend
-          npm install
-          npm run predeploy
-          npm run deploy
+#
+#  deploy:
+#    name: Deploy Frontend
+#    runs-on: self-hosted
+#    needs: [ build-image ]
+#    steps:
+#
+#      - name: Deploy To GH Pages
+#        run: |
+#          cd frontend
+#          npm install
+#          npm run predeploy
+#          npm run deploy
 
 #  health-check:
 #    name: UI Health Check
