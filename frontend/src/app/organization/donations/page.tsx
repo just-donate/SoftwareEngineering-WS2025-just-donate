@@ -8,9 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Badge } from "../../../components/organization/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../../components/organization/ui/dialog"
 import { Textarea } from "../../../components/organization/ui/textarea"
-import { mockDonations } from '../../../data/mockDonations'
+import { mockDonations } from '@/app/tracking/[id]/donations'
 
 export default function DonationsPage() {
+
   const [donations] = useState<Donation[]>(mockDonations)
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null)
   const [updateContent, setUpdateContent] = useState('')

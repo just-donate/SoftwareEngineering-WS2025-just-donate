@@ -6,14 +6,15 @@ import { ThemeSwitcher } from './ThemeSwitcher';
 import { themes } from '../../styles/themes';
 
 
-export const Navigation: React.FC = () => {
+interface NavigationProps {
+  links: {
+    link: string;
+    name: string;
+  }[];
+}
+
+export const Navigation: React.FC<NavigationProps> = ({ links }) => {
   const { theme } = useTheme();
-
-  const getCurrentThemeName = () => {
-    return Object.keys(themes).find(key => themes[key] === theme) || 'Default';
-  };
-
-  // bg-purple-600 text-white
 
   return (
     <nav className={`${theme.primary} shadow`}>
@@ -25,24 +26,18 @@ export const Navigation: React.FC = () => {
             </span>
             <h1 className={`text-2xl font-bold text-white`}>Donation Tracker</h1>
           </div>
-          <div className="flex items-center space-x-4">
-            <a
-              href={theme.ngoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`text-white hover:opacity-80 transition-opacity`}
-            >
-              {theme.ngoName}
-            </a>
-            <a
-              href={theme.helpUrl}
-              className={`text-white hover:opacity-80 transition-opacity`}
-            >
-              Help
-            </a>
-            <span className="text-white">Current Theme: {getCurrentThemeName()}</span>
-            <ThemeSwitcher />
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex space-x-4">
+            {links.map((link, index) => (
+              <a
+                key={index}
+                href={link.link}
+                className={`text-white hover:opacity-80 transition-opacity`}
+              >
+                {link.name}
+              </a>
+            ))}
           </div>
+          <ThemeSwitcher />
         </div>
       </div>
     </nav>
