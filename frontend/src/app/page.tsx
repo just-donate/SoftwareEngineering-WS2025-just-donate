@@ -21,7 +21,7 @@ export default function SearchPage() {
     if (searchInput.startsWith('http://') || searchInput.startsWith('https://')) {
       window.location.href = searchInput
     } else {
-      router.push(`/tracking/${searchInput}`)
+      router.push(`/tracking?id=${searchInput}`)
     }
   }
 
