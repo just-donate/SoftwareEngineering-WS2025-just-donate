@@ -1,11 +1,11 @@
 package com.just.donate.models
 
 case class Expense(
-  description: String,
-  amount: BigDecimal,
-  paidBy: Seq[DonationPart] = Seq.empty,
-  earMarking: Option[String] = None
-):
+                    description: String,
+                    amount: BigDecimal,
+                    paidBy: Seq[DonationPart] = Seq.empty,
+                    earMarking: Option[String] = None
+                  ):
 
   def payWith(donationPart: DonationPart): Expense =
     if paidBy.contains(donationPart) then

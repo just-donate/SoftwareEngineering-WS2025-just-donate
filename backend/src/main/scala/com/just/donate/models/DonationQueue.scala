@@ -3,10 +3,10 @@ package com.just.donate.models
 import com.just.donate.utils.ReservableQueue
 
 case class DonationQueue(
-  context: Account,
-  donationQueue: ReservableQueue[DonationPart, BigDecimal, Account],
-  negativeBalance: BigDecimal = BigDecimal(0)
-):
+                          context: String,
+                          donationQueue: ReservableQueue[DonationPart, BigDecimal, String],
+                          negativeBalance: BigDecimal = BigDecimal(0)
+                        ):
 
   def add(donation: DonationPart): DonationQueue =
     copy(donationQueue = donationQueue.add(donation))

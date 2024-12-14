@@ -32,12 +32,13 @@ dependencies {
     implementation 'io.circe:circe-generic_3:0.14.10'
     implementation 'io.circe:circe-parser_3:0.14.10'
 
-    implementation "io.vavr:vavr:0.10.4"
+    implementation 'org.typelevel:munit-cats-effect_3:2.0.0'
 
     testImplementation "org.scalatest:scalatest_3:3.2.19"
     testImplementation "org.junit.platform:junit-platform-launcher:1.11.3"
     testRuntimeOnly "org.junit.platform:junit-platform-engine:1.11.3"
     testRuntimeOnly "org.scalatestplus:junit-5-11_3:3.2.19.0"
+
 }
 
 application {
@@ -88,5 +89,5 @@ jar {
 
 // Optional: Scala compiler options
 tasks.withType(ScalaCompile).configureEach {
-    scalaCompileOptions.additionalParameters = ['-deprecation', '-feature']
+    scalaCompileOptions.additionalParameters = ['-deprecation', '-feature', '-Xmax-inlines', '100']
 }
