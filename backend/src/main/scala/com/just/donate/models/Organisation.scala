@@ -23,7 +23,7 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty):
     copy(accounts = accounts.map(_.removeEarmarking(earmarking)))
 
   def donate(donor: String, amount: BigDecimal, earmarking: Option[String], account: String): Organisation =
-    val donation: Donation = new Donation(donor, amount)
+    val donation = Donation(donor, amount)
     accounts.find(_.name == account) match
       case Some(acc) =>
         val (donated, newAcc) = earmarking match

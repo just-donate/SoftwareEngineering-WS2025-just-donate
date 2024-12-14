@@ -1,6 +1,6 @@
 package com.just.donate.utils
 
-import com.just.donate.models.DonationPart
+import com.just.donate.models.{Donation, DonationPart}
 import org.scalatest.*
 import org.scalatest.flatspec.*
 import org.scalatest.matchers.*
@@ -11,7 +11,7 @@ class ReservableQueueTest extends AnyFlatSpec with should.Matchers:
 
   "A ReservableQueue" should "add and reserve the exact amount" in {
     var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
-    queue = queue.add(DonationPart(BigDecimal.valueOf(100), LocalDateTime.now))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(100)))
 
     val (amountRemaining, updatedQueue) = queue.reserve(BigDecimal.valueOf(100), "ContextA")
 
@@ -27,7 +27,7 @@ class ReservableQueueTest extends AnyFlatSpec with should.Matchers:
 
   it should "reserve less than the available amount" in {
     var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
-    queue = queue.add(DonationPart(BigDecimal.valueOf(100), LocalDateTime.now))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(100)))
 
     val (amountRemaining, updatedQueue) = queue.reserve(BigDecimal.valueOf(40), "ContextA")
 
@@ -47,7 +47,7 @@ class ReservableQueueTest extends AnyFlatSpec with should.Matchers:
 
   it should "reserve more than the available amount" in {
     var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
-    queue = queue.add(DonationPart(BigDecimal.valueOf(50), LocalDateTime.now))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(50)))
 
     val (amountRemaining, updatedQueue) = queue.reserve(BigDecimal.valueOf(100), "ContextA")
 
@@ -63,8 +63,8 @@ class ReservableQueueTest extends AnyFlatSpec with should.Matchers:
 
   it should "handle multiple reserves from different contexts" in {
     var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
-    queue = queue.add(DonationPart(BigDecimal.valueOf(100), LocalDateTime.now))
-    queue = queue.add(DonationPart(BigDecimal.valueOf(50), LocalDateTime.now))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(100)))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(50)))
 
     val (amountRemaining1, updatedQueue1) = queue.reserve(BigDecimal.valueOf(80), "ContextA")
     amountRemaining1 should be(None)
@@ -92,7 +92,7 @@ class ReservableQueueTest extends AnyFlatSpec with should.Matchers:
 
   it should "not allow reserving an already reserved item by a different context" in {
     var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
-    queue = queue.add(DonationPart(BigDecimal.valueOf(100), LocalDateTime.now))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(100)))
 
     val (_, updatedQueue1) = queue.reserve(BigDecimal.valueOf(100), "ContextA")
 
@@ -109,8 +109,8 @@ class ReservableQueueTest extends AnyFlatSpec with should.Matchers:
 
   it should "reserve by splitting across multiple items" in {
     var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
-    queue = queue.add(DonationPart(BigDecimal.valueOf(60), LocalDateTime.now))
-    queue = queue.add(DonationPart(BigDecimal.valueOf(40), LocalDateTime.now))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(60)))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(40)))
 
     val (amountRemaining, updatedQueue) = queue.reserve(BigDecimal.valueOf(80), "ContextA")
 
@@ -133,8 +133,8 @@ class ReservableQueueTest extends AnyFlatSpec with should.Matchers:
 
   it should "handle insufficient resources gracefully" in {
     var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
-    queue = queue.add(DonationPart(BigDecimal.valueOf(30), LocalDateTime.now))
-    queue = queue.add(DonationPart(BigDecimal.valueOf(20), LocalDateTime.now))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(30)))
+    queue = queue.add(Donation("Donor", BigDecimal.valueOf(20)))
 
     val (amountRemaining, updatedQueue) = queue.reserve(BigDecimal.valueOf(100), "ContextA")
 
@@ -164,7 +164,7 @@ class ReservableQueueTest extends AnyFlatSpec with should.Matchers:
     val (_, updatedQueue1) = queue.reserve(BigDecimal.valueOf(50), "ContextA")
 
     // Adding resources after reservation attempt
-    queue = updatedQueue1.add(DonationPart(BigDecimal.valueOf(100), LocalDateTime.now))
+    queue = updatedQueue1.add(Donation("Donor", BigDecimal.valueOf(100)))
 
     val (amountRemaining, updatedQueue2) = queue.reserve(BigDecimal.valueOf(50), "ContextA")
 

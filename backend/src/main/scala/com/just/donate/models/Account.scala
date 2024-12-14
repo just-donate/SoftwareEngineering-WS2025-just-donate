@@ -2,30 +2,29 @@ package com.just.donate.models
 
 import com.just.donate.utils.ReservableQueue
 
-case class Account private(
-                            name: String,
-                            boundDonations: Seq[(String, DonationQueue)],
-                            unboundDonations: DonationQueue,
-                          ):
+case class Account private (
+  name: String,
+  boundDonations: Seq[(String, DonationQueue)],
+  unboundDonations: DonationQueue
+):
 
   def this(name: String) = this(name, Seq.empty, DonationQueue(name, ReservableQueue(name)))
 
   def donate(donor: String, amount: BigDecimal): (Boolean, Account) =
-    val donation: Donation = new Donation(donor, amount)
+    val donation: DonationPart = Donation(donor, amount)
     donate(donation)
 
-  def donate(donation: Donation): (Boolean, Account) =
-    (true, copy(unboundDonations = unboundDonations.addAll(donation.parts)))
+  def donate(donation: DonationPart): (Boolean, Account) =
+    (true, copy(unboundDonations = unboundDonations.add(donation)))
 
-  def donate(donor: String, amount: BigDecimal, boundTo: String): (Boolean, Account) =
-    donate(new Donation(donor, amount), boundTo)
+  def donate(donor: String, amount: BigDecimal, earmarking: String): (Boolean, Account) =
+    donate(Donation(donor, amount, earmarking), earmarking)
 
-  def donate(donation: Donation, earmarking: String): (Boolean, Account) =
+  def donate(donation: DonationPart, earmarking: String): (Boolean, Account) =
     def donateRec(queues: Seq[(String, DonationQueue)]): (Boolean, Seq[(String, DonationQueue)]) = queues match
       case Nil => (false, Nil)
       case (earmarkingQueue, queue) :: tail =>
-        if earmarking == earmarkingQueue then
-          (true, (earmarkingQueue, queue.addAll(donation.parts)) +: tail)
+        if earmarking == earmarkingQueue then (true, (earmarkingQueue, queue.add(donation)) +: tail)
         else
           val (donated, newQueues) = donateRec(tail)
           (donated, (earmarkingQueue, queue) +: newQueues)
@@ -44,15 +43,12 @@ case class Account private(
   def totalEarmarkedBalance(earmarking: String): BigDecimal =
     getBoundQueue(earmarking).map(_.totalBalance).getOrElse(BigDecimal(0))
 
-  private def getBoundQueue(earmarking: String): Option[DonationQueue] = boundDonations
-    .filter(_._1 == earmarking)
-    .map(_._2)
-    .headOption
+  private def getBoundQueue(earmarking: String): Option[DonationQueue] =
+    boundDonations.filter(_._1 == earmarking).map(_._2).headOption
 
   protected def spend(expense: Expense): Boolean =
     // If the total balance is less than the expense, we cannot spend it
-    if totalBalance < expense.amount then
-      return false
+    if totalBalance < expense.amount then return false
     if expense.isBound then spendBound(expense)
     else spendUnbound(expense)
 

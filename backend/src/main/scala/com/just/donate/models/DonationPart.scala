@@ -4,14 +4,14 @@ import com.just.donate.utils.{Split, Splittable}
 
 import java.time.LocalDateTime
 
-case class DonationPart(amount: BigDecimal, donationTime: LocalDateTime)
+case class DonationPart(amount: BigDecimal, donation: Donation)
   extends Splittable[DonationPart, BigDecimal] with Ordering[DonationPart]:
 
   override def splitOf(split: BigDecimal): Split[DonationPart, BigDecimal] =
     if split == BigDecimal(0) then
       Split(None, Some(this), None)
     else if split < amount then
-      Split(Some(DonationPart(split, donationTime)), Some(DonationPart(amount - split, donationTime)), None)
+      Split(Some(DonationPart(split, donation)), Some(DonationPart(amount - split, donation)), None)
     else if split == amount then
       Split(Some(this), None, None)
     else if split > amount && amount > BigDecimal(0) then
@@ -21,6 +21,7 @@ case class DonationPart(amount: BigDecimal, donationTime: LocalDateTime)
 
   override def toString: String = amount.toString
 
-  override def compare(x: DonationPart, y: DonationPart): Int = x.donationTime.compareTo(y.donationTime)
+  override def compare(x: DonationPart, y: DonationPart): Int =
+    x.donation.donationDate.compareTo(y.donation.donationDate)
 
 
