@@ -1,9 +1,9 @@
 package com.just.donate.utils
 
 case class ReservableQueue[T <: Splittable[T, S], S, C](
-                                                         context: C,
-                                                         queue: Seq[Reservable[T, S, C]] = Seq.empty[Reservable[T, S, C]]
-                                                       ):
+  context: C,
+  queue: Seq[Reservable[T, S, C]] = Seq.empty[Reservable[T, S, C]]
+):
 
   def add(value: T): ReservableQueue[T, S, C] = add(new Reservable(value))
 
@@ -40,7 +40,7 @@ case class ReservableQueue[T <: Splittable[T, S], S, C](
 
   private def pollUnreserved(inner: Seq[Reservable[T, S, C]]): (Option[T], Seq[Reservable[T, S, C]]) =
     inner match
-      case Nil => (None, inner)
+      case Nil                              => (None, inner)
       case head :: tail if !head.isReserved => (Some(head.value), tail)
       case head :: tail =>
         val (polled, newQueue) = pollUnreserved(tail)

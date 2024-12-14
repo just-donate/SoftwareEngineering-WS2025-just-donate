@@ -13,16 +13,17 @@ object DonationRoute:
 
   val donationRoute: HttpRoutes[IO] = HttpRoutes.of[IO]:
 
-    case req@POST -> Root / "organisation" / organisationId / "account" / accountName / "donate" => for
-      donation <- req.as[RequestDonation]
-      organisation <- FileStore.load(organisationId)
-      response <- organisation match
-        case Some(organisation) =>
-          FileStore.save(organisationId, organisation.donate(donation.donor, donation.amount, donation.earmarking, accountName)) >> Ok()
-        case None => NotFound()
-    yield response
+    case req @ POST -> Root / "organisation" / organisationId / "account" / accountName / "donate" =>
+      for
+        donation <- req.as[RequestDonation]
+        organisation <- FileStore.load(organisationId)
+        response <- organisation match
+          case Some(organisation) =>
+            FileStore.save(
+              organisationId,
+              organisation.donate(donation.donor, donation.amount, donation.earmarking, accountName)
+            ) >> Ok()
+          case None => NotFound()
+      yield response
 
   private case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])
-    
-    
-    

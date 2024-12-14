@@ -13,13 +13,13 @@ object WithdrawlRoute:
 
   val withdrawlRoute: HttpRoutes[IO] = HttpRoutes.of[IO]:
 
-    case req@POST -> Root / "organisation" / organisationId / "account" / accountName / "withdrawal" => for
-      donation <- req.as[RequestWithdrawl]
-      organisation <- FileStore.load(organisationId)
-      response <- organisation match
-        case Some(organisation) => ??? // TODO: Implement withdrawal
-        case None => NotFound()
-    yield response
+    case req @ POST -> Root / "organisation" / organisationId / "account" / accountName / "withdrawal" =>
+      for
+        donation <- req.as[RequestWithdrawl]
+        organisation <- FileStore.load(organisationId)
+        response <- organisation match
+          case Some(organisation) => ??? // TODO: Implement withdrawal
+          case None               => NotFound()
+      yield response
 
   private case class RequestWithdrawl(amount: BigDecimal, earmarking: Option[String], description: Option[String])
-    

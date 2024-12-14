@@ -1,11 +1,12 @@
 package com.just.donate.models
 
+import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import java.time.LocalDateTime
-import org.scalatest.Assertions._
 
-class DonationPartTest extends AnyFlatSpec with Matchers {
+import java.time.LocalDateTime
+
+class DonationPartTest extends AnyFlatSpec with Matchers:
 
   "A DonationPart" should "correctly initialize with given amounts" in {
     val donationPart = Donation("Donor", BigDecimal(100))
@@ -61,8 +62,7 @@ class DonationPartTest extends AnyFlatSpec with Matchers {
 
   it should "throw an IllegalStateException when splitting from an empty donation part" in {
     val donationPart = Donation("Donor", BigDecimal(0))
-    an [IllegalStateException] should be thrownBy {
+    an[IllegalStateException] should be thrownBy {
       donationPart.splitOf(BigDecimal.valueOf(100))
     }
   }
-}

@@ -4,7 +4,7 @@ import cats.effect.IO
 import com.just.donate.models.Organisation
 
 trait Store:
-  
+
   def init(): Unit
 
   def save(id: String, organisation: Organisation): IO[Unit]

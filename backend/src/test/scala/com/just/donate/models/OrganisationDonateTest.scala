@@ -3,10 +3,10 @@ package com.just.donate.models
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class OrganisationDonateTest extends AnyFlatSpec with Matchers {
+class OrganisationDonateTest extends AnyFlatSpec with Matchers:
 
   // Helper method to set up a new Organisation with accounts and flows
-  def createNewRoots(): Organisation = {
+  def createNewRoots(): Organisation =
     var newRoots = Organisation("New Roots")
 
     val paypal = new Account("Paypal")
@@ -20,7 +20,6 @@ class OrganisationDonateTest extends AnyFlatSpec with Matchers {
     newRoots = newRoots.addAccount(kenya)
 
     newRoots
-  }
 
   "An Organisation" should "have a total balance of zero without any donations or expenses" in {
     val newRoots = createNewRoots()
@@ -89,9 +88,8 @@ class OrganisationDonateTest extends AnyFlatSpec with Matchers {
 
     // Adding donation to an account with incoming flows
     newRoots = newRoots.donate("Donor3", BigDecimal("200.00"), None, "Kenya")
-    
+
     val kenya = newRoots.getAccount("Kenya")
     kenya.get.totalBalance shouldEqual BigDecimal("200.00")
     newRoots.totalBalance shouldEqual BigDecimal("450.00")
   }
-}

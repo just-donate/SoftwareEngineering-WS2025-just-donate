@@ -13,12 +13,18 @@ object TransferRoute:
 
   val transferRoute: HttpRoutes[IO] = HttpRoutes.of[IO]:
 
-    case req@POST -> Root / "organisation" / organisationId / "transfer" => for
-      transfer <- req.as[RequestTransfer]
-      organisation <- FileStore.load(organisationId)
-      response <- organisation match
-        case Some(organisation) => ??? // TODO: Implement transfer
-        case None => NotFound()
-    yield response
+    case req @ POST -> Root / "organisation" / organisationId / "transfer" =>
+      for
+        transfer <- req.as[RequestTransfer]
+        organisation <- FileStore.load(organisationId)
+        response <- organisation match
+          case Some(organisation) => ??? // TODO: Implement transfer
+          case None               => NotFound()
+      yield response
 
-  private case class RequestTransfer(fromAccount: String, toAccount: String, amount: BigDecimal, earmarking: Option[String])
+  private case class RequestTransfer(
+    fromAccount: String,
+    toAccount: String,
+    amount: BigDecimal,
+    earmarking: Option[String]
+  )

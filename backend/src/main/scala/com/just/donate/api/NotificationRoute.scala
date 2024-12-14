@@ -12,16 +12,15 @@ import org.http4s.dsl.io.*
 
 object NotificationRoute:
 
-  private case class NotificationRequest(message: String)
-
   val notificationRoute: HttpRoutes[IO] = HttpRoutes.of[IO]:
 
-    case req@POST -> Root / "notify" / donor => for
-      notification <- req.attemptAs[NotificationRequest].value
-      _ <- notification match
-        case Right(NotificationRequest(message)) => SendEmail.sendEmail(donor, message)
-        case Left(_) => SendEmail.sendEmail(donor)
-      response <- Ok("Notification sent")
-    yield response
+    case req @ POST -> Root / "notify" / donor =>
+      for
+        notification <- req.attemptAs[NotificationRequest].value
+        _ <- notification match
+          case Right(NotificationRequest(message)) => SendEmail.sendEmail(donor, message)
+          case Left(_)                             => SendEmail.sendEmail(donor)
+        response <- Ok("Notification sent")
+      yield response
 
-
+  private case class NotificationRequest(message: String)

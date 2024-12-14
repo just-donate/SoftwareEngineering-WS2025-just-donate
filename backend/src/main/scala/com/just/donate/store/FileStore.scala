@@ -22,15 +22,12 @@ object FileStore extends Store:
     if Files.exists(Paths.get(s"store/$id.json")) then
       val json = Files.readString(Paths.get(s"store/$id.json"))
       IO(jawn.decode[Organisation](json).toOption)
-    else
-      IO.pure(None)
+    else IO.pure(None)
 
   override def list(): IO[List[String]] =
     val store = Paths.get("store")
-    if Files.exists(store) then
-      IO(Files.list(store).map(_.getFileName).toArray.map(_.toString.split('.').head).toList)
-    else
-      IO.pure(List.empty)
+    if Files.exists(store) then IO(Files.list(store).map(_.getFileName).toArray.map(_.toString.split('.').head).toList)
+    else IO.pure(List.empty)
 
   override def delete(id: String): IO[Unit] =
     IO(Files.delete(Paths.get(s"store/$id.json")))

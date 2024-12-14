@@ -5,8 +5,6 @@ import org.scalatest.*
 import org.scalatest.flatspec.*
 import org.scalatest.matchers.*
 
-import java.time.LocalDateTime
-
 class ReservableQueueTest extends AnyFlatSpec with should.Matchers:
 
   "A ReservableQueue" should "add and reserve the exact amount" in {

@@ -19,16 +19,16 @@ case class Donation(
 
 object Donation:
 
+  def apply(donor: String, amount: BigDecimal): DonationPart =
+    apply(donor, amount, LocalDateTime.now)
+
   def apply(donor: String, amount: BigDecimal, donationDate: LocalDateTime): DonationPart =
     val donation = Donation(donor, donationDate)
     DonationPart(amount, donation)
 
-  def apply(donor: String, amount: BigDecimal): DonationPart =
-    apply(donor, amount, LocalDateTime.now)
-    
+  def apply(donor: String, amount: BigDecimal, earmarking: String): DonationPart =
+    apply(donor, amount, earmarking, LocalDateTime.now)
+
   def apply(donor: String, amount: BigDecimal, earmarking: String, donationDate: LocalDateTime): DonationPart =
     val donation = Donation(donor, donationDate, Some(earmarking))
     DonationPart(amount, donation)
-    
-  def apply(donor: String, amount: BigDecimal, earmarking: String): DonationPart =
-    apply(donor, amount, earmarking, LocalDateTime.now)
