@@ -1,4 +1,4 @@
-package com.just.donate.utils
+package com.just.donate.utils.structs
 
 case class ReservableQueue[T <: Splittable[T, S], S, C](
   context: C,

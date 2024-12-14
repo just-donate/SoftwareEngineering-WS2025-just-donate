@@ -1,4 +1,4 @@
-package com.just.donate.utils
+package com.just.donate.utils.structs
 
 import com.just.donate.models.{Donation, DonationPart}
 import org.scalatest.*

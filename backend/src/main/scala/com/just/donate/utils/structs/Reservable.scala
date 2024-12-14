@@ -1,4 +1,4 @@
-package com.just.donate.utils
+package com.just.donate.utils.structs
 
 case class Reservable[R <: Splittable[R, S], S, C](value: R, context: Option[C] = None):
 

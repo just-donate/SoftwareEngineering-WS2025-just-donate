@@ -1,6 +1,6 @@
 package com.just.donate.models
 
-import com.just.donate.utils.{Split, Splittable}
+import com.just.donate.utils.structs.{Split, Splittable}
 
 case class DonationPart(amount: BigDecimal, donation: Donation)
     extends Splittable[DonationPart, BigDecimal]

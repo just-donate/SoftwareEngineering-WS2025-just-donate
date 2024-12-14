@@ -1,6 +1,6 @@
 package com.just.donate.models
 
-import com.just.donate.utils.ReservableQueue
+import com.just.donate.utils.structs.ReservableQueue
 
 case class Account private (
   name: String,
