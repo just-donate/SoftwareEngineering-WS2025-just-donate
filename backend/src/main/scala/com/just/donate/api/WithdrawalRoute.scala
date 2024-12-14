@@ -10,17 +10,17 @@ import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 
-object DonationRoute:
+object WithdrawalRoute:
 
-  val donationRoute: Store => HttpRoutes[IO] = (store: Store) =>
+  val withdrawalRoute: Store => HttpRoutes[IO] = (store: Store) =>
     HttpRoutes.of[IO]:
 
-      case req @ POST -> Root / "organisation" / organisationId / "account" / accountName / "donate" =>
+      case req @ POST -> Root / "organisation" / organisationId / "account" / accountName / "withdrawal" =>
         for
-          donation <- req.as[RequestDonation]
+          donation <- req.as[RequestWithdrawal]
           response <- loadAndSaveOrganisation(organisationId)(store)(
-            _.donate(donation.donor, donation.amount, donation.earmarking, accountName)
+            _.withdrawal(donation.amount, accountName, donation.earmarking)
           )
         yield response
 
-  private case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])
+  private case class RequestWithdrawal(amount: BigDecimal, earmarking: Option[String], description: Option[String])

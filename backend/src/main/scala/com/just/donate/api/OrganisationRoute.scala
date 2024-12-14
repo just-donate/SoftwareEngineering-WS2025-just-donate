@@ -3,6 +3,7 @@ package com.just.donate.api
 import cats.effect.*
 import com.just.donate.models.Organisation
 import com.just.donate.store.{FileStore, Store}
+import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisation, loadOrganisation}
 import io.circe.*
 import io.circe.generic.auto.*
 import org.http4s.*
@@ -44,26 +45,7 @@ object OrganisationRoute:
 
       case GET -> Root / "organisation" / organisationId / "account" / "list" =>
         loadOrganisation(organisationId)(store)(_.accounts.map(_.name))
-
-  private inline def loadOrganisation[R: Encoder](
-    organisationId: String
-  )(store: Store)(mapper: Organisation => R): IO[Response[IO]] = for
-    organisation <- store.load(organisationId)
-    response <- organisation match
-      case Some(organisation) => Ok(mapper(organisation))
-      case None               => NotFound()
-  yield response
-
-  private inline def loadAndSaveOrganisation(
-    organisationId: String
-  )(store: Store)(mapper: Organisation => Organisation): IO[Response[IO]] = for
-    organisation <- store.load(organisationId)
-    response <- organisation match
-      case Some(organisation) =>
-        FileStore.save(organisationId, mapper(organisation)) >> Ok()
-      case None => NotFound()
-  yield response
-
+  
   case class RequestOrganisation(name: String)
 
   case class ResponseOrganisation(organisationId: String, name: String)

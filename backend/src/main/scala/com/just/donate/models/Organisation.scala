@@ -32,9 +32,17 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty):
         copy(accounts = accounts.map(a => if a.name == account then newAcc else a))
       case None => this
 
-  def withdrawal(amount: BigDecimal, account: String, earmarking: Option[String]): Organisation = ???
+  def withdrawal(amount: BigDecimal, account: String, earmarking: Option[String]): Organisation =
+    getAccount(account)
 
-  def transfer(amount: BigDecimal, fromAccount: String, toAccount: String): Organisation = ???
+
+    ???
+
+  def transfer(amount: BigDecimal, fromAccount: String, toAccount: String): Organisation =
+
+
+
+    ???
 
   def totalBalance: BigDecimal =
     accounts.map(_.totalBalance).sum
