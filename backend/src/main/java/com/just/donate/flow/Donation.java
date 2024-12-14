@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents a single donation. A donation can be split into multiple parts, e.g. for different purposes.
@@ -11,11 +12,13 @@ import java.util.List;
  */
 public class Donation {
 
+    private final String donationId;
     private final String donor;
     private final LocalDateTime donationDate;
     private final List<DonationPart> parts;
 
-    protected Donation(String donor, BigDecimal amount, LocalDateTime donationDate) {
+    protected Donation(String donor, BigDecimal amount, LocalDateTime donationDate, String donationId) {
+        this.donationId = donationId;
         this.donor = donor;
         this.parts = new ArrayList<>();
         this.parts.add(new DonationPart(amount, donationDate));
@@ -23,6 +26,7 @@ public class Donation {
     }
 
     public Donation(String donor, BigDecimal amount) {
+        this.donationId = generateDonationId();
         this.donor = donor;
         this.parts = new ArrayList<>();
         this.donationDate = LocalDateTime.now();
@@ -43,6 +47,14 @@ public class Donation {
 
     public BigDecimal getAmount() {
         return parts.stream().map(DonationPart::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public String getDonationId() {
+        return donationId;
+    }
+
+    private String generateDonationId() {
+        return UUID.randomUUID().toString();
     }
 
     @Override
