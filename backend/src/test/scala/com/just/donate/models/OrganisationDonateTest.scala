@@ -7,17 +7,17 @@ class OrganisationDonateTest extends AnyFlatSpec with Matchers {
 
   // Helper method to set up a new Organisation with accounts and flows
   def createNewRoots(): Organisation = {
-    val newRoots = Organisation("New Roots")
+    var newRoots = Organisation("New Roots")
 
     val paypal = new Account("Paypal")
     val betterPlace = new Account("Better Place")
     val bank = new Account("Bank")
     val kenya = new Account("Kenya")
 
-    newRoots.addAccount(paypal)
-    newRoots.addAccount(betterPlace)
-    newRoots.addAccount(bank)
-    newRoots.addAccount(kenya)
+    newRoots = newRoots.addAccount(paypal)
+    newRoots = newRoots.addAccount(betterPlace)
+    newRoots = newRoots.addAccount(bank)
+    newRoots = newRoots.addAccount(kenya)
 
     newRoots
   }
@@ -28,28 +28,27 @@ class OrganisationDonateTest extends AnyFlatSpec with Matchers {
   }
 
   it should "reflect unbound donations in the total balance" in {
-    val newRoots = createNewRoots()
+    var newRoots = createNewRoots()
+
+    newRoots = newRoots.donate("Donor1", BigDecimal("100.00"), None, "Paypal")
+
     val paypalOption = newRoots.getAccount("Paypal")
-
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
-
-    paypal.donate("Donor1", BigDecimal("100.00"))
 
     paypal.totalBalance shouldEqual BigDecimal("100.00")
     newRoots.totalBalance shouldEqual BigDecimal("100.00")
   }
 
   it should "reflect bound donations in the total balance and earmarked balances" in {
-    val newRoots = createNewRoots()
-    val paypalOption = newRoots.getAccount("Paypal")
+    var newRoots = createNewRoots()
 
+    newRoots = newRoots.addEarmarking("Education")
+    newRoots = newRoots.donate("Donor1", BigDecimal("200.00"), Some("Education"), "Paypal")
+
+    val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
 
-    paypal.addEarmarking("Education")
-    val (success, paypal2) = paypal.donate("Donor1", BigDecimal("200.00"), "Education")
-    success shouldBe (true)
-
-    paypal2.totalBalance shouldEqual BigDecimal("200.00")
+    paypal.totalBalance shouldEqual BigDecimal("200.00")
     newRoots.totalBalance shouldEqual BigDecimal("200.00")
 
     paypal.totalEarmarkedBalance("Education") shouldEqual BigDecimal("200.00")
@@ -62,14 +61,13 @@ class OrganisationDonateTest extends AnyFlatSpec with Matchers {
   }
 
   it should "aggregate donations from multiple accounts correctly in the total balance" in {
-    val newRoots = createNewRoots()
+    var newRoots = createNewRoots()
+
+    newRoots = newRoots.donate("Donor1", BigDecimal("100.00"), None, "Paypal")
+    newRoots = newRoots.donate("Donor2", BigDecimal("150.00"), None, "Bank")
+
     val paypal = newRoots.getAccount("Paypal")
     val bank = newRoots.getAccount("Bank")
-    
-    
-
-    paypal.get.donate("Donor1", BigDecimal("100.00"))
-    bank.get.donate("Donor2", BigDecimal("150.00"))
 
     paypal.get.totalBalance shouldEqual BigDecimal("100.00")
     bank.get.totalBalance shouldEqual BigDecimal("150.00")
@@ -77,21 +75,22 @@ class OrganisationDonateTest extends AnyFlatSpec with Matchers {
   }
 
   it should "correctly update the total balance when donations are made to accounts with incoming flows" in {
-    val newRoots = createNewRoots()
+    var newRoots = createNewRoots()
+
+    newRoots = newRoots.donate("Donor1", BigDecimal("100.00"), None, "Paypal")
+    newRoots = newRoots.donate("Donor2", BigDecimal("150.00"), None, "Bank")
+
     val paypal = newRoots.getAccount("Paypal")
     val bank = newRoots.getAccount("Bank")
-
-    paypal.get.donate("Donor1", BigDecimal("100.00"))
-    bank.get.donate("Donor2", BigDecimal("150.00"))
 
     paypal.get.totalBalance shouldEqual BigDecimal("100.00")
     bank.get.totalBalance shouldEqual BigDecimal("150.00")
     newRoots.totalBalance shouldEqual BigDecimal("250.00")
 
     // Adding donation to an account with incoming flows
+    newRoots = newRoots.donate("Donor3", BigDecimal("200.00"), None, "Kenya")
+    
     val kenya = newRoots.getAccount("Kenya")
-    kenya.get.donate("Donor3", BigDecimal("200.00"))
-
     kenya.get.totalBalance shouldEqual BigDecimal("200.00")
     newRoots.totalBalance shouldEqual BigDecimal("450.00")
   }
