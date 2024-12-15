@@ -15,3 +15,4 @@ case class DonationQueue(
     copy(donationQueue = donations.foldLeft(donationQueue)(_.add(_)))
 
   def totalBalance: BigDecimal = donationQueue.queue.map(_.value.amount).sum
+

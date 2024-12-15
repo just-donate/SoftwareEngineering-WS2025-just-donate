@@ -33,16 +33,34 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty):
       case None => this
 
   def withdrawal(amount: BigDecimal, account: String, earmarking: Option[String]): Organisation =
-    getAccount(account)
-
-
-    ???
+    getAccount(account) match
+      case Some(value) =>
+        val expense = Expense("", amount, earmarking)
+        copy(accounts = accounts.map(a => if a.name == account then value.withdrawal(expense) else a))
+      case None => throw new IllegalArgumentException(s"Account $account does not exist")
 
   def transfer(amount: BigDecimal, fromAccount: String, toAccount: String): Organisation =
+    (getAccount(fromAccount), getAccount(toAccount)) match
+      case (Some(from), Some(to)) => transfer(amount, from, to)
+      case _ => throw new IllegalArgumentException(s"Account $fromAccount or $toAccount does not exist")
 
+  def transfer(amount: BigDecimal, fromAccount: Account, toAccount: Account): Organisation =
+    if fromAccount.totalBalance < amount then
+      throw new IllegalArgumentException(s"Account ${fromAccount.name} has insufficient funds")
+      
+    val (remaining, donationPart, earmarked, updatedFrom) = fromAccount.pull(amount)
+    val updatedTo = toAccount.push(donationPart, earmarked)
 
+    val updatedOrg = copy(accounts =
+      accounts.map(a =>
+        if a.name == fromAccount.name then updatedFrom
+        else if a.name == toAccount.name then updatedTo
+        else a
+      )
+    )
 
-    ???
+    if remaining == BigDecimal(0) then updatedOrg
+    else updatedOrg.transfer(remaining, fromAccount, toAccount)
 
   def totalBalance: BigDecimal =
     accounts.map(_.totalBalance).sum

@@ -34,7 +34,12 @@ case class Account private (
     else (false, this)
 
   def removeEarmarking(earmarking: String): Account =
-    ???
+    boundDonations.find(_._1 == earmarking) match
+      case Some(value) =>
+        if value._2.totalBalance == BigDecimal.valueOf(0) then
+          copy(boundDonations = boundDonations.filterNot(_._1 == earmarking))
+        else throw new IllegalArgumentException(s"Earmarking $earmarking has a balance of ${value._2.totalBalance}")
+      case None => this
 
   def addEarmarking(earmarking: String): Account =
     // boundDonations = boundDonations :+ ((earmarking, DonationQueue(name, ReservableQueue(name))))
@@ -46,30 +51,21 @@ case class Account private (
   private def getBoundQueue(earmarking: String): Option[DonationQueue] =
     boundDonations.filter(_._1 == earmarking).map(_._2).headOption
 
-  protected def spend(expense: Expense): Boolean =
+  def withdrawal(expense: Expense): Account =
     // If the total balance is less than the expense, we cannot spend it
-    if totalBalance < expense.amount then return false
-    if expense.isBound then spendBound(expense)
-    else spendUnbound(expense)
+    if totalBalance < expense.amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
+    if expense.isBound then withdrawalBound(expense)
+    else withdrawalUnbound(expense)
 
-  private def spendUnbound(expense: Expense): Boolean =
+  private def withdrawalUnbound(expense: Expense): Account =
     // 1. Expense is unbound, withdraw from unbound donations
     //    - if unbound are not enough, go into minus as long it is covered by bound donations
     //      (we don't need to subtract form bound, as they are reserved and the organization
     //       must cover the expense from unbound later on)
     // 2. Expense is unbound, but not enough unbound donations, return false
-    val remainingExpense: Expense = spendUnboundFromAccount(expense)
-    if remainingExpense.isPaid then return true
-    // Now we need to reserve upstream
-    // TODO: Implement this
-    false
+    this
 
-  private def spendUnboundFromAccount(expense: Expense): Expense =
-    val polled = this.unboundDonations.donationQueue.pollUnreserved(expense.amount)
-    polled._1.foreach(expense.payWith)
-    expense
-
-  private def spendBound(expense: Expense): Boolean =
+  private def withdrawalBound(expense: Expense): Account =
     // 1. Expense is bound, withdraw from bound donations
     //    - if bound are not enough, check if up the queue are more and reserve them, go into minus
     //      as long it is covered by unbound donations
@@ -77,7 +73,21 @@ case class Account private (
     //    - if unbound are not enough, do not go into minus, as an account must be covered, return false
     val earmarking: String = expense.earMarking.get
     // TODO: Implement this
-    false
+    this
+
+  private[models] def pull(amount: BigDecimal): (BigDecimal, DonationPart, Option[String], Account) =
+    if totalBalance < amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
+
+    val oldestDonation =
+      (("", unboundDonations) +: boundDonations).minBy(_._2.donationQueue._2.head.value.donation.donationDate)
+    
+    ???
+
+
+  private[models] def push(donation: DonationPart, earmarking: Option[String]): Account =
+    earmarking match
+      case Some(earmark) => donate(donation, earmark)._2
+      case None          => donate(donation)._2
 
   def totalBalance: BigDecimal = totalBalanceUnbound + totalBalanceBound
 

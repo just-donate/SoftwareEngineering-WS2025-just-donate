@@ -1,26 +1,11 @@
 package com.just.donate.models
 
+import com.just.donate.helper.OrganisationHelper.createNewRoots
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class OrganisationDonateTest extends AnyFlatSpec with Matchers:
-
-  // Helper method to set up a new Organisation with accounts and flows
-  def createNewRoots(): Organisation =
-    var newRoots = Organisation("New Roots")
-
-    val paypal = new Account("Paypal")
-    val betterPlace = new Account("Better Place")
-    val bank = new Account("Bank")
-    val kenya = new Account("Kenya")
-
-    newRoots = newRoots.addAccount(paypal)
-    newRoots = newRoots.addAccount(betterPlace)
-    newRoots = newRoots.addAccount(bank)
-    newRoots = newRoots.addAccount(kenya)
-
-    newRoots
-
+  
   "An Organisation" should "have a total balance of zero without any donations or expenses" in {
     val newRoots = createNewRoots()
     newRoots.totalBalance shouldEqual BigDecimal(0)

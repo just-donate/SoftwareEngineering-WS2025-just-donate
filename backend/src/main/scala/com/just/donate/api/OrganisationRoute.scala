@@ -13,7 +13,7 @@ import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 
 object OrganisationRoute:
-
+  
   val organisationApi: Store => HttpRoutes[IO] = (store: Store) =>
     HttpRoutes.of[IO]:
 
