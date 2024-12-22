@@ -16,3 +16,9 @@ case class DonationQueue(
 
   def totalBalance: BigDecimal = donationQueue.queue.map(_.value.amount).sum
 
+  def pull(amount: BigDecimal): (Seq[DonationPart], DonationQueue) =
+    val (donations, remaining, newQueue) = donationQueue.pollUnreserved(amount)
+    if remaining > BigDecimal(0) then
+      throw new IllegalArgumentException(s"Not enough donations to pull $amount (TODO: handle this)")
+    (donations, copy(donationQueue = newQueue))
+

@@ -1,6 +1,9 @@
 package com.just.donate.models
 
-case class Organisation(name: String, accounts: Seq[Account] = Seq.empty):
+import com.just.donate.utils.CollectionUtils.updatedReturn
+
+
+case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expenses: Seq[Expense] = Seq.empty):
 
   def getAccount(name: String): Option[Account] =
     accounts.find(_.name == name)
@@ -33,11 +36,11 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty):
       case None => this
 
   def withdrawal(amount: BigDecimal, account: String, earmarking: Option[String]): Organisation =
-    getAccount(account) match
-      case Some(value) =>
-        val expense = Expense("", amount, earmarking)
-        copy(accounts = accounts.map(a => if a.name == account then value.withdrawal(expense) else a))
-      case None => throw new IllegalArgumentException(s"Account $account does not exist")
+    accounts.updatedReturn(a => a.name == account)(a => a.withdrawal(amount, earmarking)) match
+      case (newAccounts, Some(donationParts)) => 
+        val expense = Expense("description", amount, earmarking, donationParts)
+        copy(accounts = newAccounts, expenses = expenses :+ expense)
+      case (newAccounts, None) => throw new IllegalArgumentException(s"Account $account does not exist")
 
   def transfer(amount: BigDecimal, fromAccount: String, toAccount: String): Organisation =
     (getAccount(fromAccount), getAccount(toAccount)) match
