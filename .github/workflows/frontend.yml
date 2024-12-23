@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm install
+        run: npm install --include=optional
 
       - name: Build the frontend
         working-directory: ./frontend
