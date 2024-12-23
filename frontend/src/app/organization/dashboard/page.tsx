@@ -59,6 +59,16 @@ export default function DashboardPage() {
             </Link>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Tracking Page</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link href="/organization/manage-tracking">
+              <Button>Customize Tracking Page</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

@@ -22,10 +22,41 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }
 
   useEffect(() => {
+// TODO: Make real api call
+    // For now just mock data
+
+    const fetchedTheme = {
+      custom: {
+        primary: 'bg-blue-600 text-white',
+        secondary: 'bg-cyan-500 text-white',
+        accent: 'bg-orange-400 text-gray-900',
+        background: 'bg-gray-50',
+        card: 'bg-white',
+        text: 'text-gray-900',
+        textLight: 'text-gray-700',
+        font: 'font-sans',
+        icon: '🌍',
+        ngoName: 'World Aid',
+        ngoUrl: 'https://www.worldaid.org',
+        helpUrl: '/support',
+        statusColors: {
+          donated: 'bg-emerald-500',
+          inTransit: 'bg-amber-500',
+          allocated: 'bg-sky-500',
+          used: 'bg-indigo-500',
+        },
+      }
+    };
+
+
+
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('theme')
       if (savedTheme && themes[savedTheme as keyof typeof themes]) {
         setThemeState(themes[savedTheme as keyof typeof themes])
+      } else {
+        setThemeState(fetchedTheme.custom)
+        localStorage.setItem('theme', 'custom');
       }
     }
   }, [])

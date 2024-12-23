@@ -11,6 +11,7 @@ const navItems = [
   { href: '/organization/transactions', label: 'Transactions' },
   { href: '/organization/donations', label: 'Donations' },
   { href: '/organization/gallery', label: 'Gallery' },
+  { href: '/organization/manage-tracking', label: 'Tracking Page'}
 ]
 
 export function NavBar() {
