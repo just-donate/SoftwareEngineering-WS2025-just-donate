@@ -19,6 +19,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
 
+      - name: Install system dependencies for Sharp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvips-dev
+
       - name: Cache Node.js modules
         uses: actions/cache@v4
         with:
