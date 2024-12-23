@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { ThemeSwitcher } from './ThemeSwitcher';
 import Link from 'next/link';
 
 
@@ -39,7 +38,6 @@ export const Navigation: React.FC<NavigationProps> = ({ links }) => {
               </a>
             ))}
           </div>
-          <ThemeSwitcher />
         </div>
       </div>
     </nav>
