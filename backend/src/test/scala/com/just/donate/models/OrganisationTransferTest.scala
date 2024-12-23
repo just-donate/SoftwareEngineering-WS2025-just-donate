@@ -31,8 +31,8 @@ class OrganisationTransferTest extends AnyFlatSpec with Matchers:
 
     newRoots = newRoots.donate("Donor1", BigDecimal("100.00"), None, "Paypal")
 
-    an[IllegalStateException] should be thrownBy {
-      newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank")
+    an[IllegalArgumentException] should be thrownBy {
+      newRoots.transfer(BigDecimal("50.00"), "NoExists", "Bank")
     }
   }
 
@@ -41,8 +41,8 @@ class OrganisationTransferTest extends AnyFlatSpec with Matchers:
 
     newRoots = newRoots.donate("Donor1", BigDecimal("100.00"), None, "Paypal")
 
-    an[IllegalStateException] should be thrownBy {
-      newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank")
+    an[IllegalArgumentException] should be thrownBy {
+      newRoots.transfer(BigDecimal("50.00"), "Paypal", "NoExists")
     }
   }
 
@@ -106,8 +106,8 @@ class OrganisationTransferTest extends AnyFlatSpec with Matchers:
     newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Education") shouldEqual BigDecimal("50.00")
     newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Health") shouldEqual BigDecimal("150.00")
 
-    newRoots.getAccount("Bank").get.totalEarmarkedBalance("Education") shouldEqual BigDecimal("0.00")
-    newRoots.getAccount("Bank").get.totalEarmarkedBalance("Health") shouldEqual BigDecimal("50.00")
+    newRoots.getAccount("Bank").get.totalEarmarkedBalance("Education") shouldEqual BigDecimal("50.00")
+    newRoots.getAccount("Bank").get.totalEarmarkedBalance("Health") shouldEqual BigDecimal("0.00")
   }
 
 

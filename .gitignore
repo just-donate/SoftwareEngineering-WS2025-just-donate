@@ -76,3 +76,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.metals/
+.vscode/
+.history/
+.next/
+.bloop/
+out/

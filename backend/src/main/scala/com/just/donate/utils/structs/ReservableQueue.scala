@@ -15,8 +15,8 @@ case class ReservableQueue[T <: Splittable[T, S], S, C](
     val (polled, newQueue) = pollUnreserved(queue)
     (polled, ReservableQueue(context, newQueue))
 
-  def pollUnreserved(s: S): (Seq[T], S, ReservableQueue[T, S, C]) =
-    val (ts, ss, newQueue) = pollUnreserved(s, queue)
+  def pollUnreserved(s: S, limit: Option[Int]): (Seq[T], Option[S], ReservableQueue[T, S, C]) =
+    val (ts, ss, newQueue) = pollUnreserved(s, queue, limit)
     (ts, ss, ReservableQueue(context, newQueue))
 
   def peekUnreserved: Option[T] =
@@ -46,26 +46,33 @@ case class ReservableQueue[T <: Splittable[T, S], S, C](
         val (polled, newQueue) = pollUnreserved(tail)
         (polled, head +: newQueue)
 
-  private def pollUnreserved(s: S, inner: Seq[Reservable[T, S, C]]): (Seq[T], S, Seq[Reservable[T, S, C]]) =
-    inner match
-      case Nil => (Seq.empty, s, inner)
-      case head +: tail if head.isReserved =>
-        val (ts, ss, newQueue) = pollUnreserved(s, tail)
-        (ts, ss, head +: newQueue)
-      case head +: tail =>
-        head.value.splitOf(s) match
-          // Nothing was split of, so we just return the head
-          case Split(None, Some(remain), None) => (Seq.empty, s, Reservable(remain) +: tail)
-          // Some was split off, so we return the split and the remain
-          case Split(Some(split), Some(remain), None) => (Seq(split), s, Reservable(remain) +: tail)
-          // Full split, so we return the split
-          case Split(Some(split), None, None) => (Seq(split), s, tail)
-          // Split of but remaining to split
-          case Split(Some(split), None, Some(open)) =>
-            val (ts, ss, newQueue) = pollUnreserved(open, tail)
-            (split +: ts, ss, newQueue)
-          // Other cases should not happen
-          case _ => throw new IllegalStateException("Should not happen?")
+  private def pollUnreserved(
+    s: S,
+    inner: Seq[Reservable[T, S, C]],
+    limit: Option[Int]
+  ): (Seq[T], Option[S], Seq[Reservable[T, S, C]]) =
+    limit match
+      case Some(value) if value <= 0 => (Seq.empty, Some(s), inner)
+      case _ =>
+        inner match
+          case Nil => (Seq.empty, Some(s), inner)
+          case head +: tail if head.isReserved =>
+            val (ts, ss, newQueue) = pollUnreserved(s, tail, limit)
+            (ts, ss, head +: newQueue)
+          case head +: tail =>
+            head.value.splitOf(s) match
+              // Nothing was split of, so we just return the head
+              case Split(None, Some(remain), None) => (Seq.empty, None, Reservable(remain) +: tail)
+              // Some was split off, so we return the split and the remain
+              case Split(Some(split), Some(remain), None) => (Seq(split), None, Reservable(remain) +: tail)
+              // Full split, so we return the split
+              case Split(Some(split), None, None) => (Seq(split), None, tail)
+              // Split of but remaining to split
+              case Split(Some(split), None, Some(open)) =>
+                val (ts, ss, newQueue) = pollUnreserved(open, tail, limit.map(_ - 1))
+                (split +: ts, ss, newQueue)
+              // Other cases should not happen
+              case _ => throw new IllegalStateException("Should not happen?")
 
   private def reserve(s: S, context: C, inner: Seq[Reservable[T, S, C]]): (Option[S], Seq[Reservable[T, S, C]]) =
     inner match

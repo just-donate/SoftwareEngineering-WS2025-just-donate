@@ -49,7 +49,13 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
 
   def transfer(amount: BigDecimal, fromAccount: Account, toAccount: Account): Organisation =
     if fromAccount.totalBalance < amount then
-      throw new IllegalArgumentException(s"Account ${fromAccount.name} has insufficient funds")
+      throw new IllegalStateException(s"Account ${fromAccount.name} has insufficient funds")
+      
+    if amount <= BigDecimal(0) then
+      throw new IllegalArgumentException("Amount must be greater than zero")
+      
+    if fromAccount.name == toAccount.name then
+      throw new IllegalArgumentException("Source and destination accounts must be different")
       
     val (remaining, donationPart, earmarked, updatedFrom) = fromAccount.pull(amount)
     val updatedTo = toAccount.push(donationPart, earmarked)
