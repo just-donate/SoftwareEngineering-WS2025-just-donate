@@ -41,13 +41,13 @@ export default function ManageTrackingPage() {
       } else {
         throw new Error('Invalid theme structure');
       }
-    } catch (err) {
+    } catch {
       setError('Invalid theme format. Please enter a valid JSON string.');
       setSuccessMessage(''); // Clear success message on error
     }
   }
 
-  const isValidTheme = (theme: any): theme is Theme => {
+  const isValidTheme = (theme: Theme): theme is Theme => {
     // Basic validation to check if the theme has the required properties
     return (
       typeof theme.primary === 'string' &&
