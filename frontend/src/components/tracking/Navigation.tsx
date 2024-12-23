@@ -1,8 +1,8 @@
-'use client'
-
 import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import Link from 'next/link';
+import Image from 'next/image';
+import logo from '@/assets/logo_white_small.png';
 
 interface NavigationProps {
   links: {
@@ -20,9 +20,7 @@ export const Navigation: React.FC<NavigationProps> = ({ links }) => {
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-              <span className="text-2xl mr-2" role="img" aria-label="Logo">
-                {theme.icon}
-              </span>
+                <Image src={logo} alt="Logo" className="h-8 w-8 mr-2 object-contain" />
                 <h1 className={`text-2xl font-bold text-white`}>Donation Tracker</h1>
               </Link>
             </div>
