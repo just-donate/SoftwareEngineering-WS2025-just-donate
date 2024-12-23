@@ -34,7 +34,7 @@ export default function SearchPage() {
 
   return (
       <div className={`h-screen ${theme.background}`}>
-        <Navigation links={[{ link: 'SoftwareEngineering-WS2025-just-donate/organization/', name: 'Organization' }]} />
+        <Navigation links={[{ link: 'SoftwareEngineering-WS2025-just-donate/organization/', name: 'Organization Login' }]} />
         <main className={`${theme.text} max-w-4xl mx-auto px-4 flex flex-col items-center justify-center h-[calc(100%-4rem)]`}>
           <div className={`${theme.card} p-6 rounded-lg shadow-lg w-full max-w-2xl`}>
             <form onSubmit={handleSearch} className="flex items-center space-x-4 w-full">
