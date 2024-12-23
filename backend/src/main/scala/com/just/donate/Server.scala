@@ -2,7 +2,8 @@ package com.just.donate
 
 import cats.effect.*
 import com.comcast.ip4s.*
-import com.just.donate.api.Routes.api
+import com.just.donate.api.OrganisationRoute.organisationApi
+import com.just.donate.store.FileStore
 import org.http4s.*
 import org.http4s.ember.server.*
 import org.http4s.implicits.*
@@ -18,7 +19,7 @@ object Server extends IOApp:
   // Serve from resources folder /public
   private val httpApp: HttpApp[IO] = Router(
     "" -> fileService[IO](FileService.Config("../frontend/dist")),
-    "api" -> api
+    "organisation" -> organisationApi(FileStore)
   ).orNotFound
 
   def run(args: List[String]): IO[ExitCode] =
