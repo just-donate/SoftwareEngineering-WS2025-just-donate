@@ -34,7 +34,7 @@ export default function SearchPage() {
 
   return (
     <div className={`h-screen ${theme.background}`}>
-      <Navigation links={[{ link: '/organization/login', name: 'Organization' }]} />
+      <Navigation links={[{ link: 'SoftwareEngineering-WS2025-just-donate/organization/', name: 'Organization' }]} />
       <main className={`${theme.text} max-w-4xl mx-auto px-4 flex flex-col items-center justify-center h-[calc(100%-4rem)]`}>
         <div className={`inline-flex rounded-md shadow-sm ${theme.background} mb-4`} role="group">
           <button
