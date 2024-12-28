@@ -14,7 +14,6 @@ object PaypalRoute:
         // Maybe list everything from DB, or just memory buffer:
         for
           allDb <- repo.findAll
-          // If we want to see them as a single string
           _ <- IO.println(s"IPNs in DB: $allDb")
           resp <- Ok(allDb.mkString("\n"))
         yield resp
