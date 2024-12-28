@@ -23,7 +23,6 @@ object Server extends IOApp:
     val mongoUri = sys.env.getOrElse("MONGO_URI", "mongodb://localhost:27017")
 
     IO.println(s"Starting server with MongoDB at $mongoUri") *>
-    
     mongoResource(mongoUri).use { client =>
       val database = client.getDatabase("just-donate")
       val paypalRepository = new PaypalRepository(database)
