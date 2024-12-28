@@ -1,25 +1,32 @@
 package com.just.donate.api
 
 import cats.effect.IO
+import com.just.donate.db.PaypalRepository
+import com.just.donate.models.PaypalIPN
 import org.http4s.dsl.io.*
 import org.http4s.{HttpRoutes, UrlForm}
 
-import scala.collection.mutable.ListBuffer
-
 object PaypalRoute:
 
-  private val ipnPayloads: ListBuffer[String] = ListBuffer.empty
+  def paypalRoute: PaypalRepository => HttpRoutes[IO] = (repo: PaypalRepository) =>
+    HttpRoutes.of[IO]:
+      case GET -> Root =>
+        // Maybe list everything from DB, or just memory buffer:
+        for
+          allDb <- repo.findAll
+          // If we want to see them as a single string
+          _ <- IO.println(s"IPNs in DB: $allDb")
+          resp <- Ok(allDb.mkString("\n"))
+        yield resp
 
-  val paypalRoute: HttpRoutes[IO] = HttpRoutes.of[IO]:
-    case GET -> Root =>
-        Ok(ipnPayloads.mkString("\n"))
+      case req@POST -> Root =>
+        for
+          formData <- req.as[UrlForm].map(_.values.toMap) // Map[String, Seq[String]]
+          _ <- IO.println(s"Received IPN Payload: $formData")
 
-    case req @ POST -> Root =>
-      for
-        // Parse the body as URL-encoded form data
-        body <- req.as[UrlForm].map(_.values.toMap)
-        _ <- IO.println(s"Received IPN Payload: $body") // Log for debugging
+          // Create a new PaypalIPN entity and insert into DB
+          newIpn = PaypalIPN(payload = formData.toString())
+          _ <- repo.create(newIpn)
 
-        _ <- IO(ipnPayloads += body.toString())
-        response <- Ok("IPN Payload received")
-      yield response
+          resp <- Ok("IPN Payload received and stored in MongoDB")
+        yield resp
