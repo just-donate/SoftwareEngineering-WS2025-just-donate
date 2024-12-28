@@ -30,7 +30,9 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm install
+        run: |
+          npm install
+          npm install --os=linux --cpu=x64 sharp
 
       - name: Build the frontend
         working-directory: ./frontend
