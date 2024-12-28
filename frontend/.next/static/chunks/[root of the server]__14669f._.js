@@ -2073,7 +2073,7 @@ Object.defineProperty(exports, "addBasePath", {
 });
 const _addpathprefix = __turbopack_require__("[project]/node_modules/next/dist/shared/lib/router/utils/add-path-prefix.js [client] (ecmascript)");
 const _normalizetrailingslash = __turbopack_require__("[project]/node_modules/next/dist/client/normalize-trailing-slash.js [client] (ecmascript)");
-const basePath = ("TURBOPACK compile-time value", "") || '';
+const basePath = ("TURBOPACK compile-time value", "/SoftwareEngineering-WS2025-just-donate") || '';
 function addBasePath(path, required) {
     return (0, _normalizetrailingslash.normalizePathTrailingSlash)(("TURBOPACK compile-time falsy", 0) ? ("TURBOPACK unreachable", undefined) : (0, _addpathprefix.addPathPrefix)(path, basePath));
 }
@@ -5848,7 +5848,7 @@ Object.defineProperty(exports, "hasBasePath", {
     }
 });
 const _pathhasprefix = __turbopack_require__("[project]/node_modules/next/dist/shared/lib/router/utils/path-has-prefix.js [client] (ecmascript)");
-const basePath = ("TURBOPACK compile-time value", "") || '';
+const basePath = ("TURBOPACK compile-time value", "/SoftwareEngineering-WS2025-just-donate") || '';
 function hasBasePath(path) {
     return (0, _pathhasprefix.pathHasPrefix)(path, basePath);
 }
@@ -5876,7 +5876,7 @@ Object.defineProperty(exports, "removeBasePath", {
     }
 });
 const _hasbasepath = __turbopack_require__("[project]/node_modules/next/dist/client/has-base-path.js [client] (ecmascript)");
-const basePath = ("TURBOPACK compile-time value", "") || '';
+const basePath = ("TURBOPACK compile-time value", "/SoftwareEngineering-WS2025-just-donate") || '';
 function removeBasePath(path) {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
@@ -7056,7 +7056,7 @@ class Router {
                     });
                     return new Promise(()=>{});
                 }
-                const routerFilterSValue = ("TURBOPACK compile-time value", JSON.parse('{"numItems":1,"errorRate":0.0001,"numBits":20,"numHashes":14,"bitArray":[1,0,0,1,1,0,0,1,0,0,1,0,0,0,1,1,0,0,1,1]}'));
+                const routerFilterSValue = ("TURBOPACK compile-time value", JSON.parse('{"numItems":12,"errorRate":0.0001,"numBits":231,"numHashes":14,"bitArray":[0,1,1,0,0,1,0,1,0,1,1,0,1,1,0,1,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,0,1,1,1,1,0,0,1,0,0,0,1,1,1,1,1,0,1,0,1,0,0,0,1,1,1,0,1,0,0,0,1,1,0,1,0,1,0,1,1,0,0,1,1,0,0,0,1,1,0,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,1,1,1,0,1,1,0,0,0,0,1,0,1,1,0,0,0,1,1,0,1,1,0,0,0,0,0,1,0,0,1,0,1,1,1,1,1,1,0,0,1,0,1,1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1,1,0,1,0,1,0,1,1,0,0,1,1,1,1,0]}'));
                 if (!staticFilterData && routerFilterSValue) {
                     staticFilterData = routerFilterSValue ? routerFilterSValue : undefined;
                 }
@@ -8046,7 +8046,7 @@ class Router {
         // if auto prerendered and dynamic route wait to update asPath
         // until after mount to prevent hydration mismatch
         const autoExportDynamic = (0, _isdynamic.isDynamicRoute)(pathname) && self.__NEXT_DATA__.autoExport;
-        this.basePath = ("TURBOPACK compile-time value", "") || '';
+        this.basePath = ("TURBOPACK compile-time value", "/SoftwareEngineering-WS2025-just-donate") || '';
         this.sub = subscription;
         this.clc = null;
         this._wrapApp = wrapApp;
@@ -9590,7 +9590,7 @@ function parseStack(stack) {
             const res = regexNextStatic.exec(url.pathname);
             if (res) {
                 var _process_env___NEXT_DIST_DIR_replace, _process_env___NEXT_DIST_DIR;
-                const distDir = (_process_env___NEXT_DIST_DIR = ("TURBOPACK compile-time value", "/Users/antonkluge/Programmieren/Java/just-donate/frontend/.next")) == null ? void 0 : (_process_env___NEXT_DIST_DIR_replace = _process_env___NEXT_DIST_DIR.replace(/\\/g, '/')) == null ? void 0 : _process_env___NEXT_DIST_DIR_replace.replace(/\/$/, '');
+                const distDir = (_process_env___NEXT_DIST_DIR = ("TURBOPACK compile-time value", "/Users/sarpsahinalp/IdeaProjects/SoftwareEngineering-WS2025-just-donate/frontend/.next")) == null ? void 0 : (_process_env___NEXT_DIST_DIR_replace = _process_env___NEXT_DIST_DIR.replace(/\\/g, '/')) == null ? void 0 : _process_env___NEXT_DIST_DIR_replace.replace(/\/$/, '');
                 if (distDir) {
                     frame.file = 'file://' + distDir.concat(res.pop()) + url.search;
                 }
@@ -10186,7 +10186,7 @@ function getOriginalStackFrame(source, type, isAppDir, errorMessage) {
         }
         const controller = new AbortController();
         const tm = setTimeout(()=>controller.abort(), 3000);
-        const res = await self.fetch((("TURBOPACK compile-time value", "") || '') + "/__nextjs_original-stack-frame?" + params.toString(), {
+        const res = await self.fetch((("TURBOPACK compile-time value", "/SoftwareEngineering-WS2025-just-donate") || '') + "/__nextjs_original-stack-frame?" + params.toString(), {
             signal: controller.signal
         }).finally(()=>{
             clearTimeout(tm);
@@ -15371,7 +15371,7 @@ function useOpenInEditor(param) {
         params.append('file', file);
         params.append('lineNumber', String(lineNumber));
         params.append('column', String(column));
-        self.fetch((("TURBOPACK compile-time value", "") || '') + "/__nextjs_launch-editor?" + params.toString()).then(()=>{}, ()=>{
+        self.fetch((("TURBOPACK compile-time value", "/SoftwareEngineering-WS2025-just-donate") || '') + "/__nextjs_launch-editor?" + params.toString()).then(()=>{}, ()=>{
             console.error('There was an issue opening this code in your editor.');
         });
     }, [
@@ -18864,7 +18864,7 @@ function AppContainer(param) {
                             children: /*#__PURE__*/ (0, _jsxruntime.jsx)(_headmanagercontextsharedruntime.HeadManagerContext.Provider, {
                                 value: headManager,
                                 children: /*#__PURE__*/ (0, _jsxruntime.jsx)(_imageconfigcontextsharedruntime.ImageConfigContext.Provider, {
-                                    value: ("TURBOPACK compile-time value", JSON.parse('{"deviceSizes":[640,750,828,1080,1200,1920,2048,3840],"imageSizes":[16,32,48,64,96,128,256,384],"path":"/_next/image","loader":"default","dangerouslyAllowSVG":false,"unoptimized":false,"domains":[],"remotePatterns":[]}')),
+                                    value: ("TURBOPACK compile-time value", JSON.parse('{"deviceSizes":[640,750,828,1080,1200,1920,2048,3840],"imageSizes":[16,32,48,64,96,128,256,384],"path":"/SoftwareEngineering-WS2025-just-donate/_next/image","loader":"default","dangerouslyAllowSVG":false,"unoptimized":true,"domains":[],"remotePatterns":[],"output":"export"}')),
                                     children: children
                                 })
                             })

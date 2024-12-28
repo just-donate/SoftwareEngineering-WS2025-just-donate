@@ -36,66 +36,6 @@ const themes = {
             allocated: 'bg-blue-500',
             used: 'bg-purple-500'
         }
-    },
-    blue: {
-        primary: 'bg-blue-600 text-white',
-        secondary: 'bg-cyan-500 text-white',
-        accent: 'bg-orange-400 text-gray-900',
-        background: 'bg-gray-50',
-        card: 'bg-white',
-        text: 'text-gray-900',
-        textLight: 'text-gray-700',
-        font: 'font-serif',
-        icon: '🌍',
-        ngoName: 'World Aid',
-        ngoUrl: 'https://www.worldaid.org',
-        helpUrl: '/support',
-        statusColors: {
-            donated: 'bg-emerald-500',
-            inTransit: 'bg-amber-500',
-            allocated: 'bg-sky-500',
-            used: 'bg-indigo-500'
-        }
-    },
-    paleGray: {
-        primary: 'bg-gray-400 text-white',
-        secondary: 'bg-gray-300 text-gray-800',
-        accent: 'bg-gray-200 text-gray-800',
-        background: 'bg-gray-50',
-        card: 'bg-white',
-        text: 'text-gray-700',
-        textLight: 'text-gray-500',
-        font: 'font-sans',
-        icon: '🕊️',
-        ngoName: 'Peace Foundation',
-        ngoUrl: 'https://www.peacefoundation.org',
-        helpUrl: '/assistance',
-        statusColors: {
-            donated: 'bg-gray-300',
-            inTransit: 'bg-gray-400',
-            allocated: 'bg-gray-500',
-            used: 'bg-gray-600'
-        }
-    },
-    paleBlue: {
-        primary: 'bg-blue-300 text-white',
-        secondary: 'bg-blue-200 text-gray-800',
-        accent: 'bg-blue-100 text-gray-800',
-        background: 'bg-blue-50',
-        card: 'bg-white',
-        text: 'text-gray-800',
-        textLight: 'text-gray-600',
-        font: 'font-sans',
-        icon: '💧',
-        ngoName: 'Ocean Care',
-        ngoUrl: 'https://www.oceancare.org',
-        helpUrl: '/support',
-        statusColors: {
-            donated: 'bg-blue-200',
-            inTransit: 'bg-blue-300',
-            allocated: 'bg-blue-400',
-            used: 'bg-blue-500'
-        }
     }
 };
 }}),
@@ -126,6 +66,30 @@ const ThemeProvider = ({ children })=>{
         }
     };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        // TODO: Make real api call
+        // For now just mock data
+        const fetchedTheme = {
+            custom: {
+                primary: 'bg-blue-600 text-white',
+                secondary: 'bg-cyan-500 text-white',
+                accent: 'bg-orange-400 text-gray-900',
+                background: 'bg-gray-50',
+                card: 'bg-white',
+                text: 'text-gray-900',
+                textLight: 'text-gray-700',
+                font: 'font-sans',
+                icon: '🌍',
+                ngoName: 'World Aid',
+                ngoUrl: 'https://www.worldaid.org',
+                helpUrl: '/support',
+                statusColors: {
+                    donated: 'bg-emerald-500',
+                    inTransit: 'bg-amber-500',
+                    allocated: 'bg-sky-500',
+                    used: 'bg-indigo-500'
+                }
+            }
+        };
         if ("TURBOPACK compile-time falsy", 0) {
             "TURBOPACK unreachable";
         }
@@ -138,7 +102,7 @@ const ThemeProvider = ({ children })=>{
         children: children
     }, void 0, false, {
         fileName: "[project]/src/contexts/ThemeContext.tsx",
-        lineNumber: 34,
+        lineNumber: 65,
         columnNumber: 5
     }, this);
 };

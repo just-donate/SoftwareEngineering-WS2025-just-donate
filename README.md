@@ -2,6 +2,10 @@
 
 # just-donate
 
+## Deployment
+
+Current Deployment of [Donation Tracking](https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/) reachable at [https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/](https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/)
+
 ## Architecture
 
 ### Structures

@@ -3,6 +3,8 @@ package com.just.donate
 import cats.effect.*
 import com.comcast.ip4s.*
 import com.just.donate.api.OrganisationRoute.organisationApi
+import com.just.donate.api.PaypalRoute.paypalRoute
+import com.just.donate.api.RootRoute.api
 import com.just.donate.store.FileStore
 import org.http4s.*
 import org.http4s.ember.server.*
@@ -18,8 +20,9 @@ object Server extends IOApp:
 
   // Serve from resources folder /public
   private val httpApp: HttpApp[IO] = Router(
-    "" -> fileService[IO](FileService.Config("../frontend/dist")),
-    "organisation" -> organisationApi(FileStore)
+    "" -> api,
+    "organisation" -> organisationApi(FileStore),
+    "paypal-ipn" -> paypalRoute
   ).orNotFound
 
   def run(args: List[String]): IO[ExitCode] =
