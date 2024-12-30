@@ -31,6 +31,7 @@ dependencies {
     implementation 'io.circe:circe-core_3:0.14.10'
     implementation 'io.circe:circe-generic_3:0.14.10'
     implementation 'io.circe:circe-parser_3:0.14.10'
+    implementation 'org.mongodb.scala:mongo-scala-driver_2.13:4.10.0'
 
     implementation 'org.typelevel:munit-cats-effect_3:2.0.0'
 
