@@ -1,133 +1,126 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: Just Donate API
-  version: '1.0'
+  title: just-donate API
+  description: API specification for organisation management, donations, withdrawals, transfers, notifications, and PayPal IPN.
+  version: "1.0.0"
+  contact:
+    name: John Doe
+    email: john.doe@example.org
+
+
+servers:
+  - url: https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/
+    description: Production server
+
 tags:
-  - name: Organizations
-    description: Operations related to organizations
-  - name: Bank Accounts
-    description: Operations related to bank accounts
-  - name: Donations
-    description: Operations related to donations
-  - name: Notifications
-    description: Operations related to notifications
+  - name: Organisation
+    description: Endpoints for managing organisations and their accounts
+  - name: Donation
+    description: Endpoints for handling donations
+  - name: Withdrawal
+    description: Endpoints for handling withdrawals
+  - name: Transfer
+    description: Endpoints for transferring funds
+  - name: Notification
+    description: Endpoints for sending notifications to donors
+  - name: Paypal
+    description: Endpoints for PayPal IPN handling
+
 paths:
-  /organizations:
+  /organisation/list:
+    get:
+      tags:
+        - Organisation
+      summary: List all organisations
+      description: Retrieve a list of all organisation IDs from the store
+      operationId: listOrganisations
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /organisation:
     post:
       tags:
-        - Organizations
-      summary: Create Organization
+        - Organisation
+      summary: Create a new organisation
+      description: Creates a new organisation and returns its ID and name
+      operationId: createOrganisation
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrganizationRequest'
+              $ref: '#/components/schemas/RequestOrganisation'
       responses:
-        '201':
-          description: Organization created successfully
+        '200':
+          description: Organisation created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateOrganizationResponse'
-  /organizations/{organizationId}:
+                $ref: '#/components/schemas/ResponseOrganisation'
+        '400':
+          description: Bad request
+
+  /organisation/{organisationId}:
     get:
       tags:
-        - Organizations
-      summary: Get Organization
+        - Organisation
+      summary: Get an organisation by its ID
+      description: Returns the organisation details based on the provided ID
+      operationId: getOrganisation
       parameters:
-        - name: organizationId
+        - name: organisationId
           in: path
           required: true
+          description: The ID of the organisation
           schema:
             type: string
       responses:
         '200':
-          description: Organization retrieved successfully
+          description: Organisation found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
+                $ref: '#/components/schemas/ResponseOrganisation'
+        '404':
+          description: Organisation not found
     delete:
       tags:
-        - Organizations
-      summary: Delete Organization
+        - Organisation
+      summary: Delete an organisation
+      description: Deletes an organisation by its ID
+      operationId: deleteOrganisation
       parameters:
-        - name: organizationId
+        - name: organisationId
           in: path
           required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Organization deleted successfully
-  /organizations/{organizationId}/bank-accounts:
-    post:
-      tags:
-        - Bank Accounts
-      summary: Create Bank Account
-      parameters:
-        - name: organizationId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateBankAccountRequest'
-      responses:
-        '201':
-          description: Bank account created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateBankAccountResponse'
-  /bank-accounts/{accountId}/link-downstream:
-    post:
-      tags:
-        - Bank Accounts
-      summary: Link Downstream Account
-      parameters:
-        - name: accountId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LinkDownstreamAccountRequest'
-      responses:
-        '200':
-          description: Downstream account linked successfully
-  /bank-accounts/{accountId}/unlink-downstream:
-    post:
-      tags:
-        - Bank Accounts
-      summary: Unlink Downstream Account
-      parameters:
-        - name: accountId
-          in: path
-          required: true
+          description: The ID of the organisation
           schema:
             type: string
       responses:
         '200':
-          description: Downstream account unlinked successfully
-  /organizations/{organizationId}/earmarkings:
+          description: Organisation deleted
+        '404':
+          description: Organisation not found
+
+  /organisation/{organisationId}/account:
     post:
       tags:
-        - Organizations
-      summary: Create Earmarking
+        - Organisation
+      summary: Add an account to an existing organisation
+      description: Adds a new account for the specified organisation
+      operationId: addAccount
       parameters:
-        - name: organizationId
+        - name: organisationId
           in: path
           required: true
+          description: The ID of the organisation
           schema:
             type: string
       requestBody:
@@ -135,374 +128,311 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateEarmarkingRequest'
+              $ref: '#/components/schemas/RequestAccount'
       responses:
-        '201':
-          description: Earmarking created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateEarmarkingResponse'
-  /earmarkings/{earmarkingId}:
+        '200':
+          description: Account added successfully
+        '404':
+          description: Organisation not found
+
+  /organisation/{organisationId}/account/{accountName}:
     delete:
       tags:
-        - Organizations
-      summary: Delete Earmarking
+        - Organisation
+      summary: Remove an account from an organisation
+      description: Removes the specified account from the organisation
+      operationId: removeAccount
       parameters:
-        - name: earmarkingId
+        - name: organisationId
           in: path
           required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+        - name: accountName
+          in: path
+          required: true
+          description: The name of the account
           schema:
             type: string
       responses:
-        '204':
-          description: Earmarking deleted successfully
-  /organizations/{organizationId}/donations:
-    post:
-      tags:
-        - Donations
-      summary: Create Donation
-      parameters:
-        - name: organizationId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateDonationRequest'
-      responses:
-        '201':
-          description: Donation created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateDonationResponse'
+        '200':
+          description: Account removed successfully
+        '404':
+          description: Organisation or account not found
+
+  /organisation/{organisationId}/account/list:
     get:
       tags:
-        - Donations
-      summary: Get Donations
+        - Organisation
+      summary: List accounts of an organisation
+      description: Returns a list of all account names for the given organisation
+      operationId: listAccounts
       parameters:
-        - name: organizationId
+        - name: organisationId
           in: path
           required: true
-          schema:
-            type: string
-        - name: donorEmail
-          in: query
-          required: true
+          description: The ID of the organisation
           schema:
             type: string
       responses:
         '200':
-          description: Donations retrieved successfully
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DonationsResponse'
-  /organizations/{organizationId}/bank-transactions:
+                type: array
+                items:
+                  type: string
+        '404':
+          description: Organisation not found
+
+  /notify/{donor}:
     post:
       tags:
-        - Bank Accounts
-      summary: Create Bank Transaction
+        - Notification
+      summary: Send a notification to a donor
+      description: Sends an email notification to the specified donor with an optional message
+      operationId: sendNotification
       parameters:
-        - name: organizationId
+        - name: donor
           in: path
           required: true
+          description: The donor's identifier (email or name)
           schema:
             type: string
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateBankTransactionRequest'
-      responses:
-        '201':
-          description: Bank transaction created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateBankTransactionResponse'
-  /organizations/{organizationId}/withdrawals:
-    post:
-      tags:
-        - Organizations
-      summary: Create Withdrawal
-      parameters:
-        - name: organizationId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateWithdrawalRequest'
-      responses:
-        '201':
-          description: Withdrawal created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateWithdrawalResponse'
-  /organizations/{organizationId}/notifications/send-tracking-link:
-    post:
-      tags:
-        - Notifications
-      summary: Send Tracking Link
-      parameters:
-        - name: organizationId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SendTrackingLinkRequest'
-      responses:
-        '200':
-          description: Tracking link sent successfully
-  /organizations/{organizationId}/notifications/personal-tracking-link:
-    get:
-      tags:
-        - Notifications
-      summary: Get Personal Tracking Link
-      parameters:
-        - name: organizationId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: donorEmail
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Personal tracking link retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PersonalLinkResponse'
-  /organizations/{organizationId}/notifications/send:
-    post:
-      tags:
-        - Notifications
-      summary: Send Notification
-      parameters:
-        - name: organizationId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SendNotificationRequest'
+              $ref: '#/components/schemas/NotificationRequest'
       responses:
         '200':
           description: Notification sent successfully
+
+  /donate/{organisationId}/account/{accountName}/donate:
+    post:
+      tags:
+        - Donation
+      summary: Make a donation to an organisation account
+      description: Donates an amount to a specific account within an organisation
+      operationId: donateToAccount
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+        - name: accountName
+          in: path
+          required: true
+          description: The name of the account
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestDonation'
+      responses:
+        '200':
+          description: Donation processed successfully
+        '404':
+          description: Organisation or account not found
+
+  /paypal-ipn:
+    get:
+      tags:
+        - Paypal
+      summary: Retrieve IPN records
+      description: Returns all PayPal IPN records from the database
+      operationId: listPaypalIpns
+      responses:
+        '200':
+          description: IPN records retrieved
+          content:
+            text/plain:
+              schema:
+                type: string
+    post:
+      tags:
+        - Paypal
+      summary: Receive IPN payload
+      description: Receives and stores the PayPal IPN payload in the database
+      operationId: receivePaypalIpn
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              description: Key-value pairs from PayPal IPN
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+      responses:
+        '200':
+          description: IPN payload received and stored
+
+  /transfer/{organisationId}/transfer:
+    post:
+      tags:
+        - Transfer
+      summary: Transfer funds between accounts
+      description: Transfers an amount from one account to another within the same organisation
+      operationId: transferFunds
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestTransfer'
+      responses:
+        '200':
+          description: Transfer completed successfully
+        '404':
+          description: Organisation or accounts not found
+
+  /withdraw/{organisationId}/account/{accountName}/withdrawal:
+    post:
+      tags:
+        - Withdrawal
+      summary: Withdraw funds from an account
+      description: Withdraws an amount from the specified account within an organisation
+      operationId: withdrawFunds
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+        - name: accountName
+          in: path
+          required: true
+          description: The name of the account
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestWithdrawal'
+      responses:
+        '200':
+          description: Withdrawal processed successfully
+        '404':
+          description: Organisation or account not found
+
 components:
   schemas:
-    # Organization Schemas
-    CreateOrganizationRequest:
+    RequestOrganisation:
       type: object
       properties:
         name:
           type: string
+          description: Name of the organisation
       required:
         - name
-    CreateOrganizationResponse:
+
+    ResponseOrganisation:
       type: object
       properties:
-        organizationId:
+        organisationId:
           type: string
-      required:
-        - organizationId
-    Organization:
-      type: object
-      properties:
-        organizationId:
-          type: string
+          description: Unique identifier for the organisation
         name:
           type: string
+          description: Name of the organisation
       required:
-        - organizationId
+        - organisationId
         - name
-    # Bank Account Schemas
-    CreateBankAccountRequest:
+
+    RequestAccount:
       type: object
       properties:
         name:
           type: string
+          description: The name of the account
+        balance:
+          type: number
+          format: decimal
+          description: The starting balance of the account
       required:
         - name
-    CreateBankAccountResponse:
+        - balance
+
+    NotificationRequest:
       type: object
       properties:
-        accountId:
-          type: string
-      required:
-        - accountId
-    LinkDownstreamAccountRequest:
-      type: object
-      properties:
-        downstreamAccountId:
-          type: string
-      required:
-        - downstreamAccountId
-    # Earmarking Schemas
-    CreateEarmarkingRequest:
-      type: object
-      properties:
-        name:
-          type: string
-      required:
-        - name
-    CreateEarmarkingResponse:
-      type: object
-      properties:
-        earmarkingId:
-          type: string
-      required:
-        - earmarkingId
-    # Donation Schemas
-    CreateDonationRequest:
-      type: object
-      properties:
-        amount:
-          type: number
-          format: double
-        earmarkingId:
-          type: string
-        accountId:
-          type: string
-        donorEmail:
-          type: string
-      required:
-        - amount
-        - earmarkingId
-        - accountId
-        - donorEmail
-    CreateDonationResponse:
-      type: object
-      properties:
-        donationId:
-          type: string
-      required:
-        - donationId
-    Donation:
-      type: object
-      properties:
-        donationId:
-          type: string
-        amount:
-          type: number
-          format: double
-        earmarkingId:
-          type: string
-        accountId:
-          type: string
-        donorEmail:
-          type: string
-        transactionDate:
-          type: string
-          format: date-time
-      required:
-        - donationId
-        - amount
-        - donorEmail
-    DonationsResponse:
-      type: object
-      properties:
-        donations:
-          type: array
-          items:
-            $ref: '#/components/schemas/Donation'
-      required:
-        - donations
-    # Bank Transaction Schemas
-    CreateBankTransactionRequest:
-      type: object
-      properties:
-        amount:
-          type: number
-          format: double
-        accountIdFrom:
-          type: string
-        accountIdTo:
-          type: string
-        transactionDate:
-          type: string
-          format: date-time
-      required:
-        - amount
-        - accountIdFrom
-        - accountIdTo
-        - transactionDate
-    CreateBankTransactionResponse:
-      type: object
-      properties:
-        transactionId:
-          type: string
-      required:
-        - transactionId
-    # Withdrawal Schemas
-    CreateWithdrawalRequest:
-      type: object
-      properties:
-        amount:
-          type: number
-          format: double
-        earmarkingId:
-          type: string
-        accountId:
-          type: string
-      required:
-        - amount
-        - earmarkingId
-        - accountId
-    CreateWithdrawalResponse:
-      type: object
-      properties:
-        withdrawalId:
-          type: string
-      required:
-        - withdrawalId
-    # Notification Schemas
-    SendTrackingLinkRequest:
-      type: object
-      properties:
-        donorEmail:
-          type: string
-      required:
-        - donorEmail
-    PersonalLinkResponse:
-      type: object
-      properties:
-        personalLink:
-          type: string
-      required:
-        - personalLink
-    SendNotificationRequest:
-      type: object
-      properties:
-        donorEmail:
-          type: string
         message:
           type: string
+          description: The notification message
       required:
-        - donorEmail
         - message
+
+    RequestDonation:
+      type: object
+      properties:
+        donor:
+          type: string
+          description: The donor's identifier (e.g., email or user ID)
+        amount:
+          type: number
+          format: decimal
+          description: Donation amount
+        earmarking:
+          type: string
+          nullable: true
+          description: Optional earmarking information for the donation
+      required:
+        - donor
+        - amount
+
+    RequestTransfer:
+      type: object
+      properties:
+        fromAccount:
+          type: string
+          description: The source account name
+        toAccount:
+          type: string
+          description: The destination account name
+        amount:
+          type: number
+          format: decimal
+          description: Transfer amount
+      required:
+        - fromAccount
+        - toAccount
+        - amount
+
+    RequestWithdrawal:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: decimal
+          description: Withdrawal amount
+        earmarking:
+          type: string
+          nullable: true
+          description: Optional earmarking information
+        description:
+          type: string
+          nullable: true
+          description: Optional description for the withdrawal
+      required:
+        - amount
