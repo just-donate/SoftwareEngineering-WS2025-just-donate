@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>PayPal Sandbox Payment</title>
+</head>
+<body>
+
+<!-- PayPal Sandbox Payment Button -->
+<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+  <!-- Tell PayPal what you want to do -->
+  <input type="hidden" name="cmd" value="_xclick" />
+
+  <!-- Your sandbox business email -->
+  <input type="hidden" name="business" value="sb-swv8l35388930@business.example.com" />
+
+  <!-- Payment details -->
+  <input type="hidden" name="item_name" value="Test Item" />
+  <input type="hidden" name="amount" value="1" />
+  <input type="hidden" name="currency_code" value="EUR" />
+
+  <!-- Return and cancel URLs -->
+  <input type="hidden" name="return" value="http://localhost:3001/SoftwareEngineering-WS2025-just-donate/paypal" />
+  <input type="hidden" name="cancel_return" value="http://localhost:3001/SoftwareEngineering-WS2025-just-donate/paypal" />
+
+  <!-- Optional: Unique Invoice or Order ID -->
+  <input type="hidden" name="invoice" value="1236" />
+
+  <!-- The Payment Button -->
+  <input type="submit" value="Pay Now (Sandbox)" />
+</form>
+
+</body>
+</html>
