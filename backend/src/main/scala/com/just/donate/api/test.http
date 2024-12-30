@@ -1,5 +1,0 @@
-POST http://localhost:8080/paypal-ipn
-Content-Type: application/x-www-form-urlencoded
-User-Agent: PayPal IPN ( https://www.paypal.com/ipn )
-
-mc_gross=9.99&protection_eligibility=Eligible&payer_id=LPLWNMTBWMFAY&payment_date=23%3A04%3A11+Dec+25%2C+2024+PST&payment_status=Completed&charset=windows-1252&first_name=John&mc_fee=0.99&notify_version=3.9&custom=&payer_status=verified&business=seller%40paypalsandbox.com&quantity=1&verify_sign=ABCDEFG12345&payer_email=buyer%40example.com&txn_id=1234567890&payment_type=instant&last_name=Doe&receiver_email=seller%40paypalsandbox.com&payment_fee=&receiver_id=S8XGHLYDW9T3S&txn_type=web_accept&item_name=Donation&mc_currency=USD&item_number=&residence_country=US&test_ipn=1&transaction_subject=Donation&ipn_track_id=7e74f

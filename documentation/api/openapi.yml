@@ -1,0 +1,438 @@
+openapi: 3.0.3
+info:
+  title: just-donate API
+  description: API specification for organisation management, donations, withdrawals, transfers, notifications, and PayPal IPN.
+  version: "1.0.0"
+  contact:
+    name: John Doe
+    email: john.doe@example.org
+
+
+servers:
+  - url: https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/
+    description: Production server
+
+tags:
+  - name: Organisation
+    description: Endpoints for managing organisations and their accounts
+  - name: Donation
+    description: Endpoints for handling donations
+  - name: Withdrawal
+    description: Endpoints for handling withdrawals
+  - name: Transfer
+    description: Endpoints for transferring funds
+  - name: Notification
+    description: Endpoints for sending notifications to donors
+  - name: Paypal
+    description: Endpoints for PayPal IPN handling
+
+paths:
+  /organisation/list:
+    get:
+      tags:
+        - Organisation
+      summary: List all organisations
+      description: Retrieve a list of all organisation IDs from the store
+      operationId: listOrganisations
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /organisation:
+    post:
+      tags:
+        - Organisation
+      summary: Create a new organisation
+      description: Creates a new organisation and returns its ID and name
+      operationId: createOrganisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestOrganisation'
+      responses:
+        '200':
+          description: Organisation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseOrganisation'
+        '400':
+          description: Bad request
+
+  /organisation/{organisationId}:
+    get:
+      tags:
+        - Organisation
+      summary: Get an organisation by its ID
+      description: Returns the organisation details based on the provided ID
+      operationId: getOrganisation
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organisation found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseOrganisation'
+        '404':
+          description: Organisation not found
+    delete:
+      tags:
+        - Organisation
+      summary: Delete an organisation
+      description: Deletes an organisation by its ID
+      operationId: deleteOrganisation
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organisation deleted
+        '404':
+          description: Organisation not found
+
+  /organisation/{organisationId}/account:
+    post:
+      tags:
+        - Organisation
+      summary: Add an account to an existing organisation
+      description: Adds a new account for the specified organisation
+      operationId: addAccount
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestAccount'
+      responses:
+        '200':
+          description: Account added successfully
+        '404':
+          description: Organisation not found
+
+  /organisation/{organisationId}/account/{accountName}:
+    delete:
+      tags:
+        - Organisation
+      summary: Remove an account from an organisation
+      description: Removes the specified account from the organisation
+      operationId: removeAccount
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+        - name: accountName
+          in: path
+          required: true
+          description: The name of the account
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Account removed successfully
+        '404':
+          description: Organisation or account not found
+
+  /organisation/{organisationId}/account/list:
+    get:
+      tags:
+        - Organisation
+      summary: List accounts of an organisation
+      description: Returns a list of all account names for the given organisation
+      operationId: listAccounts
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '404':
+          description: Organisation not found
+
+  /notify/{donor}:
+    post:
+      tags:
+        - Notification
+      summary: Send a notification to a donor
+      description: Sends an email notification to the specified donor with an optional message
+      operationId: sendNotification
+      parameters:
+        - name: donor
+          in: path
+          required: true
+          description: The donor's identifier (email or name)
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        '200':
+          description: Notification sent successfully
+
+  /donate/{organisationId}/account/{accountName}/donate:
+    post:
+      tags:
+        - Donation
+      summary: Make a donation to an organisation account
+      description: Donates an amount to a specific account within an organisation
+      operationId: donateToAccount
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+        - name: accountName
+          in: path
+          required: true
+          description: The name of the account
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestDonation'
+      responses:
+        '200':
+          description: Donation processed successfully
+        '404':
+          description: Organisation or account not found
+
+  /paypal-ipn:
+    get:
+      tags:
+        - Paypal
+      summary: Retrieve IPN records
+      description: Returns all PayPal IPN records from the database
+      operationId: listPaypalIpns
+      responses:
+        '200':
+          description: IPN records retrieved
+          content:
+            text/plain:
+              schema:
+                type: string
+    post:
+      tags:
+        - Paypal
+      summary: Receive IPN payload
+      description: Receives and stores the PayPal IPN payload in the database
+      operationId: receivePaypalIpn
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              description: Key-value pairs from PayPal IPN
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+      responses:
+        '200':
+          description: IPN payload received and stored
+
+  /transfer/{organisationId}/transfer:
+    post:
+      tags:
+        - Transfer
+      summary: Transfer funds between accounts
+      description: Transfers an amount from one account to another within the same organisation
+      operationId: transferFunds
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestTransfer'
+      responses:
+        '200':
+          description: Transfer completed successfully
+        '404':
+          description: Organisation or accounts not found
+
+  /withdraw/{organisationId}/account/{accountName}/withdrawal:
+    post:
+      tags:
+        - Withdrawal
+      summary: Withdraw funds from an account
+      description: Withdraws an amount from the specified account within an organisation
+      operationId: withdrawFunds
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          description: The ID of the organisation
+          schema:
+            type: string
+        - name: accountName
+          in: path
+          required: true
+          description: The name of the account
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestWithdrawal'
+      responses:
+        '200':
+          description: Withdrawal processed successfully
+        '404':
+          description: Organisation or account not found
+
+components:
+  schemas:
+    RequestOrganisation:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the organisation
+      required:
+        - name
+
+    ResponseOrganisation:
+      type: object
+      properties:
+        organisationId:
+          type: string
+          description: Unique identifier for the organisation
+        name:
+          type: string
+          description: Name of the organisation
+      required:
+        - organisationId
+        - name
+
+    RequestAccount:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the account
+        balance:
+          type: number
+          format: decimal
+          description: The starting balance of the account
+      required:
+        - name
+        - balance
+
+    NotificationRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The notification message
+      required:
+        - message
+
+    RequestDonation:
+      type: object
+      properties:
+        donor:
+          type: string
+          description: The donor's identifier (e.g., email or user ID)
+        amount:
+          type: number
+          format: decimal
+          description: Donation amount
+        earmarking:
+          type: string
+          nullable: true
+          description: Optional earmarking information for the donation
+      required:
+        - donor
+        - amount
+
+    RequestTransfer:
+      type: object
+      properties:
+        fromAccount:
+          type: string
+          description: The source account name
+        toAccount:
+          type: string
+          description: The destination account name
+        amount:
+          type: number
+          format: decimal
+          description: Transfer amount
+      required:
+        - fromAccount
+        - toAccount
+        - amount
+
+    RequestWithdrawal:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: decimal
+          description: Withdrawal amount
+        earmarking:
+          type: string
+          nullable: true
+          description: Optional earmarking information
+        description:
+          type: string
+          nullable: true
+          description: Optional description for the withdrawal
+      required:
+        - amount
