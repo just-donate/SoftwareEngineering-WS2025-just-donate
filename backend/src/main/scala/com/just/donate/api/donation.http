@@ -1,0 +1,12 @@
+### Donate
+
+@id = 3556498
+@account = acc1
+POST http://localhost:8080/organisation/{{ id }}/account/{{ account }}/donate
+Content-Type: application/json
+
+{
+  "donor": "brennauer11@t-online.de",
+  "amount": 10,
+  "earmarking": "proj1"
+}

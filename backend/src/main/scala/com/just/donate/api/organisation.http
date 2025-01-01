@@ -1,0 +1,37 @@
+@orgId = 3556498
+
+### Create org
+
+POST http://localhost:8080/organisation
+Content-Type: application/json
+
+{
+  "name":"test1"
+}
+
+### List orgs
+
+GET http://localhost:8080/organisation/list
+
+### Create earmarking
+
+POST http://localhost:8080/organisation/{{ orgId }}/earmarking
+Content-Type: application/json
+
+{
+  "name":"proj2"
+}
+
+### Add account
+
+POST http://localhost:8080/organisation/{{ orgId }}/account
+Content-Type: application/json
+
+{
+  "name":"acc2",
+  "balance":0
+}
+
+### List accounts
+
+GET http://localhost:8080/organisation/{{ orgId }}/account/list

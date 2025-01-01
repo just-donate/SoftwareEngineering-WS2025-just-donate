@@ -2,9 +2,7 @@ package com.just.donate.models
 
 import com.just.donate.utils.CollectionUtils.updatedReturn
 
-
 case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expenses: Seq[Expense] = Seq.empty):
-
   def getAccount(name: String): Option[Account] =
     accounts.find(_.name == name)
 

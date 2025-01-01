@@ -1,0 +1,8 @@
+# build outputs
+/bin
+
+# editor settings
+/.settings
+
+# the file storage path
+/store
