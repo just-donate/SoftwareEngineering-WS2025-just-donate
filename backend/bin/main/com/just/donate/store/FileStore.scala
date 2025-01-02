@@ -6,28 +6,38 @@ import io.circe.generic.auto.*
 import io.circe.jawn
 import io.circe.syntax.*
 
-import java.nio.file.{Files, Paths}
+import java.nio.file.{ Files, Paths }
 
 object FileStore extends Store:
+  private val storePath = Paths.get("store")
+  private def storePathForId(id: String) = storePath.resolve(s"$id.json")
 
-  override def init(): Unit = Files.createDirectories(Paths.get("store"))
+  override def init(): Unit = Files.createDirectories(storePath)
 
   override def save(id: String, organisation: Organisation): IO[Unit] =
     val json = organisation.asJson
     IO.blocking {
-      Files.writeString(Paths.get(s"./store/$id.json"), json.spaces4)
+      Files.writeString(storePathForId(id), json.spaces4)
     }
 
   override def load(id: String): IO[Option[Organisation]] =
-    if Files.exists(Paths.get(s"store/$id.json")) then
-      val json = Files.readString(Paths.get(s"store/$id.json"))
-      IO(jawn.decode[Organisation](json).toOption)
+    if Files.exists(storePathForId(id)) then
+      val json = Files.readString(storePathForId(id))
+      try
+        val decoded = jawn.decode[Organisation](json)
+        IO(decoded.toOption)
+      catch
+        // BUG: this triggers when donating the second time
+        case e: Throwable =>
+          println(f"encountered error while decoding: ${e}")
+          IO.pure(None)
     else IO.pure(None)
 
   override def list(): IO[List[String]] =
-    val store = Paths.get("store")
-    if Files.exists(store) then IO(Files.list(store).map(_.getFileName).toArray.map(_.toString.split('.').head).toList)
+    if Files.exists(storePath) then
+      IO(Files.list(storePath).map(_.getFileName).toArray.map(_.toString.split('.').head).toList)
     else IO.pure(List.empty)
 
   override def delete(id: String): IO[Unit] =
-    IO(Files.delete(Paths.get(s"store/$id.json")))
+    IO(Files.delete(storePathForId(id)))
+

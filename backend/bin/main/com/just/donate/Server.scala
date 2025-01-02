@@ -24,10 +24,11 @@ object Server extends IOApp:
   private val mongoUri = sys.env.getOrElse("MONGO_URI", "mongodb://localhost:27017")
 
   def run(args: List[String]): IO[ExitCode] =
-    
     mongoResource(mongoUri).use { client =>
       val database = client.getDatabase("just-donate")
       val paypalRepository = new PaypalRepository(database)
+
+      FileStore.init()
 
       val httpApp: HttpApp[IO] = Router(
         "organisation" -> organisationApi(FileStore),

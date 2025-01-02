@@ -1,4 +1,4 @@
-@orgId = 3556498
+@orgId = 110251487
 
 ### Create org
 
@@ -21,6 +21,10 @@ Content-Type: application/json
 {
   "name":"proj2"
 }
+
+### List earmarkings
+
+GET http://localhost:8080/organisation/{{ orgId }}/earmarking/list
 
 ### Add account
 

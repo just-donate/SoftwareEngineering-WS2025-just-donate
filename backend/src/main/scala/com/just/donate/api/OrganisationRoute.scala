@@ -70,7 +70,7 @@ object OrganisationRoute:
 
   case class ResponseOrganisation(organisationId: String, name: String)
 
-  private case class RequestAccount(name: String, balance: BigDecimal)
+  private case class RequestEarmarking(name: String)
 
   private case class RequestAccount(name: String, balance: BigDecimal)
 

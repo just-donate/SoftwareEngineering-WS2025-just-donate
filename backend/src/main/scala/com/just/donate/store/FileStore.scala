@@ -6,7 +6,7 @@ import io.circe.generic.auto.*
 import io.circe.jawn
 import io.circe.syntax.*
 
-import java.nio.file.{Files, Paths}
+import java.nio.file.{ Files, Paths }
 
 object FileStore extends Store:
   private val storePath = Paths.get("store")
@@ -23,19 +23,21 @@ object FileStore extends Store:
   override def load(id: String): IO[Option[Organisation]] =
     if Files.exists(storePathForId(id)) then
       val json = Files.readString(storePathForId(id))
-      try {
+      try
         val decoded = jawn.decode[Organisation](json)
         IO(decoded.toOption)
-      } catch {
+      catch
+        // BUG: this triggers when donating the second time
         case e: Throwable =>
           println(f"encountered error while decoding: ${e}")
           IO.pure(None)
-      }
     else IO.pure(None)
 
   override def list(): IO[List[String]] =
-    if Files.exists(storePath) then IO(Files.list(storePath).map(_.getFileName).toArray.map(_.toString.split('.').head).toList)
+    if Files.exists(storePath) then
+      IO(Files.list(storePath).map(_.getFileName).toArray.map(_.toString.split('.').head).toList)
     else IO.pure(List.empty)
 
   override def delete(id: String): IO[Unit] =
     IO(Files.delete(storePathForId(id)))
+

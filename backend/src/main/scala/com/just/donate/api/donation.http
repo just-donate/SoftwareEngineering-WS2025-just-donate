@@ -1,8 +1,8 @@
 ### Donate
 
-@id = 3556498
+@id = 110251487
 @account = acc1
-POST http://localhost:8080/organisation/{{ id }}/account/{{ account }}/donate
+POST http://localhost:8080/donate/{{ id }}/account/{{ account }}/donate
 Content-Type: application/json
 
 {

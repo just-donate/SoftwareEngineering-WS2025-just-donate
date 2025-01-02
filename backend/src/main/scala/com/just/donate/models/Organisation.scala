@@ -24,7 +24,9 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
     copy(accounts = accounts.map(_.removeEarmarking(earmarking)))
 
   def donate(donor: String, amount: BigDecimal, earmarking: Option[String], account: String): Organisation =
-    val donation = Donation(donor, amount)
+    val donation = earmarking match
+      case Some(earmarking) => Donation(donor, amount, earmarking)
+      case None => Donation(donor, amount)
     accounts.find(_.name == account) match
       case Some(acc) =>
         val (donated, newAcc) = earmarking match
@@ -35,7 +37,7 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
 
   def withdrawal(amount: BigDecimal, account: String, earmarking: Option[String]): Organisation =
     accounts.updatedReturn(a => a.name == account)(a => a.withdrawal(amount, earmarking)) match
-      case (newAccounts, Some(donationParts)) => 
+      case (newAccounts, Some(donationParts)) =>
         val expense = Expense("description", amount, earmarking, donationParts)
         copy(accounts = newAccounts, expenses = expenses :+ expense)
       case (newAccounts, None) => throw new IllegalArgumentException(s"Account $account does not exist")
@@ -48,13 +50,13 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
   def transfer(amount: BigDecimal, fromAccount: Account, toAccount: Account): Organisation =
     if fromAccount.totalBalance < amount then
       throw new IllegalStateException(s"Account ${fromAccount.name} has insufficient funds")
-      
+
     if amount <= BigDecimal(0) then
       throw new IllegalArgumentException("Amount must be greater than zero")
-      
+
     if fromAccount.name == toAccount.name then
       throw new IllegalArgumentException("Source and destination accounts must be different")
-      
+
     val (remaining, donationPart, earmarked, updatedFrom) = fromAccount.pull(amount)
     val updatedTo = toAccount.push(donationPart, earmarked)
 
