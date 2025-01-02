@@ -23,9 +23,7 @@ object RouteUtils:
   inline def loadAndSaveOrganisation(
     organisationId: String
   )(store: Store)(mapper: Organisation => Organisation): IO[Response[IO]] = for
-    _ <- IO.println(f"loading org")
     organisation <- store.load(organisationId)
-    _ <- IO.println(f"org: ${organisation}")
     response <- organisation match
       case Some(organisation) =>
         store.save(organisationId, mapper(organisation)) >> Ok()

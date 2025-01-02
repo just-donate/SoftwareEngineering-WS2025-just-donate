@@ -58,14 +58,6 @@ object OrganisationRoute:
       case GET -> Root / organisationId / "account" / "list" =>
         loadOrganisation(organisationId)(store)(_.accounts.map(_.name))
 
-      case req @ POST -> Root / "organisation" / organisationId / "account" / accountName / "donate" =>
-        for
-          donation <- req.as[RequestDonation]
-          response <- loadAndSaveOrganisation(organisationId)(store) { org =>
-            org.donate(donation.donor, donation.amount, donation.earmarking, accountName)
-          }
-        yield response
-
   case class RequestOrganisation(name: String)
 
   case class ResponseOrganisation(organisationId: String, name: String)
