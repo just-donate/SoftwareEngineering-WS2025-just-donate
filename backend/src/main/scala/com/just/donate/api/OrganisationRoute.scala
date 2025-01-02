@@ -48,6 +48,6 @@ object OrganisationRoute:
   
   case class RequestOrganisation(name: String)
 
-  case class ResponseOrganisation(organisationId: String, name: String)
+  private[api] case class ResponseOrganisation(organisationId: String, name: String)
 
-  private case class RequestAccount(name: String, balance: BigDecimal)
+  private[api] case class RequestAccount(name: String, balance: BigDecimal)

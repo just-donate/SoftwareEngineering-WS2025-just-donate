@@ -12,7 +12,7 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.implicits.*
 
-class OrganisationApiTest extends CatsEffectSuite:
+class OrganisationApiSuite extends CatsEffectSuite:
 
   private val routes = OrganisationRoute.organisationApi(MemoryStore).orNotFound
 
@@ -23,7 +23,7 @@ class OrganisationApiTest extends CatsEffectSuite:
   private def uri(paths: String*): Uri = Uri.unsafeFromString(paths.mkString("/"))
 
   test("GET /organisation/list should return OK and an empty JSON list if no organisations exists") {
-    val req = Request[IO](Method.GET, uri"/organisation/list")
+    val req = Request[IO](Method.GET, uri"/list")
     for
       resp <- routes.run(req)
       status = resp.status
@@ -37,9 +37,9 @@ class OrganisationApiTest extends CatsEffectSuite:
     val orgRequest1 = RequestOrganisation("Org1")
     val orgRequest2 = RequestOrganisation("Org2")
 
-    val req1 = Request[IO](Method.POST, uri"/organisation").withEntity(orgRequest1)
-    val req2 = Request[IO](Method.POST, uri"/organisation").withEntity(orgRequest2)
-    val reqList = Request[IO](Method.GET, uri"/organisation/list")
+    val req1 = Request[IO](Method.POST, uri"/").withEntity(orgRequest1)
+    val req2 = Request[IO](Method.POST, uri"/").withEntity(orgRequest2)
+    val reqList = Request[IO](Method.GET, uri"/list")
 
     for
       resp1 <- routes.run(req1)
@@ -58,7 +58,7 @@ class OrganisationApiTest extends CatsEffectSuite:
 
   test("POST /organisation should create a new organisation and return it") {
     val requestJson = Json.obj("name" -> Json.fromString("MyOrg"))
-    val req = Request[IO](Method.POST, uri"/organisation").withEntity(requestJson)
+    val req = Request[IO](Method.POST, uri"/").withEntity(requestJson)
     for
       resp <- routes.run(req)
       status = resp.status
@@ -71,14 +71,14 @@ class OrganisationApiTest extends CatsEffectSuite:
   }
 
   test("GET /organisation/{id} should return NotFound if not exists") {
-    val req = Request[IO](Method.GET, uri"/organisation/unknown-id")
+    val req = Request[IO](Method.GET, uri"/unknown-id")
     for resp <- routes.run(req)
     yield assertEquals(resp.status, Status.NotFound)
   }
 
   test("GET /organisation/{id} should return OK and the organisation if it exists") {
     val orgRequest = RequestOrganisation("Org1")
-    val req = Request[IO](Method.POST, uri"/organisation").withEntity(orgRequest)
+    val req = Request[IO](Method.POST, uri"/").withEntity(orgRequest)
     for
       resp <- routes.run(req)
       body <- resp.as[ResponseOrganisation]
@@ -90,16 +90,16 @@ class OrganisationApiTest extends CatsEffectSuite:
 
   test("DELETE /organisation/{id} should return Ok even if not present") {
     // For simplicity, expect that deleting a non-existent org returns Ok (idempotent behavior)
-    val req = Request[IO](Method.DELETE, uri"/organisation/00000")
+    val req = Request[IO](Method.DELETE, uri"/00000")
     for resp <- routes.run(req)
     yield assertEquals(resp.status, Status.Ok)
   }
 
   test("DELETE /organisation/{id} should really delete the organisation") {
     val orgRequest = RequestOrganisation("Org1")
-    val reqCreate = Request[IO](Method.POST, uri"/organisation").withEntity(orgRequest)
-    val reqDelete = Request[IO](Method.DELETE, uri("/organisation", organisationId("Org1")))
-    val reqList = Request[IO](Method.GET, uri"/organisation/list")
+    val reqCreate = Request[IO](Method.POST, uri"/").withEntity(orgRequest)
+    val reqDelete = Request[IO](Method.DELETE, uri(organisationId("Org1")))
+    val reqList = Request[IO](Method.GET, uri"/list")
 
     for
       respCreate <- routes.run(reqCreate)
@@ -120,25 +120,26 @@ class OrganisationApiTest extends CatsEffectSuite:
 
   test("POST /organisation/{id}/account should return NotFound if org does not exist") {
     val requestJson = Json.obj("name" -> Json.fromString("AccName"), "balance" -> Json.fromBigDecimal(100.00))
-    val req = Request[IO](Method.POST, uri"/organisation/00000/account").withEntity(requestJson)
+    val req = Request[IO](Method.POST, uri"/00000/account").withEntity(requestJson)
     for resp <- routes.run(req)
     yield assertEquals(resp.status, Status.NotFound)
   }
 
   test("DELETE /organisation/{id}/account/{name} should return NotFound if org does not exist") {
-    val req = Request[IO](Method.DELETE, uri"/organisation/non-existing/account/AccName")
+    val req = Request[IO](Method.DELETE, uri"/non-existing/account/AccName")
     for resp <- routes.run(req)
     yield assertEquals(resp.status, Status.NotFound)
   }
 
   test("GET /organisation/{id}/account/list should return Ok and all accounts") {
     val orgRequest = RequestOrganisation("Org1")
-    val reqCreate = Request[IO](Method.POST, uri"/organisation").withEntity(orgRequest)
-    val reqList = Request[IO](Method.GET, uri("/organisation", organisationId("Org1"), "account", "list"))
+    val reqCreate = Request[IO](Method.POST, uri"/").withEntity(orgRequest)
+    val reqList = Request[IO](Method.GET, uri(organisationId("Org1"), "account", "list"))
 
     for
       respCreate <- routes.run(reqCreate)
       respList <- routes.run(reqList)
+      _ <- IO.println(respList)
       body <- respList.as[List[String]]
     yield
       assertEquals(respCreate.status, Status.Ok)
