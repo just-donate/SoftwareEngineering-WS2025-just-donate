@@ -29,3 +29,4 @@ object RouteUtils:
         store.save(organisationId, mapper(organisation)) >> Ok()
       case None => NotFound()
   yield response
+

@@ -21,4 +21,3 @@ case class DonationQueue(
     if remaining.isDefined && remaining.get > BigDecimal(0) then
       throw new IllegalArgumentException(s"Not enough donations to pull $amount (TODO: handle this)")
     (donations, copy(donationQueue = newQueue))
-
