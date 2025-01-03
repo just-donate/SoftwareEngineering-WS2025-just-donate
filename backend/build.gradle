@@ -36,10 +36,11 @@ dependencies {
     implementation 'com.sun.mail:javax.mail:1.6.2'
     implementation 'com.typesafe:config:1.4.3'
 
-    implementation 'org.typelevel:munit-cats-effect_3:2.0.0'
-
+    testImplementation 'org.typelevel:munit-cats-effect_3:2.0.0'
+    testImplementation group: 'org.scalameta', name: 'munit_3', version: '1.0.3'
     testImplementation "org.scalatest:scalatest_3:3.2.19"
     testImplementation "org.junit.platform:junit-platform-launcher:1.11.3"
+
     testRuntimeOnly "org.junit.platform:junit-platform-engine:1.11.3"
     testRuntimeOnly "org.scalatestplus:junit-5-11_3:3.2.19.0"
 
@@ -69,11 +70,9 @@ sourceSets {
 }
 
 test {
-    useJUnitPlatform {
-        includeEngines 'scalatest'
-        testLogging {
-            events("passed", "skipped", "failed", "standard_error")
-        }
+    useJUnit()
+    testLogging {
+        events("passed", "skipped", "failed", "standard_error")
     }
 }
 

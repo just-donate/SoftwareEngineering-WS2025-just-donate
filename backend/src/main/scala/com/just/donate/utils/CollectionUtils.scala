@@ -1,7 +1,10 @@
 package com.just.donate.utils
 
+import scala.annotation.tailrec
+
 object CollectionUtils:
 
+  @tailrec
   private def updatedReturnHelper[T, R](seq: Seq[T], at: T => Boolean)(f: T => (R, T)): (Seq[T], Option[R]) =
     seq match
       case Seq() => (seq, None)

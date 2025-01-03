@@ -39,4 +39,4 @@ object DonationRoute:
           )
         yield response
 
-  private case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])
+  private[api] case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])

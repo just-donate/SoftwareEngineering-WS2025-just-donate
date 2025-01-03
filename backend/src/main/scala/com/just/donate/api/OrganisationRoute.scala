@@ -60,10 +60,10 @@ object OrganisationRoute:
 
   case class RequestOrganisation(name: String)
 
-  case class ResponseOrganisation(organisationId: String, name: String)
+  private[api] case class ResponseOrganisation(organisationId: String, name: String)
 
-  private case class RequestEarmarking(name: String)
+  private[api] case class RequestEarmarking(name: String)
 
-  private case class RequestAccount(name: String, balance: BigDecimal)
+  private[api] case class RequestAccount(name: String, balance: BigDecimal)
 
-  private case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])
+  private[api] case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])
