@@ -1,10 +1,10 @@
 package com.just.donate.config
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{Config as TypesafeConfig, ConfigFactory}
 
 import scala.util.Properties
 
-class AppConfig(val conf: Config):
+class AppConfig(private val conf: TypesafeConfig) extends Config:
   def this() = {
     this(
       Properties.envOrElse("ENV", "prod") match

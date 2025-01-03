@@ -30,7 +30,7 @@ object FileStore extends Store:
         // BUG: this triggers when donating the second time
         case e: Throwable =>
           println(f"encountered error while decoding: ${e}")
-          IO.pure(None)
+          throw e
     else IO.pure(None)
 
   override def list(): IO[List[String]] =
@@ -40,4 +40,3 @@ object FileStore extends Store:
 
   override def delete(id: String): IO[Unit] =
     IO(Files.delete(storePathForId(id)))
-

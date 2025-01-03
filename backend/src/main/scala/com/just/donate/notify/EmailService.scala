@@ -1,13 +1,13 @@
 package com.just.donate.notify
 
 import cats.effect.IO
-import com.just.donate.config.AppConfig
+import com.just.donate.config.Config
 
 import java.util.Properties
 import javax.mail.*
 import javax.mail.internet.*
 
-class SendEmail(val config: AppConfig):
+class EmailService(val config: Config) extends IEmailService:
   private val mailServerProperties = {
     val properties = new Properties()
     properties.put("mail.smtp.host", config.mailSmtpHost)
