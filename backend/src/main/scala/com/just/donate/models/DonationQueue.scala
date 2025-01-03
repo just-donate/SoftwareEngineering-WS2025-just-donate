@@ -4,7 +4,7 @@ import com.just.donate.utils.structs.ReservableQueue
 
 case class DonationQueue(
   context: String,
-  donationQueue: ReservableQueue[DonationPart, BigDecimal, String],
+  donationQueue: ReservableQueue,
   negativeBalance: BigDecimal = BigDecimal(0)
 ):
 
