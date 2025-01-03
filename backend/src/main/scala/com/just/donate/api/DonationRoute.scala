@@ -1,9 +1,9 @@
 package com.just.donate.api
 
 import cats.effect.*
-import com.just.donate.config.AppConfig
+import com.just.donate.config.Config
 import com.just.donate.models.Donation
-import com.just.donate.notify.SendEmail
+import com.just.donate.notify.IEmailService
 import com.just.donate.store.Store
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisation
 import io.circe.*
@@ -14,9 +14,8 @@ import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 
 object DonationRoute:
-  val donationRoute: (Store, AppConfig) => HttpRoutes[IO] = (store: Store, config: AppConfig) =>
+  val donationRoute: (Store, Config, IEmailService) => HttpRoutes[IO] = (store, config, emailService) =>
     HttpRoutes.of[IO]:
-
       case req@POST -> Root / organisationId / "account" / accountName / "donate" =>
         for
           requestDonation <- req.as[RequestDonation]
@@ -28,7 +27,7 @@ object DonationRoute:
           )
           trackingId <- IO(donationPart.donation.donorId)
           trackingLink <- IO(f"${config.frontendUrl}/tracking?id=${trackingId}")
-          _ <- new SendEmail(config).sendEmail(
+          _ <- emailService.sendEmail(
             requestDonation.donor,
             f"""Thank you for your donation, to track your progress visit
                |${trackingLink}

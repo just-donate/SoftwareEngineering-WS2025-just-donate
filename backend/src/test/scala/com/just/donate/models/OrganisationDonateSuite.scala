@@ -13,7 +13,8 @@ class OrganisationDonateSuite extends FunSuite:
   test("reflect unbound donations in the total balance") {
     var newRoots = createNewRoots()
 
-    newRoots = newRoots.donate("Donor1", BigDecimal("100.00"), None, "Paypal")
+    val donationPart = Donation("Donor1", BigDecimal("100.00"))
+    newRoots = newRoots.donate(donationPart, "Paypal")
 
     val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
@@ -26,7 +27,8 @@ class OrganisationDonateSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     newRoots = newRoots.addEarmarking("Education")
-    newRoots = newRoots.donate("Donor1", BigDecimal("200.00"), Some("Education"), "Paypal")
+    val donationPart = Donation("Donor1", BigDecimal("200.00"), "Education")
+    newRoots = newRoots.donate(donationPart, "Paypal")
 
     val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
@@ -46,8 +48,10 @@ class OrganisationDonateSuite extends FunSuite:
   test("aggregate donations from multiple accounts correctly in the total balance") {
     var newRoots = createNewRoots()
 
-    newRoots = newRoots.donate("Donor1", BigDecimal("100.00"), None, "Paypal")
-    newRoots = newRoots.donate("Donor2", BigDecimal("150.00"), None, "Bank")
+    val donationPart = Donation("Donor1", BigDecimal("100.00"))
+    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donationPart2 = Donation("Donor2", BigDecimal("150.00"))
+    newRoots = newRoots.donate(donationPart2, "Bank")
 
     val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
@@ -63,8 +67,10 @@ class OrganisationDonateSuite extends FunSuite:
   test("correctly update the total balance when donations are made to accounts with incoming flows") {
     var newRoots = createNewRoots()
 
-    newRoots = newRoots.donate("Donor1", BigDecimal("100.00"), None, "Paypal")
-    newRoots = newRoots.donate("Donor2", BigDecimal("150.00"), None, "Bank")
+    val donationPart = Donation("Donor1", BigDecimal("100.00"))
+    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donationPart2 = Donation("Donor2", BigDecimal("150.00"))
+    newRoots = newRoots.donate(donationPart2, "Bank")
 
     val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
@@ -77,7 +83,8 @@ class OrganisationDonateSuite extends FunSuite:
     assertEquals(newRoots.totalBalance, BigDecimal("250.00"))
 
     // Adding donation to an account with incoming flows
-    newRoots = newRoots.donate("Donor3", BigDecimal("200.00"), None, "Kenya")
+    val donationPart3 = Donation("Donor3", BigDecimal("200.00"))
+    newRoots = newRoots.donate(donationPart3, "Kenya")
 
     val kenyaOption = newRoots.getAccount("Kenya")
     val kenya = kenyaOption.getOrElse(fail("Kenya account not found"))

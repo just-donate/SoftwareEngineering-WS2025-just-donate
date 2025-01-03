@@ -5,6 +5,8 @@ import cats.effect.unsafe.implicits.global
 import com.just.donate.api.DonationRoute.RequestDonation
 import com.just.donate.api.OrganisationRoute.ResponseOrganisation
 import com.just.donate.helper.OrganisationHelper.createNewRoots
+import com.just.donate.mocks.config.AppConfigMock
+import com.just.donate.mocks.notify.EmailServiceMock
 import com.just.donate.store.MemoryStore
 import io.circe.*
 import munit.CatsEffectSuite
@@ -23,7 +25,7 @@ import io.circe.generic.auto.*
 
 class DonationApiSuite extends CatsEffectSuite:
 
-  private val donationRoute = DonationRoute.donationRoute(MemoryStore).orNotFound
+  private val donationRoute = DonationRoute.donationRoute(MemoryStore, AppConfigMock(), EmailServiceMock()).orNotFound
   private val organisationRoute = OrganisationRoute.organisationApi(MemoryStore).orNotFound
 
   override def beforeEach(context: BeforeEach): Unit =
