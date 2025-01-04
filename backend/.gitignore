@@ -1,0 +1,11 @@
+# secrets
+src/main/resources/application*.conf
+
+# build outputs
+bin
+
+# editor settings
+.settings
+
+# the file storage path
+store
