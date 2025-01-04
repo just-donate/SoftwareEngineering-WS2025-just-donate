@@ -6,7 +6,7 @@ import munit.FunSuite
 class ReservableQueueSuite extends FunSuite {
 
   test("add and reserve the exact amount") {
-    var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
+    var queue = ReservableQueue("MainAccount")
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(100)))
 
     val (amountRemaining, updatedQueue) = queue.reserve(BigDecimal.valueOf(100), "ContextA")
@@ -22,7 +22,7 @@ class ReservableQueueSuite extends FunSuite {
   }
 
   test("reserve less than the available amount") {
-    var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
+    var queue = ReservableQueue("MainAccount")
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(100)))
 
     val (amountRemaining, updatedQueue) = queue.reserve(BigDecimal.valueOf(40), "ContextA")
@@ -43,7 +43,7 @@ class ReservableQueueSuite extends FunSuite {
   }
 
   test("reserve more than the available amount") {
-    var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
+    var queue = ReservableQueue("MainAccount")
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(50)))
 
     val (amountRemaining, updatedQueue) = queue.reserve(BigDecimal.valueOf(100), "ContextA")
@@ -60,7 +60,7 @@ class ReservableQueueSuite extends FunSuite {
   }
 
   test("handle multiple reserves from different contexts") {
-    var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
+    var queue = ReservableQueue("MainAccount")
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(100)))
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(50)))
 
@@ -89,7 +89,7 @@ class ReservableQueueSuite extends FunSuite {
   }
 
   test("not allow reserving an already reserved item by a different context") {
-    var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
+    var queue = ReservableQueue("MainAccount")
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(100)))
 
     val (_, updatedQueue1) = queue.reserve(BigDecimal.valueOf(100), "ContextA")
@@ -107,7 +107,7 @@ class ReservableQueueSuite extends FunSuite {
   }
 
   test("reserve by splitting across multiple items") {
-    var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
+    var queue = ReservableQueue("MainAccount")
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(60)))
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(40)))
 
@@ -132,7 +132,7 @@ class ReservableQueueSuite extends FunSuite {
   }
 
   test("handle insufficient resources gracefully") {
-    var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
+    var queue = ReservableQueue("MainAccount")
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(30)))
     queue = queue.add(Donation("Donor", BigDecimal.valueOf(20)))
 
@@ -149,7 +149,7 @@ class ReservableQueueSuite extends FunSuite {
   }
 
   test("not reserve when no resources are available") {
-    val queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
+    val queue = ReservableQueue("MainAccount")
 
     val (amountRemaining, updatedQueue) = queue.reserve(BigDecimal.valueOf(50), "ContextA")
 
@@ -162,7 +162,7 @@ class ReservableQueueSuite extends FunSuite {
   }
 
   test("allow adding resources after attempting to reserve") {
-    var queue = ReservableQueue[DonationPart, BigDecimal, String]("MainAccount")
+    var queue = ReservableQueue("MainAccount")
 
     // Attempt to reserve before adding any resources
     val (_, updatedQueue1) = queue.reserve(BigDecimal.valueOf(50), "ContextA")
