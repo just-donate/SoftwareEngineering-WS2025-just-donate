@@ -2,10 +2,10 @@
 src/main/resources/application*.conf
 
 # build outputs
-/bin
+bin
 
 # editor settings
-/.settings
+.settings
 
 # the file storage path
-/store
+store
