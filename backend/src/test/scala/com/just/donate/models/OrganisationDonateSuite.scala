@@ -52,19 +52,12 @@ class OrganisationDonateSuite extends FunSuite:
   test("aggregate donations from multiple accounts correctly in the total balance") {
     var newRoots = createNewRoots()
 
-    <<<<<<< HEAD
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
     val donationPart = Donation(donor.id, BigDecimal("100.00"))
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
     val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
     val donationPart2 = Donation(donor2.id, BigDecimal("150.00"))
     newRoots = newRoots.donate(donor2, donationPart2, "Bank").toOption.get
-    =======
-    val donationPart = Donation("Donor1", BigDecimal("100.00"))
-    newRoots = newRoots.donate(donationPart, "Paypal")
-    val donationPart2 = Donation("Donor2", BigDecimal("150.00"))
-    newRoots = newRoots.donate(donationPart2, "Bank")
-      >>>>>>> main
 
     val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
