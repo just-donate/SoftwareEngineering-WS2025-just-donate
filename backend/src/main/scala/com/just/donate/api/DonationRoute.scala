@@ -2,7 +2,7 @@ package com.just.donate.api
 
 import cats.effect.*
 import com.just.donate.config.Config
-import com.just.donate.models.Donation
+import com.just.donate.models.{ Donation, DonationError, Donor, Organisation }
 import com.just.donate.notify.IEmailService
 import com.just.donate.store.Store
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisation
@@ -12,23 +12,37 @@ import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+import cats.implicits.*
 
 object DonationRoute:
   val donationRoute: (Store, Config, IEmailService) => HttpRoutes[IO] = (store, config, emailService) =>
     HttpRoutes.of[IO]:
-      case req@POST -> Root / organisationId / "account" / accountName / "donate" =>
+      case req @ POST -> Root / organisationId / "account" / accountName / "donate" =>
+        var trackingId = ""
+        var trackingLink = config.frontendUrl
         for
           requestDonation <- req.as[RequestDonation]
-          donationPart <- IO(requestDonation.earmarking match
-            case Some(earmarking) => Donation(requestDonation.donor, requestDonation.amount, earmarking)
-            case None => Donation(requestDonation.donor, requestDonation.amount))
-          response <- loadAndSaveOrganisation(organisationId)(store)(
-            _.donate(donationPart, accountName)
+          response <- loadAndSaveOrganisation(organisationId)(store)(org =>
+            val existingDonor = org.getExistingDonor(requestDonation.donorEmail)
+            val donor = existingDonor.getOrElse(
+              Donor(org.getNewDonorId, requestDonation.donorName, requestDonation.donorEmail)
+            )
+            val donationPart = requestDonation.earmarking match
+              case Some(earmarking) => Donation(donor.id, requestDonation.amount, earmarking)
+              case None             => Donation(donor.id, requestDonation.amount)
+
+            val newOrg = org.donate(donor, donationPart, accountName) match
+              case Left(DonationError.INVALID_ACCOUNT)    => throw new RuntimeException("invalid account")
+              case Left(DonationError.INVALID_EARMARKING) => throw new RuntimeException("invalid earmarking")
+              case Right(value)                           => value
+
+            trackingId = donationPart.donation.donorId
+            trackingLink = f"${trackingLink}/tracking?id=${trackingId}"
+
+            newOrg
           )
-          trackingId <- IO(donationPart.donation.donorId)
-          trackingLink <- IO(f"${config.frontendUrl}/tracking?id=${trackingId}")
           _ <- emailService.sendEmail(
-            requestDonation.donor,
+            requestDonation.donorEmail,
             f"""Thank you for your donation, to track your progress visit
                |${trackingLink}
                |or enter your tracking id
@@ -38,4 +52,9 @@ object DonationRoute:
           )
         yield response
 
-  private[api] case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])
+  private[api] case class RequestDonation(
+    donorName: String,
+    donorEmail: String,
+    amount: BigDecimal,
+    earmarking: Option[String]
+  )

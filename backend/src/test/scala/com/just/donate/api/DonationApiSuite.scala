@@ -1,21 +1,13 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import com.just.donate.api.DonationRoute.RequestDonation
-import com.just.donate.api.OrganisationRoute.ResponseOrganisation
 import com.just.donate.helper.OrganisationHelper.createNewRoots
 import com.just.donate.mocks.config.AppConfigMock
 import com.just.donate.mocks.notify.EmailServiceMock
 import com.just.donate.store.MemoryStore
-import io.circe.*
 import munit.CatsEffectSuite
 import org.http4s.*
-import org.http4s.circe.*
-import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
-import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
-import org.http4s.circe.CirceEntityEncoder.circeEntityEncoder
-import org.http4s.implicits.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
@@ -51,7 +43,7 @@ class DonationApiSuite extends CatsEffectSuite:
 
   test("POST /donation/organisationId/account/accountName/donate should return OK and the updated organisation") {
     val req = Request[IO](Method.POST, uri(organisationId("newRoots"), "account", "Paypal", "donate"))
-      .withEntity(RequestDonation("MyDonor", 100, None))
+      .withEntity(RequestDonation("MyDonor", "mydonor@example.org", 100, None))
     for
       resp <- donationRoute.run(req)
       status = resp.status
@@ -61,5 +53,3 @@ class DonationApiSuite extends CatsEffectSuite:
       println(updatedOrg)
       assert(updatedOrg.totalBalance == BigDecimal(100))
   }
-
-

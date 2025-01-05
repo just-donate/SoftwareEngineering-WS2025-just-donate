@@ -17,9 +17,9 @@ class EmailService(val config: Config) extends IEmailService:
     properties
   }
 
-  def sendEmail(donor: String, message: String, subject: String = "Just Donate: Thank you for your donation"): IO[Unit] =
+  def sendEmail(email: String, message: String, subject: String = "Just Donate: Thank you for your donation"): IO[Unit] =
     for {
-      _ <- IO.println(s"Sending email to $donor")
+      _ <- IO.println(s"Sending email to $email")
       session <- IO(Session.getInstance(mailServerProperties, new Authenticator() {
         // TODO: choose a more secure authentication method
         override def getPasswordAuthentication: PasswordAuthentication = {
@@ -29,7 +29,7 @@ class EmailService(val config: Config) extends IEmailService:
       mailMessage <- IO({
         val mailMessage = new MimeMessage(session)
         mailMessage.setFrom(new InternetAddress(config.mailAddress))
-        mailMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(donor))
+        mailMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(email))
         mailMessage.setSubject(subject)
         mailMessage.setText(message)
         mailMessage

@@ -9,26 +9,25 @@ import java.util.UUID
  * The donation is always made by a donor and has a date when it was made.
  */
 case class Donation(
-  donor: String,
+  donorId: String,
   donationDate: LocalDateTime,
   earmarking: Option[String] = None,
-  donorId: String = UUID.randomUUID().toString
 ):
 
-  override def toString: String = String.format("Donation from %s on %s", donor, donationDate)
+  override def toString: String = String.format("Donation from %s on %s", donorId, donationDate)
 
 object Donation:
 
-  def apply(donor: String, amount: BigDecimal): DonationPart =
-    apply(donor, amount, LocalDateTime.now)
+  def apply(donorId: String, amount: BigDecimal): DonationPart =
+    apply(donorId, amount, LocalDateTime.now)
 
-  def apply(donor: String, amount: BigDecimal, donationDate: LocalDateTime): DonationPart =
-    val donation = Donation(donor, donationDate)
+  def apply(donorId: String, amount: BigDecimal, donationDate: LocalDateTime): DonationPart =
+    val donation = Donation(donorId, donationDate)
     DonationPart(amount, donation)
 
-  def apply(donor: String, amount: BigDecimal, earmarking: String): DonationPart =
-    apply(donor, amount, earmarking, LocalDateTime.now)
+  def apply(donorId: String, amount: BigDecimal, earmarking: String): DonationPart =
+    apply(donorId, amount, earmarking, LocalDateTime.now)
 
-  def apply(donor: String, amount: BigDecimal, earmarking: String, donationDate: LocalDateTime): DonationPart =
-    val donation = Donation(donor, donationDate, Some(earmarking))
+  def apply(donorId: String, amount: BigDecimal, earmarking: String, donationDate: LocalDateTime): DonationPart =
+    val donation = Donation(donorId, donationDate, Some(earmarking))
     DonationPart(amount, donation)

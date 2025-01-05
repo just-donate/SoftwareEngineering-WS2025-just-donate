@@ -36,7 +36,7 @@ POST http://localhost:8080/organisation/{{ orgId }}/account
 Content-Type: application/json
 
 {
-  "name":"acc2",
+  "name":"acc1",
   "balance":0
 }
 
