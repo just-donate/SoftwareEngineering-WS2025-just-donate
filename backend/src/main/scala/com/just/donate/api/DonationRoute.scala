@@ -1,6 +1,7 @@
 package com.just.donate.api
 
 import cats.effect.*
+import cats.implicits.*
 import com.just.donate.config.Config
 import com.just.donate.models.{Donation, DonationError, Donor, Organisation}
 import com.just.donate.notify.IEmailService
@@ -12,7 +13,6 @@ import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
-import cats.implicits.*
 
 object DonationRoute:
   private val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
@@ -25,13 +25,16 @@ object DonationRoute:
 
   val donationRoute: (Store, Config, IEmailService) => HttpRoutes[IO] = (store, config, emailService) =>
     HttpRoutes.of[IO]:
+
       case req @ POST -> Root / organisationId / "account" / accountName / "donate" =>
-        for
+        (for
           requestDonation <- req.as[RequestDonation]
-          trackingId <- loadAndSaveOrganisationOps(organisationId)(store)(organisationMapper(requestDonation, accountName))
+          trackingId <- loadAndSaveOrganisationOps(organisationId)(store)(
+            organisationMapper(requestDonation, accountName)
+          )
           response <- trackingId match
-            case None => BadRequest("Organisation not found")
-            case Some(Left(DonationError.INVALID_ACCOUNT)) => BadRequest("Account not found")
+            case None                                         => BadRequest("Organisation not found")
+            case Some(Left(DonationError.INVALID_ACCOUNT))    => BadRequest("Account not found")
             case Some(Left(DonationError.INVALID_EARMARKING)) => BadRequest("Earmarking not found")
             case Some(Right(trackingId)) =>
               val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
@@ -39,7 +42,9 @@ object DonationRoute:
                 requestDonation.donorEmail,
                 emailTemplate(trackingLink, trackingId, config.frontendUrl)
               ) >> Ok()
-        yield response
+        yield response).handleErrorWith {
+          case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
+        }
 
   private[api] case class RequestDonation(
     donorName: String,
@@ -48,15 +53,17 @@ object DonationRoute:
     earmarking: Option[String]
   )
 
-  private def organisationMapper(requestDonation: RequestDonation, accountName: String)(org: Organisation): (Organisation, Either[DonationError, String]) =
+  private def organisationMapper(requestDonation: RequestDonation, accountName: String)(
+    org: Organisation
+  ): (Organisation, Either[DonationError, String]) =
     val existingDonor = org.getExistingDonor(requestDonation.donorEmail)
     val donor = existingDonor.getOrElse(
       Donor(org.getNewDonorId, requestDonation.donorName, requestDonation.donorEmail)
     )
     val donationPart = requestDonation.earmarking match
       case Some(earmarking) => Donation(donor.id, requestDonation.amount, earmarking)
-      case None => Donation(donor.id, requestDonation.amount)
+      case None             => Donation(donor.id, requestDonation.amount)
 
     org.donate(donor, donationPart, accountName) match
-      case Left(error) => (org, Left(error))
+      case Left(error)   => (org, Left(error))
       case Right(newOrg) => (newOrg, Right(donationPart.donation.donorId))
