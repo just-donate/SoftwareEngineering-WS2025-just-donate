@@ -4,7 +4,12 @@ import com.just.donate.utils.CollectionUtils.updatedReturn
 
 import java.util.UUID
 
-case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expenses: Seq[Expense] = Seq.empty, donors: Map[String, Donor] = Map.empty):
+case class Organisation(
+  name: String,
+  accounts: Seq[Account] = Seq.empty,
+  expenses: Seq[Expense] = Seq.empty,
+  donors: Map[String, Donor] = Map.empty
+):
   def getAccount(name: String): Option[Account] =
     accounts.find(_.name == name)
 
@@ -30,8 +35,7 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
   def getNewDonorId: String =
     var newDonorId = UUID.randomUUID().toString
 
-    while donors.contains(newDonorId) do
-      newDonorId = UUID.randomUUID().toString
+    while donors.contains(newDonorId) do newDonorId = UUID.randomUUID().toString
 
     newDonorId
 
@@ -40,7 +44,7 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
       case Some(acc) =>
         val (donated, newAcc) = donationPart.donation.earmarking match
           case Some(earmark) => acc.donate(donationPart, earmark)
-          case None => acc.donate(donationPart)
+          case None          => acc.donate(donationPart)
 
         if !donated
         then Left(DonationError.INVALID_EARMARKING)
@@ -73,8 +77,7 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
     if fromAccount.totalBalance < amount then
       throw new IllegalStateException(s"Account ${fromAccount.name} has insufficient funds")
 
-    if amount <= BigDecimal(0) then
-      throw new IllegalArgumentException("Amount must be greater than zero")
+    if amount <= BigDecimal(0) then throw new IllegalArgumentException("Amount must be greater than zero")
 
     if fromAccount.name == toAccount.name then
       throw new IllegalArgumentException("Source and destination accounts must be different")

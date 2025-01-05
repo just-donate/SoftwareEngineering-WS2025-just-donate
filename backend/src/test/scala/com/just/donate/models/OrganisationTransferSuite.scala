@@ -93,9 +93,14 @@ class OrganisationTransferSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     newRoots = newRoots.addEarmarking("Education")
+      <<<<<<< HEAD
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
     val donationPart = Donation(donor.id, BigDecimal("200.00"), "Education")
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    =======
+    val donationPart = Donation("Donor1", BigDecimal("200.00"), "Education")
+    newRoots = newRoots.donate(donationPart, "Paypal")
+      >>>>>>> main
     newRoots = newRoots.transfer(BigDecimal("100.00"), "Paypal", "Bank")
 
     assertEquals(newRoots.getAccount("Paypal").get.totalBalance, BigDecimal("100.00"))
