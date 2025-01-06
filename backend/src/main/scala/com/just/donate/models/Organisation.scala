@@ -1,8 +1,11 @@
 package com.just.donate.models
 
+import com.just.donate.config.Config
+import com.just.donate.notify.IEmailService
 import com.just.donate.utils.CollectionUtils.updatedReturn
 
 import java.util.UUID
+import org.http4s.headers.`Cross-Origin-Resource-Policy`.SameSite
 
 case class Organisation(
   name: String,
@@ -68,33 +71,67 @@ case class Organisation(
         copy(accounts = newAccounts, expenses = expenses :+ expense)
       case (newAccounts, None) => throw new IllegalArgumentException(s"Account $account does not exist")
 
-  def transfer(amount: BigDecimal, fromAccount: String, toAccount: String): Organisation =
+  def transfer(
+    amount: BigDecimal,
+    fromAccount: String,
+    toAccount: String,
+    config: Config,
+    emailService: IEmailService
+  ): Either[TransferError, Organisation] =
     (getAccount(fromAccount), getAccount(toAccount)) match
-      case (Some(from), Some(to)) => transfer(amount, from, to)
-      case _ => throw new IllegalArgumentException(s"Account $fromAccount or $toAccount does not exist")
+      case (Some(from), Some(to)) => transfer(amount, from, to, config, emailService)
+      case (None, _)              => Left(TransferError.INVALID_ACCOUNT)
+      case (Some(_), None)        => Left(TransferError.INVALID_ACCOUNT)
 
-  def transfer(amount: BigDecimal, fromAccount: Account, toAccount: Account): Organisation =
-    if fromAccount.totalBalance < amount then
-      throw new IllegalStateException(s"Account ${fromAccount.name} has insufficient funds")
+  def transfer(
+    amount: BigDecimal,
+    fromAccount: Account,
+    toAccount: Account,
+    config: Config,
+    emailService: IEmailService
+  ): Either[TransferError, Organisation] =
+    if fromAccount.totalBalance < amount then return Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
 
-    if amount <= BigDecimal(0) then throw new IllegalArgumentException("Amount must be greater than zero")
+    if amount <= BigDecimal(0) then return Left(TransferError.NON_POSITIVE_AMOUNT)
 
-    if fromAccount.name == toAccount.name then
-      throw new IllegalArgumentException("Source and destination accounts must be different")
+    if fromAccount.name == toAccount.name then return Left(TransferError.SAME_SOURCE_AND_DESTINATION_ACCOUNT)
 
     val (remaining, donationPart, earmarked, updatedFrom) = fromAccount.pull(amount)
     val updatedTo = toAccount.push(donationPart, earmarked)
 
-    val updatedOrg = copy(accounts =
-      accounts.map(a =>
+    val updatedOrg = copy(
+      accounts = accounts.map(a =>
         if a.name == fromAccount.name then updatedFrom
         else if a.name == toAccount.name then updatedTo
         else a
       )
     )
 
-    if remaining == BigDecimal(0) then updatedOrg
-    else updatedOrg.transfer(remaining, fromAccount, toAccount)
+    val fromQueue = earmarked match
+      case None             => updatedFrom.unboundDonations
+      case Some(earmarking) => updatedFrom.boundDonations.find { (key, _) => key == earmarking }.get._2
+    val fromQueueHasRemainingPart =
+      fromQueue.donationQueue.queue.exists(reservable => reservable.value.donation.id == donationPart.donation.id)
+    if !fromQueueHasRemainingPart then
+      donors.get(donationPart.donation.donorId) match
+        case None => return Left(TransferError.INVALID_DONOR)
+        case Some(donor) =>
+          val trackingId = donor.id
+          val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+          emailService.sendEmail(
+            donor.email,
+            f"""Your recent donation to ${name} has been fully transferred away from the account ${fromAccount.name}.
+               |To see more details about the status of your donation, visit the following link
+               |${trackingLink}
+               |or enter your tracking id
+               |${trackingId}
+               |on our tracking page
+               |${config.frontendUrl}""".stripMargin,
+            "Just Donate: News about your donation"
+          )
+
+    if remaining == BigDecimal(0) then Right(updatedOrg)
+    else updatedOrg.transfer(remaining, fromAccount, toAccount, config, emailService)
 
   def totalBalance: BigDecimal =
     accounts.map(_.totalBalance).sum
@@ -103,4 +140,12 @@ case class Organisation(
     accounts.map(_.totalEarmarkedBalance(earmarking)).sum
 
 enum DonationError:
-  case INVALID_ACCOUNT, INVALID_EARMARKING
+  case INVALID_ACCOUNT
+  case INVALID_EARMARKING
+
+enum TransferError:
+  case INVALID_ACCOUNT
+  case INSUFFICIENT_ACCOUNT_FUNDS
+  case NON_POSITIVE_AMOUNT
+  case SAME_SOURCE_AND_DESTINATION_ACCOUNT
+  case INVALID_DONOR

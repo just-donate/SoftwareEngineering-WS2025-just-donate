@@ -3,7 +3,7 @@ package com.just.donate.api
 import cats.effect.*
 import cats.implicits.*
 import com.just.donate.config.Config
-import com.just.donate.models.{Donation, DonationError, Donor, Organisation}
+import com.just.donate.models.{ Donation, DonationError, Donor, Organisation }
 import com.just.donate.notify.IEmailService
 import com.just.donate.store.Store
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
@@ -46,13 +46,6 @@ object DonationRoute:
           case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
         }
 
-  private[api] case class RequestDonation(
-    donorName: String,
-    donorEmail: String,
-    amount: BigDecimal,
-    earmarking: Option[String]
-  )
-
   private def organisationMapper(requestDonation: RequestDonation, accountName: String)(
     org: Organisation
   ): (Organisation, Either[DonationError, String]) =
@@ -67,3 +60,10 @@ object DonationRoute:
     org.donate(donor, donationPart, accountName) match
       case Left(error)   => (org, Left(error))
       case Right(newOrg) => (newOrg, Right(donationPart.donation.donorId))
+
+  private[api] case class RequestDonation(
+    donorName: String,
+    donorEmail: String,
+    amount: BigDecimal,
+    earmarking: Option[String]
+  )

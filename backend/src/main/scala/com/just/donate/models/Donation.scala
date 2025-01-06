@@ -12,6 +12,7 @@ case class Donation(
   donorId: String,
   donationDate: LocalDateTime,
   earmarking: Option[String] = None,
+  id: String = UUID.randomUUID().toString
 ):
 
   override def toString: String = String.format("Donation from %s on %s", donorId, donationDate)
@@ -31,3 +32,4 @@ object Donation:
   def apply(donorId: String, amount: BigDecimal, earmarking: String, donationDate: LocalDateTime): DonationPart =
     val donation = Donation(donorId, donationDate, Some(earmarking))
     DonationPart(amount, donation)
+
