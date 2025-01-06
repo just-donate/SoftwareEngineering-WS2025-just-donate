@@ -30,3 +30,13 @@ object RouteUtils:
       case None => NotFound()
   yield response
 
+  inline def loadAndSaveOrganisationOps[R](
+    organisationId: String
+  )(store: Store)(mapper: Organisation => (Organisation, R)): IO[Option[R]] = for
+    organisation <- store.load(organisationId)
+    response <- organisation match
+      case Some(organisation) =>
+        val (newOrganisation, response) = mapper(organisation)
+        store.save(organisationId, newOrganisation) >> IO.pure(Some(response))
+      case None => IO.pure(None)
+  yield response

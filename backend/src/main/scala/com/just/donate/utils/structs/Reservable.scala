@@ -1,14 +1,16 @@
 package com.just.donate.utils.structs
 
-case class Reservable[R <: Splittable[R, S], S, C](value: R, context: Option[C] = None):
+import com.just.donate.models.DonationPart
+
+case class Reservable(value: DonationPart, context: Option[String] = None):
 
   def isReserved: Boolean = context.isDefined
 
-  def isReservedBy(ctx: C): Boolean = context.exists(c => c.equals(ctx))
+  def isReservedBy(ctx: String): Boolean = context.exists(c => c.equals(ctx))
 
-  def reserve(ctx: C): Reservable[R, S, C] = Reservable(value, Option(ctx))
+  def reserve(ctx: String): Reservable = Reservable(value, Option(ctx))
 
-  def release(): Reservable[R, S, C] = Reservable(value, None)
+  def release(): Reservable = Reservable(value, None)
 
   override def toString: String =
     if context.isDefined then String.format("%s(%s)", context.get, value)

@@ -13,13 +13,17 @@ Content-Type: application/json
 
 GET http://localhost:8080/organisation/list
 
+### Get org
+
+GET http://localhost:8080/organisation/{{ orgId }}
+
 ### Create earmarking
 
 POST http://localhost:8080/organisation/{{ orgId }}/earmarking
 Content-Type: application/json
 
 {
-  "name":"proj2"
+  "name":"proj1"
 }
 
 ### List earmarkings
@@ -32,7 +36,7 @@ POST http://localhost:8080/organisation/{{ orgId }}/account
 Content-Type: application/json
 
 {
-  "name":"acc2",
+  "name":"acc1",
   "balance":0
 }
 

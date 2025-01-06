@@ -2,7 +2,14 @@ package com.just.donate.models
 
 import com.just.donate.utils.CollectionUtils.updatedReturn
 
-case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expenses: Seq[Expense] = Seq.empty):
+import java.util.UUID
+
+case class Organisation(
+  name: String,
+  accounts: Seq[Account] = Seq.empty,
+  expenses: Seq[Expense] = Seq.empty,
+  donors: Map[String, Donor] = Map.empty
+):
   def getAccount(name: String): Option[Account] =
     accounts.find(_.name == name)
 
@@ -23,18 +30,36 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
   def removeEarmarking(earmarking: String): Organisation =
     copy(accounts = accounts.map(_.removeEarmarking(earmarking)))
 
-  def donate(donationPart: DonationPart, account: String): Organisation =
+  def getExistingDonor(email: String): Option[Donor] = donors.find { case (_, d) => d.email == email }.map(_._2)
+
+  def getNewDonorId: String =
+    var newDonorId = UUID.randomUUID().toString
+
+    while donors.contains(newDonorId) do newDonorId = UUID.randomUUID().toString
+
+    newDonorId
+
+  def donate(donor: Donor, donationPart: DonationPart, account: String): Either[DonationError, Organisation] =
     accounts.find(_.name == account) match
       case Some(acc) =>
         val (donated, newAcc) = donationPart.donation.earmarking match
           case Some(earmark) => acc.donate(donationPart, earmark)
-          case None => acc.donate(donationPart)
-        copy(accounts = accounts.map(a =>
-          if a.name == account
-          then newAcc
-          else a
-        ))
-      case None => this
+          case None          => acc.donate(donationPart)
+
+        if !donated
+        then Left(DonationError.INVALID_EARMARKING)
+        else
+          val newAccounts = accounts.map(a =>
+            if a.name == account
+            then newAcc
+            else a
+          )
+          val newDonors =
+            if donors.contains(donationPart.donation.donorId)
+            then donors
+            else donors.updated(donor.id, donor)
+          Right(copy(accounts = newAccounts, donors = newDonors))
+      case None => Left(DonationError.INVALID_ACCOUNT)
 
   def withdrawal(amount: BigDecimal, account: String, earmarking: Option[String]): Organisation =
     accounts.updatedReturn(a => a.name == account)(a => a.withdrawal(amount, earmarking)) match
@@ -52,8 +77,7 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
     if fromAccount.totalBalance < amount then
       throw new IllegalStateException(s"Account ${fromAccount.name} has insufficient funds")
 
-    if amount <= BigDecimal(0) then
-      throw new IllegalArgumentException("Amount must be greater than zero")
+    if amount <= BigDecimal(0) then throw new IllegalArgumentException("Amount must be greater than zero")
 
     if fromAccount.name == toAccount.name then
       throw new IllegalArgumentException("Source and destination accounts must be different")
@@ -77,3 +101,6 @@ case class Organisation(name: String, accounts: Seq[Account] = Seq.empty, expens
 
   def totalEarmarkedBalance(earmarking: String): BigDecimal =
     accounts.map(_.totalEarmarkedBalance(earmarking)).sum
+
+enum DonationError:
+  case INVALID_ACCOUNT, INVALID_EARMARKING

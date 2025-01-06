@@ -1,25 +1,27 @@
 package com.just.donate.utils.structs
 
-case class ReservableQueue[T <: Splittable[T, S], S, C](
-  context: C,
-  queue: Seq[Reservable[T, S, C]] = Seq.empty[Reservable[T, S, C]]
+import com.just.donate.models.DonationPart
+
+case class ReservableQueue(
+  context: String,
+  queue: Seq[Reservable] = Seq.empty[Reservable]
 ):
 
-  def add(value: T): ReservableQueue[T, S, C] = add(new Reservable(value))
+  def add(value: DonationPart): ReservableQueue = add(new Reservable(value))
 
-  def add(value: Reservable[T, S, C]): ReservableQueue[T, S, C] =
+  def add(value: Reservable): ReservableQueue =
     val toAdd = if value.isReservedBy(this.context) then value.release() else value
     ReservableQueue(context, queue.appended(toAdd))
 
-  def pollUnreserved(): (Option[T], ReservableQueue[T, S, C]) =
+  def pollUnreserved(): (Option[DonationPart], ReservableQueue) =
     val (polled, newQueue) = pollUnreserved(queue)
     (polled, ReservableQueue(context, newQueue))
 
-  def pollUnreserved(s: S, limit: Option[Int]): (Seq[T], Option[S], ReservableQueue[T, S, C]) =
+  def pollUnreserved(s: BigDecimal, limit: Option[Int]): (Seq[DonationPart], Option[BigDecimal], ReservableQueue) =
     val (ts, ss, newQueue) = pollUnreserved(s, queue, limit)
     (ts, ss, ReservableQueue(context, newQueue))
 
-  def peekUnreserved: Option[T] =
+  def peekUnreserved: Option[DonationPart] =
     queue.find(r => !r.isReserved).map(_.value)
 
   def hasUnreserved: Boolean =
@@ -31,14 +33,14 @@ case class ReservableQueue[T <: Splittable[T, S], S, C](
   def isFullyReserved: Boolean =
     queue.forall(_.isReserved)
 
-  def reserve(s: S, context: C): (Option[S], ReservableQueue[T, S, C]) =
+  def reserve(s: BigDecimal, context: String): (Option[BigDecimal], ReservableQueue) =
     val (ss, newQueue) = reserve(s, context, queue)
     (ss, ReservableQueue(context, newQueue))
 
   override def toString: String =
     "[" + queue.map(r => r.toString).zipWithIndex.map((s, i) => s"${i + 1}: $s").mkString(", ") + "]"
 
-  private def pollUnreserved(inner: Seq[Reservable[T, S, C]]): (Option[T], Seq[Reservable[T, S, C]]) =
+  private def pollUnreserved(inner: Seq[Reservable]): (Option[DonationPart], Seq[Reservable]) =
     inner match
       case Nil                              => (None, inner)
       case head :: tail if !head.isReserved => (Some(head.value), tail)
@@ -47,10 +49,10 @@ case class ReservableQueue[T <: Splittable[T, S], S, C](
         (polled, head +: newQueue)
 
   private def pollUnreserved(
-    s: S,
-    inner: Seq[Reservable[T, S, C]],
+    s: BigDecimal,
+    inner: Seq[Reservable],
     limit: Option[Int]
-  ): (Seq[T], Option[S], Seq[Reservable[T, S, C]]) =
+  ): (Seq[DonationPart], Option[BigDecimal], Seq[Reservable]) =
     limit match
       case Some(value) if value <= 0 => (Seq.empty, Some(s), inner)
       case _ =>
@@ -74,7 +76,7 @@ case class ReservableQueue[T <: Splittable[T, S], S, C](
               // Other cases should not happen
               case _ => throw new IllegalStateException("Should not happen?")
 
-  private def reserve(s: S, context: C, inner: Seq[Reservable[T, S, C]]): (Option[S], Seq[Reservable[T, S, C]]) =
+  private def reserve(s: BigDecimal, context: String, inner: Seq[Reservable]): (Option[BigDecimal], Seq[Reservable]) =
     inner match
       case Nil => (Some(s), inner)
       case head +: tail if head.isReserved =>

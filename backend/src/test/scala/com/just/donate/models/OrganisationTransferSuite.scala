@@ -3,13 +3,14 @@ package com.just.donate.models
 import com.just.donate.helper.OrganisationHelper.createNewRoots
 import munit.FunSuite
 
-class OrganisationTransferSuite extends FunSuite {
+class OrganisationTransferSuite extends FunSuite:
 
   test("transfer money between accounts") {
     var newRoots = createNewRoots()
 
-    val donationPart = Donation("Donor1", BigDecimal("100.00"))
-    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donationPart = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
     newRoots = newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank")
 
     assertEquals(newRoots.getAccount("Paypal").get.totalBalance, BigDecimal("50.00"))
@@ -19,8 +20,9 @@ class OrganisationTransferSuite extends FunSuite {
   test("not transfer money if the source account does not have enough balance") {
     var newRoots = createNewRoots()
 
-    val donationPart = Donation("Donor1", BigDecimal("100.00"))
-    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donationPart = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
     intercept[IllegalStateException] {
       newRoots.transfer(BigDecimal("150.00"), "Paypal", "Bank")
@@ -30,8 +32,9 @@ class OrganisationTransferSuite extends FunSuite {
   test("not transfer money if the source account does not exist") {
     var newRoots = createNewRoots()
 
-    val donationPart = Donation("Donor1", BigDecimal("100.00"))
-    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donationPart = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
     intercept[IllegalArgumentException] {
       newRoots.transfer(BigDecimal("50.00"), "NoExists", "Bank")
@@ -41,8 +44,9 @@ class OrganisationTransferSuite extends FunSuite {
   test("not transfer money if the destination account does not exist") {
     var newRoots = createNewRoots()
 
-    val donationPart = Donation("Donor1", BigDecimal("100.00"))
-    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donationPart = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
     intercept[IllegalArgumentException] {
       newRoots.transfer(BigDecimal("50.00"), "Paypal", "NoExists")
@@ -52,8 +56,9 @@ class OrganisationTransferSuite extends FunSuite {
   test("not transfer money if the amount is negative") {
     var newRoots = createNewRoots()
 
-    val donationPart = Donation("Donor1", BigDecimal("100.00"))
-    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donationPart = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
     intercept[IllegalArgumentException] {
       newRoots.transfer(BigDecimal("-50.00"), "Paypal", "Bank")
@@ -63,8 +68,9 @@ class OrganisationTransferSuite extends FunSuite {
   test("not transfer money if the amount is zero") {
     var newRoots = createNewRoots()
 
-    val donationPart = Donation("Donor1", BigDecimal("100.00"))
-    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donationPart = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
     intercept[IllegalArgumentException] {
       newRoots.transfer(BigDecimal("0.00"), "Paypal", "Bank")
@@ -74,8 +80,9 @@ class OrganisationTransferSuite extends FunSuite {
   test("not transfer money if the source account is the same as the destination account") {
     var newRoots = createNewRoots()
 
-    val donationPart = Donation("Donor1", BigDecimal("100.00"))
-    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donationPart = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
     intercept[IllegalArgumentException] {
       newRoots.transfer(BigDecimal("50.00"), "Paypal", "Paypal")
@@ -86,8 +93,9 @@ class OrganisationTransferSuite extends FunSuite {
     var newRoots = createNewRoots()
 
     newRoots = newRoots.addEarmarking("Education")
-    val donationPart = Donation("Donor1", BigDecimal("200.00"), "Education")
-    newRoots = newRoots.donate(donationPart, "Paypal")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donationPart = Donation(donor.id, BigDecimal("200.00"), "Education")
+    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
     newRoots = newRoots.transfer(BigDecimal("100.00"), "Paypal", "Bank")
 
     assertEquals(newRoots.getAccount("Paypal").get.totalBalance, BigDecimal("100.00"))
@@ -108,10 +116,12 @@ class OrganisationTransferSuite extends FunSuite {
     newRoots = newRoots.addEarmarking("Education")
     newRoots = newRoots.addEarmarking("Health")
 
-    val donationPart = Donation("Donor1", BigDecimal("100.00"), "Education")
-    newRoots = newRoots.donate(donationPart, "Paypal")
-    val donationPart2 = Donation("Donor2", BigDecimal("150.00"), "Health")
-    newRoots = newRoots.donate(donationPart2, "Paypal")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donationPart = Donation(donor.id, BigDecimal("100.00"), "Education")
+    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
+    val donationPart2 = Donation(donor2.id, BigDecimal("150.00"), "Health")
+    newRoots = newRoots.donate(donor2, donationPart2, "Paypal").toOption.get
 
     newRoots = newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank")
 
@@ -138,7 +148,4 @@ class OrganisationTransferSuite extends FunSuite {
       BigDecimal("0.00")
     )
   }
-}
-
-
 
