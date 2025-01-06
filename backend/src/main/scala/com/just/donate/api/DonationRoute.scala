@@ -33,9 +33,8 @@ object DonationRoute:
             organisationMapper(requestDonation, accountName)
           )
           response <- trackingId match
-            case None                                         => BadRequest("Organisation not found")
-            case Some(Left(DonationError.INVALID_ACCOUNT))    => BadRequest("Account not found")
-            case Some(Left(DonationError.INVALID_EARMARKING)) => BadRequest("Earmarking not found")
+            case None                      => BadRequest("Organisation not found")
+            case Some(Left(donationError)) => BadRequest(donationError.message)
             case Some(Right(trackingId)) =>
               val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
               emailService.sendEmail(

@@ -146,13 +146,13 @@ case class Organisation(
   def totalEarmarkedBalance(earmarking: String): BigDecimal =
     accounts.map(_.totalEarmarkedBalance(earmarking)).sum
 
-enum DonationError:
-  case INVALID_ACCOUNT
-  case INVALID_EARMARKING
+enum DonationError(val message: String):
+  case INVALID_ACCOUNT extends DonationError("Account not found")
+  case INVALID_EARMARKING extends DonationError("Earmarking not found")
 
-enum TransferError:
-  case INVALID_ACCOUNT
-  case INSUFFICIENT_ACCOUNT_FUNDS
-  case NON_POSITIVE_AMOUNT
-  case SAME_SOURCE_AND_DESTINATION_ACCOUNT
-  case INVALID_DONOR
+enum TransferError(val message: String):
+  case INVALID_ACCOUNT extends TransferError("Account not found")
+  case INSUFFICIENT_ACCOUNT_FUNDS extends TransferError("Source account has insufficient funds")
+  case NON_POSITIVE_AMOUNT extends TransferError("Amount has to be positive")
+  case SAME_SOURCE_AND_DESTINATION_ACCOUNT extends TransferError("The source and target accounts are the same")
+  case INVALID_DONOR extends TransferError("Donor not found")

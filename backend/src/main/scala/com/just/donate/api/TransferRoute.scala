@@ -28,14 +28,8 @@ object TransferRoute:
               case Right((newOrg, emailMessages)) => (newOrg, Right(emailMessages))
           )
           response <- emailMessages match
-            case None                                      => BadRequest("Organisation not found")
-            case Some(Left(TransferError.INVALID_ACCOUNT)) => BadRequest(s"Account not found")
-            case Some(Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)) =>
-              BadRequest(s"Source account has insufficient funds")
-            case Some(Left(TransferError.NON_POSITIVE_AMOUNT)) => BadRequest("Amount has to be positive")
-            case Some(Left(TransferError.SAME_SOURCE_AND_DESTINATION_ACCOUNT)) =>
-              BadRequest("The source and target accounts are the same")
-            case Some(Left(TransferError.INVALID_DONOR)) => BadRequest(s"Donor not found")
+            case None                      => BadRequest("Organisation not found")
+            case Some(Left(transferError)) => BadRequest(transferError.message)
             case Some(Right(emailMessages)) =>
               emailMessages
                 .map(message => emailService.sendEmail(message.targetAddress, message.message, message.subject))
