@@ -3,7 +3,7 @@ package com.just.donate.api
 import cats.effect.*
 import cats.implicits.*
 import com.just.donate.config.Config
-import com.just.donate.models.{Donation, DonationError, Donor, Organisation}
+import com.just.donate.models.{ Donation, DonationError, Donor, Organisation }
 import com.just.donate.notify.IEmailService
 import com.just.donate.store.Store
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
@@ -33,9 +33,8 @@ object DonationRoute:
             organisationMapper(requestDonation, accountName)
           )
           response <- trackingId match
-            case None                                         => BadRequest("Organisation not found")
-            case Some(Left(DonationError.INVALID_ACCOUNT))    => BadRequest("Account not found")
-            case Some(Left(DonationError.INVALID_EARMARKING)) => BadRequest("Earmarking not found")
+            case None                      => BadRequest("Organisation not found")
+            case Some(Left(donationError)) => BadRequest(donationError.message)
             case Some(Right(trackingId)) =>
               val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
               emailService.sendEmail(
@@ -45,13 +44,6 @@ object DonationRoute:
         yield response).handleErrorWith {
           case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
         }
-
-  private[api] case class RequestDonation(
-    donorName: String,
-    donorEmail: String,
-    amount: BigDecimal,
-    earmarking: Option[String]
-  )
 
   private def organisationMapper(requestDonation: RequestDonation, accountName: String)(
     org: Organisation
@@ -67,3 +59,10 @@ object DonationRoute:
     org.donate(donor, donationPart, accountName) match
       case Left(error)   => (org, Left(error))
       case Right(newOrg) => (newOrg, Right(donationPart.donation.donorId))
+
+  private[api] case class RequestDonation(
+    donorName: String,
+    donorEmail: String,
+    amount: BigDecimal,
+    earmarking: Option[String]
+  )

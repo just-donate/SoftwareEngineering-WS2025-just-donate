@@ -38,7 +38,7 @@ object Server extends IOApp:
         "organisation" -> organisationApi(FileStore),
         "withdraw" -> withdrawalRoute(FileStore),
         "donate" -> donationRoute(FileStore, appConfig, emailService),
-        "transfer" -> transferRoute(FileStore),
+        "transfer" -> transferRoute(FileStore, appConfig, emailService),
         "notify" -> notificationRoute(appConfig),
         "paypal-ipn" -> paypalRoute(paypalRepository)
       ).orNotFound

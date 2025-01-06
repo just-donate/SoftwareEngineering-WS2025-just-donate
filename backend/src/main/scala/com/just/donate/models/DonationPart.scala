@@ -1,7 +1,8 @@
 package com.just.donate.models
 
-import com.just.donate.utils.structs.{Split, Splittable}
+import com.just.donate.utils.structs.{ Split, Splittable }
 
+// TODO: when encoding and decoding json, make sure the connection between the donation and it's parts isn't lost
 case class DonationPart(amount: BigDecimal, donation: Donation)
     extends Splittable[DonationPart, BigDecimal]
     with Ordering[DonationPart]:
