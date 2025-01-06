@@ -2,6 +2,7 @@ package com.just.donate.models
 
 import com.just.donate.helper.OrganisationHelper.createNewRoots
 import munit.FunSuite
+import com.just.donate.mocks.config.AppConfigMock
 
 class OrganisationTransferSuite extends FunSuite:
 
@@ -11,7 +12,7 @@ class OrganisationTransferSuite extends FunSuite:
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
     val donationPart = Donation(donor.id, BigDecimal("100.00"))
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
-    newRoots = newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank")
+    newRoots = newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
 
     assertEquals(newRoots.getAccount("Paypal").get.totalBalance, BigDecimal("50.00"))
     assertEquals(newRoots.getAccount("Bank").get.totalBalance, BigDecimal("50.00"))
@@ -24,9 +25,10 @@ class OrganisationTransferSuite extends FunSuite:
     val donationPart = Donation(donor.id, BigDecimal("100.00"))
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
-    intercept[IllegalStateException] {
-      newRoots.transfer(BigDecimal("150.00"), "Paypal", "Bank")
-    }
+    assertEquals(
+      newRoots.transfer(BigDecimal("150.00"), "Paypal", "Bank", AppConfigMock()),
+      Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
+    )
   }
 
   test("not transfer money if the source account does not exist") {
@@ -36,9 +38,10 @@ class OrganisationTransferSuite extends FunSuite:
     val donationPart = Donation(donor.id, BigDecimal("100.00"))
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
-    intercept[IllegalArgumentException] {
-      newRoots.transfer(BigDecimal("50.00"), "NoExists", "Bank")
-    }
+    assertEquals(
+      newRoots.transfer(BigDecimal("50.00"), "NoExists", "Bank", AppConfigMock()),
+      Left(TransferError.INVALID_ACCOUNT)
+    )
   }
 
   test("not transfer money if the destination account does not exist") {
@@ -48,9 +51,10 @@ class OrganisationTransferSuite extends FunSuite:
     val donationPart = Donation(donor.id, BigDecimal("100.00"))
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
-    intercept[IllegalArgumentException] {
-      newRoots.transfer(BigDecimal("50.00"), "Paypal", "NoExists")
-    }
+    assertEquals(
+      newRoots.transfer(BigDecimal("50.00"), "Paypal", "NoExists", AppConfigMock()),
+      Left(TransferError.INVALID_ACCOUNT)
+    )
   }
 
   test("not transfer money if the amount is negative") {
@@ -60,9 +64,10 @@ class OrganisationTransferSuite extends FunSuite:
     val donationPart = Donation(donor.id, BigDecimal("100.00"))
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
-    intercept[IllegalArgumentException] {
-      newRoots.transfer(BigDecimal("-50.00"), "Paypal", "Bank")
-    }
+    assertEquals(
+      newRoots.transfer(BigDecimal("-50.00"), "Paypal", "Bank", AppConfigMock()),
+      Left(TransferError.NON_POSITIVE_AMOUNT)
+    )
   }
 
   test("not transfer money if the amount is zero") {
@@ -72,9 +77,10 @@ class OrganisationTransferSuite extends FunSuite:
     val donationPart = Donation(donor.id, BigDecimal("100.00"))
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
-    intercept[IllegalArgumentException] {
-      newRoots.transfer(BigDecimal("0.00"), "Paypal", "Bank")
-    }
+    assertEquals(
+      newRoots.transfer(BigDecimal("0.00"), "Paypal", "Bank", AppConfigMock()),
+      Left(TransferError.NON_POSITIVE_AMOUNT)
+    )
   }
 
   test("not transfer money if the source account is the same as the destination account") {
@@ -84,9 +90,10 @@ class OrganisationTransferSuite extends FunSuite:
     val donationPart = Donation(donor.id, BigDecimal("100.00"))
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
 
-    intercept[IllegalArgumentException] {
-      newRoots.transfer(BigDecimal("50.00"), "Paypal", "Paypal")
-    }
+    assertEquals(
+      newRoots.transfer(BigDecimal("50.00"), "Paypal", "Paypal", AppConfigMock()),
+      Left(TransferError.SAME_SOURCE_AND_DESTINATION_ACCOUNT)
+    )
   }
 
   test("transfer earmarked money retains its earmarking after transfer") {
@@ -96,7 +103,7 @@ class OrganisationTransferSuite extends FunSuite:
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
     val donationPart = Donation(donor.id, BigDecimal("200.00"), "Education")
     newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
-    newRoots = newRoots.transfer(BigDecimal("100.00"), "Paypal", "Bank")
+    newRoots = newRoots.transfer(BigDecimal("100.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
 
     assertEquals(newRoots.getAccount("Paypal").get.totalBalance, BigDecimal("100.00"))
     assertEquals(newRoots.getAccount("Bank").get.totalBalance, BigDecimal("100.00"))
@@ -123,7 +130,7 @@ class OrganisationTransferSuite extends FunSuite:
     val donationPart2 = Donation(donor2.id, BigDecimal("150.00"), "Health")
     newRoots = newRoots.donate(donor2, donationPart2, "Paypal").toOption.get
 
-    newRoots = newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank")
+    newRoots = newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
 
     assertEquals(newRoots.getAccount("Paypal").get.totalBalance, BigDecimal("200.00"))
     assertEquals(newRoots.getAccount("Bank").get.totalBalance, BigDecimal("50.00"))
@@ -148,4 +155,3 @@ class OrganisationTransferSuite extends FunSuite:
       BigDecimal("0.00")
     )
   }
-
