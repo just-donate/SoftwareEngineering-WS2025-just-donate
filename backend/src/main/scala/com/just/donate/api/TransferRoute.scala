@@ -20,7 +20,7 @@ object TransferRoute:
     HttpRoutes.of[IO]:
 
       case req @ POST -> Root / organisationId / "transfer" =>
-        for
+        (for
           transfer <- req.as[RequestTransfer]
           emailMessages <- loadAndSaveOrganisationOps(organisationId)(store)(org =>
             org.transfer(transfer.amount, transfer.fromAccount, transfer.toAccount, config) match
@@ -40,7 +40,9 @@ object TransferRoute:
               emailMessages
                 .map(message => emailService.sendEmail(message.targetAddress, message.message, message.subject))
                 .sequence >> Ok()
-        yield response
+        yield response).handleErrorWith {
+          case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
+        }
 
   private case class RequestTransfer(
     fromAccount: String,
