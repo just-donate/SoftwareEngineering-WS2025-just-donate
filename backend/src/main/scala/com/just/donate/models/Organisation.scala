@@ -6,6 +6,7 @@ import com.just.donate.utils.CollectionUtils.updatedReturn
 
 import java.util.UUID
 import org.http4s.headers.`Cross-Origin-Resource-Policy`.SameSite
+import com.just.donate.notify.EmailMessage
 
 case class Organisation(
   name: String,
@@ -75,11 +76,10 @@ case class Organisation(
     amount: BigDecimal,
     fromAccount: String,
     toAccount: String,
-    config: Config,
-    emailService: IEmailService
-  ): Either[TransferError, Organisation] =
+    config: Config
+  ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
     (getAccount(fromAccount), getAccount(toAccount)) match
-      case (Some(from), Some(to)) => transfer(amount, from, to, config, emailService)
+      case (Some(from), Some(to)) => transfer(amount, from, to, config)
       case (None, _)              => Left(TransferError.INVALID_ACCOUNT)
       case (Some(_), None)        => Left(TransferError.INVALID_ACCOUNT)
 
@@ -87,9 +87,8 @@ case class Organisation(
     amount: BigDecimal,
     fromAccount: Account,
     toAccount: Account,
-    config: Config,
-    emailService: IEmailService
-  ): Either[TransferError, Organisation] =
+    config: Config
+  ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
     if fromAccount.totalBalance < amount then return Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
 
     if amount <= BigDecimal(0) then return Left(TransferError.NON_POSITIVE_AMOUNT)
@@ -112,26 +111,34 @@ case class Organisation(
       case Some(earmarking) => updatedFrom.boundDonations.find { (key, _) => key == earmarking }.get._2
     val fromQueueHasRemainingPart =
       fromQueue.donationQueue.queue.exists(reservable => reservable.value.donation.id == donationPart.donation.id)
-    if !fromQueueHasRemainingPart then
-      donors.get(donationPart.donation.donorId) match
-        case None => return Left(TransferError.INVALID_DONOR)
-        case Some(donor) =>
-          val trackingId = donor.id
-          val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
-          emailService.sendEmail(
-            donor.email,
-            f"""Your recent donation to ${name} has been fully transferred away from the account ${fromAccount.name}.
+
+    val emailMessage: Option[EmailMessage] =
+      if !fromQueueHasRemainingPart then
+        donors.get(donationPart.donation.donorId) match
+          case None => return Left(TransferError.INVALID_DONOR)
+          case Some(donor) =>
+            val trackingId = donor.id
+            val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+            Some(
+              EmailMessage(
+                donor.email,
+                f"""Your recent donation to ${name} has been fully transferred away from the account ${fromAccount.name}.
                |To see more details about the status of your donation, visit the following link
                |${trackingLink}
                |or enter your tracking id
                |${trackingId}
                |on our tracking page
                |${config.frontendUrl}""".stripMargin,
-            "Just Donate: News about your donation"
-          )
+                "Just Donate: News about your donation"
+              )
+            )
+      else None
 
-    if remaining == BigDecimal(0) then Right(updatedOrg)
-    else updatedOrg.transfer(remaining, fromAccount, toAccount, config, emailService)
+    if remaining == BigDecimal(0) then Right(updatedOrg, emailMessage.toSeq)
+    else
+      updatedOrg.transfer(remaining, fromAccount, toAccount, config).map {
+        case (org, emailMessages) => (org, emailMessages.prependedAll(emailMessage))
+      }
 
   def totalBalance: BigDecimal =
     accounts.map(_.totalBalance).sum

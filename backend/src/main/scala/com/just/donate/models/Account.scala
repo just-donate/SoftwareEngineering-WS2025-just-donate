@@ -1,6 +1,6 @@
 package com.just.donate.models
 
-import com.just.donate.utils.CollectionUtils.{map2, updated, updatedReturn}
+import com.just.donate.utils.CollectionUtils.{ map2, updated, updatedReturn }
 import com.just.donate.utils.structs.ReservableQueue
 
 case class Account private (
@@ -97,11 +97,10 @@ case class Account private (
     val (donationPart, updatedQueue) = queue.pull(amount, Some(1))
 
     val updatedAccount = earmarking match
-      case None => copy(unboundDonations = updatedQueue)
-      case Some(e)  => copy(boundDonations = boundDonations.updated(b => b._1 == e)((e, updatedQueue)))
+      case None    => copy(unboundDonations = updatedQueue)
+      case Some(e) => copy(boundDonations = boundDonations.updated(b => b._1 == e)((e, updatedQueue)))
 
     (amount - donationPart.head.amount, donationPart.head, earmarking, updatedAccount)
-
 
   private[models] def push(donation: DonationPart, earmarking: Option[String]): Account =
     earmarking match

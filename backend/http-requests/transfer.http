@@ -1,0 +1,11 @@
+### Donate
+
+@orgId = 110251487
+POST http://localhost:8080/transfer/{{ orgId }}/transfer
+Content-Type: application/json
+
+{
+  "fromAccount": "acc1",
+  "toAccount": "acc2",
+  "amount": 10
+}
