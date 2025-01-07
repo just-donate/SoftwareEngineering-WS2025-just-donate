@@ -21,6 +21,7 @@ case class Account private (
   def donate(donor: String, amount: BigDecimal, earmarking: String): (Boolean, Account) =
     donate(Donation(donor, amount, earmarking), earmarking)
 
+  // TODO: use error instead of bool
   def donate(donation: DonationPart, earmarking: String): (Boolean, Account) =
     def donateRec(queues: Seq[(String, DonationQueue)]): (Boolean, Seq[(String, DonationQueue)]) = queues match
       case Nil => (false, Nil)
@@ -54,6 +55,7 @@ case class Account private (
 
   def withdrawal(amount: BigDecimal, earmarking: Option[String]): (Seq[DonationPart], Account) =
     // If the total balance is less than the expense, we cannot spend it
+    // TODO: change to actual error handling
     if totalBalance < amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
     if earmarking.isDefined then withdrawalBound(amount, earmarking.get)
     else withdrawalUnbound(amount)
@@ -88,9 +90,11 @@ case class Account private (
     allQueues
       .filter(_._2.donationQueue._2.nonEmpty)
       .minByOption(_._2.donationQueue._2.head.value.donation.donationDate)
+      // TODO: change to actual error handling
       .getOrElse(throw new IllegalStateException("No donations available in any queue"))
 
   private[models] def pull(amount: BigDecimal): (BigDecimal, DonationPart, Option[String], Account) =
+    // TODO: change to actual error handling
     if totalBalance < amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
 
     val (earmarking, queue) = findQueueWithOldestDonation

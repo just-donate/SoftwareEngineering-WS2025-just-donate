@@ -65,12 +65,91 @@ case class Organisation(
           Right(copy(accounts = newAccounts, donors = newDonors))
       case None => Left(DonationError.INVALID_ACCOUNT)
 
-  def withdrawal(amount: BigDecimal, account: String, earmarking: Option[String]): Organisation =
-    accounts.updatedReturn(a => a.name == account)(a => a.withdrawal(amount, earmarking)) match
-      case (newAccounts, Some(donationParts)) =>
-        val expense = Expense("description", amount, earmarking, donationParts)
-        copy(accounts = newAccounts, expenses = expenses :+ expense)
-      case (newAccounts, None) => throw new IllegalArgumentException(s"Account $account does not exist")
+  def withdrawal(
+    amount: BigDecimal,
+    accountName: String,
+    description: String,
+    earmarking: Option[String],
+    config: Config
+  ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
+    getAccount(accountName) match
+      case None          => Left(WithdrawError.INVALID_ACCOUNT)
+      case Some(account) => withdrawal(amount, account, description, earmarking, config)
+
+  def withdrawal(
+    amount: BigDecimal,
+    account: Account,
+    description: String,
+    earmarking: Option[String],
+    config: Config
+  ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
+    val (donationParts, updatedAccount) = account.withdrawal(amount, earmarking)
+
+    val newAccounts = accounts.map(a =>
+      if a.name == account.name then updatedAccount
+      else a
+    )
+    val expense = Expense(description, amount, earmarking, donationParts)
+    val updatedOrg = copy(accounts = newAccounts, expenses = expenses.appended(expense))
+
+    // TODO: change the datastructure to simpify this checking process
+
+    def singleHelper(donationPart: DonationPart, account: Account): Either[WithdrawError, Seq[EmailMessage]] =
+      val queue = earmarking match
+        case None => account.unboundDonations
+        case Some(earmarking) =>
+          account.boundDonations.find {
+            case (key, _) => key == earmarking
+          } match
+            case None        => return Left(WithdrawError.INVALID_EARMARKING)
+            case Some(entry) => entry._2
+
+      val donationHasUnusedParts =
+        queue.donationQueue.queue.exists(r => r.value.donation.id == donationPart.donation.id)
+
+      if donationHasUnusedParts then Right(Seq())
+      else
+        val donor = donors.get(donationPart.donation.donorId) match
+          case None        => return Left(WithdrawError.INVALID_DONOR)
+          case Some(donor) => donor
+        val trackingId = donor.id
+        val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+
+        Right(
+          Seq(
+            EmailMessage(
+              donor.email,
+              f"""Your recent donation to ${name} has been fully utilized.
+                 |To see more details about the status of your donation, visit the following link
+                 |${trackingLink}
+                 |or enter your tracking id
+                 |${trackingId}
+                 |on our tracking page
+                 |${config.frontendUrl}""".stripMargin,
+              "Just Donate: Your donation has been utilized"
+            )
+          )
+        )
+
+    def accountHelper(donationPart: DonationPart, accounts: Seq[Account]): Either[WithdrawError, Seq[EmailMessage]] =
+      accounts match
+        case Seq() => Right(Seq())
+        case account +: tail =>
+          singleHelper(donationPart, account) match
+            case l @ Left(_) => l
+            case Right(emailMessages) =>
+              accountHelper(donationPart, tail).map(recMessages => emailMessages :++ recMessages)
+
+    def donationPartsHelper(donationParts: Seq[DonationPart]): Either[WithdrawError, Seq[EmailMessage]] =
+      donationParts match
+        case Seq() => Right(Seq())
+        case donationPart +: tail =>
+          accountHelper(donationPart, updatedOrg.accounts) match
+            case l @ Left(_) => l
+            case Right(emailMessages) =>
+              donationPartsHelper(tail).map(recMessages => emailMessages :++ recMessages)
+
+    donationPartsHelper(donationParts).map(messages => (updatedOrg, messages))
 
   def transfer(
     amount: BigDecimal,
@@ -123,12 +202,12 @@ case class Organisation(
               EmailMessage(
                 donor.email,
                 f"""Your recent donation to ${name} has been fully transferred away from the account ${fromAccount.name}.
-               |To see more details about the status of your donation, visit the following link
-               |${trackingLink}
-               |or enter your tracking id
-               |${trackingId}
-               |on our tracking page
-               |${config.frontendUrl}""".stripMargin,
+                   |To see more details about the status of your donation, visit the following link
+                   |${trackingLink}
+                   |or enter your tracking id
+                   |${trackingId}
+                   |on our tracking page
+                   |${config.frontendUrl}""".stripMargin,
                 "Just Donate: News about your donation"
               )
             )
@@ -156,3 +235,9 @@ enum TransferError(val message: String):
   case NON_POSITIVE_AMOUNT extends TransferError("Amount has to be positive")
   case SAME_SOURCE_AND_DESTINATION_ACCOUNT extends TransferError("The source and target accounts are the same")
   case INVALID_DONOR extends TransferError("Donor not found")
+
+enum WithdrawError(val message: String):
+  case INVALID_ACCOUNT extends WithdrawError("Account not found")
+  case INSUFFICIENT_ACCOUNT_FUNDS extends WithdrawError("Source account has insufficient funds")
+  case INVALID_EARMARKING extends WithdrawError("Earmarking not found")
+  case INVALID_DONOR extends WithdrawError("Donor not found")

@@ -8,9 +8,9 @@ import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
 import com.just.donate.api.NotificationRoute.notificationRoute
-import com.just.donate.config.{AppConfig, Config}
+import com.just.donate.config.{ AppConfig, Config }
 import com.just.donate.db.PaypalRepository
-import com.just.donate.notify.{EmailService, IEmailService}
+import com.just.donate.notify.{ EmailService, IEmailService }
 import com.just.donate.store.FileStore
 import org.http4s.*
 import org.http4s.ember.server.*
@@ -36,7 +36,7 @@ object Server extends IOApp:
 
       val httpApp: HttpApp[IO] = Router(
         "organisation" -> organisationApi(FileStore),
-        "withdraw" -> withdrawalRoute(FileStore),
+        "withdraw" -> withdrawalRoute(FileStore, appConfig, emailService),
         "donate" -> donationRoute(FileStore, appConfig, emailService),
         "transfer" -> transferRoute(FileStore, appConfig, emailService),
         "notify" -> notificationRoute(appConfig),
@@ -56,3 +56,4 @@ object Server extends IOApp:
   /** Acquire and safely release the Mongo client (using Resource). */
   private def mongoResource(uri: String): Resource[IO, MongoClient] =
     Resource.make(IO(MongoClient(uri)))(client => IO(client.close()))
+
