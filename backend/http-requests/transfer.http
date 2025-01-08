@@ -1,7 +1,7 @@
 ### Donate
 
 @orgId = 110251487
-POST http://localhost:8080/transfer/{{ orgId }}/transfer
+POST http://localhost:8080/transfer/{{ orgId }}
 Content-Type: application/json
 
 {

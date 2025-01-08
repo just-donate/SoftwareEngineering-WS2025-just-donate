@@ -3,6 +3,7 @@ package com.just.donate.models
 import com.just.donate.helper.OrganisationHelper.createNewRoots
 import munit.FunSuite
 import com.just.donate.mocks.config.AppConfigMock
+import com.just.donate.models.errors.TransferError
 
 class OrganisationTransferSuite extends FunSuite:
 
@@ -10,8 +11,8 @@ class OrganisationTransferSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
     newRoots = newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
 
     assertEquals(newRoots.getAccount("Paypal").get.totalBalance, BigDecimal("50.00"))
@@ -22,8 +23,8 @@ class OrganisationTransferSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
       newRoots.transfer(BigDecimal("150.00"), "Paypal", "Bank", AppConfigMock()),
@@ -35,8 +36,8 @@ class OrganisationTransferSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
       newRoots.transfer(BigDecimal("50.00"), "NoExists", "Bank", AppConfigMock()),
@@ -48,8 +49,8 @@ class OrganisationTransferSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
       newRoots.transfer(BigDecimal("50.00"), "Paypal", "NoExists", AppConfigMock()),
@@ -61,8 +62,8 @@ class OrganisationTransferSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
       newRoots.transfer(BigDecimal("-50.00"), "Paypal", "Bank", AppConfigMock()),
@@ -74,8 +75,8 @@ class OrganisationTransferSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
       newRoots.transfer(BigDecimal("0.00"), "Paypal", "Bank", AppConfigMock()),
@@ -87,8 +88,8 @@ class OrganisationTransferSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
       newRoots.transfer(BigDecimal("50.00"), "Paypal", "Paypal", AppConfigMock()),
@@ -101,8 +102,8 @@ class OrganisationTransferSuite extends FunSuite:
 
     newRoots = newRoots.addEarmarking("Education")
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("200.00"), "Education")
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("200.00"), "Education")
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
     newRoots = newRoots.transfer(BigDecimal("100.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
 
     assertEquals(newRoots.getAccount("Paypal").get.totalBalance, BigDecimal("100.00"))
@@ -124,11 +125,11 @@ class OrganisationTransferSuite extends FunSuite:
     newRoots = newRoots.addEarmarking("Health")
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"), "Education")
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"), "Education")
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
     val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
-    val donationPart2 = Donation(donor2.id, BigDecimal("150.00"), "Health")
-    newRoots = newRoots.donate(donor2, donationPart2, "Paypal").toOption.get
+    val (donation2, donationPart2) = Donation(donor2.id, BigDecimal("150.00"), "Health")
+    newRoots = newRoots.donate(donor2, donationPart2, donation2, "Paypal").toOption.get
 
     newRoots = newRoots.transfer(BigDecimal("50.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
 
@@ -155,3 +156,31 @@ class OrganisationTransferSuite extends FunSuite:
       BigDecimal("0.00")
     )
   }
+
+  // FIX: this test
+  // TODO: readd it afterwards
+  // test("transfer multiple donation parts") {
+  //   var newRoots = createNewRoots()
+  //   newRoots = newRoots.addEarmarking("Education")
+  //   newRoots = newRoots.addEarmarking("Health")
+  //
+  //   val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+  //   val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"), "Education")
+  //   val (donation2, donationPart2) = Donation(donor.id, BigDecimal("150.00"), "Education")
+  //   newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
+  //   newRoots = newRoots.donate(donor, donationPart2, donation2, "Paypal").toOption.get
+  //
+  //   newRoots = newRoots.transfer(BigDecimal("120.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
+  //
+  //   assertEquals(newRoots.getAccount("Paypal").get.totalBalance, BigDecimal("130.00"))
+  //   assertEquals(newRoots.getAccount("Bank").get.totalBalance, BigDecimal("120.00"))
+  //
+  //   assertEquals(
+  //     newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Education"),
+  //     BigDecimal("130.00")
+  //   )
+  //   assertEquals(
+  //     newRoots.getAccount("Bank").get.totalEarmarkedBalance("Education"),
+  //     BigDecimal("120.00")
+  //   )
+  // }

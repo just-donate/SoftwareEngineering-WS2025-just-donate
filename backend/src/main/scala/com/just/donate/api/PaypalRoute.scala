@@ -18,7 +18,7 @@ object PaypalRoute:
           resp <- Ok(allDb.mkString("\n"))
         yield resp
 
-      case req@POST -> Root =>
+      case req @ POST -> Root =>
         for
           formData <- req.as[UrlForm].map(_.values.toMap) // Map[String, Seq[String]]
           _ <- IO.println(s"Received IPN Payload: $formData")

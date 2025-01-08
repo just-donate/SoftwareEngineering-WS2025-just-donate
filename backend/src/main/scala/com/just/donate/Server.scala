@@ -3,14 +3,14 @@ package com.just.donate
 import cats.effect.*
 import com.comcast.ip4s.*
 import com.just.donate.api.DonationRoute.donationRoute
+import com.just.donate.api.NotificationRoute.notificationRoute
 import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
-import com.just.donate.api.NotificationRoute.notificationRoute
-import com.just.donate.config.{AppConfig, Config}
+import com.just.donate.config.{ AppConfig, AppEnvironment, Config }
 import com.just.donate.db.PaypalRepository
-import com.just.donate.notify.{EmailService, IEmailService}
+import com.just.donate.notify.{ DevEmailService, EmailService, IEmailService }
 import com.just.donate.store.FileStore
 import org.http4s.*
 import org.http4s.ember.server.*
@@ -22,7 +22,7 @@ import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 object Server extends IOApp:
 
-  private val appConfig: Config = new AppConfig()
+  private val appConfig: Config = AppConfig()
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   def run(args: List[String]): IO[ExitCode] =
@@ -32,13 +32,15 @@ object Server extends IOApp:
 
       FileStore.init()
 
-      val emailService: IEmailService = new EmailService(appConfig)
+      val emailService: IEmailService = appConfig.environment match
+        case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
+        case AppEnvironment.PRODUCTION  => new EmailService(appConfig)
 
       val httpApp: HttpApp[IO] = Router(
         "organisation" -> organisationApi(FileStore),
-        "withdraw" -> withdrawalRoute(FileStore),
         "donate" -> donationRoute(FileStore, appConfig, emailService),
         "transfer" -> transferRoute(FileStore, appConfig, emailService),
+        "withdraw" -> withdrawalRoute(FileStore, appConfig, emailService),
         "notify" -> notificationRoute(appConfig),
         "paypal-ipn" -> paypalRoute(paypalRepository)
       ).orNotFound

@@ -2,8 +2,8 @@ package com.just.donate.api
 
 import cats.effect.*
 import com.just.donate.models.Organisation
-import com.just.donate.store.{ FileStore, Store }
-import com.just.donate.utils.RouteUtils.{ loadAndSaveOrganisation, loadOrganisation }
+import com.just.donate.store.Store
+import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisation, loadOrganisation}
 import io.circe.*
 import io.circe.generic.auto.*
 import org.http4s.*
@@ -44,7 +44,9 @@ object OrganisationRoute:
         loadAndSaveOrganisation(organisationId)(store)(_.removeEarmarking(earmarking))
 
       case GET -> Root / organisationId / "earmarking" / "list" =>
-        loadOrganisation(organisationId)(store)(_.accounts.headOption.map(_.boundDonations.map(_._1)).getOrElse(Seq()))
+        loadOrganisation(organisationId)(store)(
+          _.accounts.headOption.map(_._2.boundDonations.map(_._1)).getOrElse(Seq())
+        )
 
       case req @ POST -> Root / organisationId / "account" =>
         for
@@ -56,7 +58,7 @@ object OrganisationRoute:
         loadAndSaveOrganisation(organisationId)(store)(_.removeAccount(accountName))
 
       case GET -> Root / organisationId / "account" / "list" =>
-        loadOrganisation(organisationId)(store)(_.accounts.map(_.name))
+        loadOrganisation(organisationId)(store)(_.accounts.map(_._2.name))
 
   case class RequestOrganisation(name: String)
 

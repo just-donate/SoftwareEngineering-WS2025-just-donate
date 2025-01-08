@@ -1,0 +1,12 @@
+### Withdraw
+
+@orgId = 110251487
+@account = acc1
+POST http://localhost:8080/withdraw/{{ orgId }}/account/{{ account }}
+Content-Type: application/json
+
+{
+  "amount": 10,
+  "description": "test-description",
+  "earmarking": "proj1"
+}

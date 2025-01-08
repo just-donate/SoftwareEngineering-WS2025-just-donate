@@ -1,38 +1,35 @@
 package com.just.donate.models
 
 import com.just.donate.config.Config
-import com.just.donate.notify.IEmailService
-import com.just.donate.utils.CollectionUtils.updatedReturn
+import com.just.donate.models.Types.DonationGetter
+import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
+import com.just.donate.notify.EmailMessage
 
 import java.util.UUID
-import org.http4s.headers.`Cross-Origin-Resource-Policy`.SameSite
-import com.just.donate.notify.EmailMessage
 
 case class Organisation(
   name: String,
-  accounts: Seq[Account] = Seq.empty,
+  accounts: Map[String, Account] = Map.empty,
+  donations: Map[String, Donation] = Map.empty,
   expenses: Seq[Expense] = Seq.empty,
   donors: Map[String, Donor] = Map.empty
 ):
-  def getAccount(name: String): Option[Account] =
-    accounts.find(_.name == name)
-
   def addAccount(name: String): Organisation =
     addAccount(new Account(name))
 
   def addAccount(account: Account): Organisation =
-    if accounts.exists(_.name == account.name) then this
-    else copy(accounts = accounts :+ account)
+    if accounts.contains(account.name) then this
+    else copy(accounts = accounts.updated(account.name, account))
 
   def removeAccount(name: String): Organisation =
-    if accounts.exists(_.name == name) then copy(accounts = accounts.filterNot(_.name == name))
+    if accounts.contains(name) then copy(accounts = accounts.removed(name))
     else this
 
   def addEarmarking(earmarking: String): Organisation =
-    copy(accounts = accounts.map(_.addEarmarking(earmarking)))
+    copy(accounts = accounts.map(t => (t._1, t._2.addEarmarking(earmarking))))
 
   def removeEarmarking(earmarking: String): Organisation =
-    copy(accounts = accounts.map(_.removeEarmarking(earmarking)))
+    copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmarking))))
 
   def getExistingDonor(email: String): Option[Donor] = donors.find { case (_, d) => d.email == email }.map(_._2)
 
@@ -43,34 +40,120 @@ case class Organisation(
 
     newDonorId
 
-  def donate(donor: Donor, donationPart: DonationPart, account: String): Either[DonationError, Organisation] =
-    accounts.find(_.name == account) match
+  given DonationGetter = getDonation
+
+  def getDonation: DonationGetter = donations.get
+
+  def donate(
+    donor: Donor,
+    donationPart: DonationPart,
+    donation: Donation,
+    account: String
+  ): Either[DonationError, Organisation] =
+    copy(donations = donations.updated(donation.id, donation)).donate(donor, donationPart, account)
+
+  private def donate(
+    donor: Donor,
+    donationPart: DonationPart,
+    account: String
+  ): Either[DonationError, Organisation] =
+    accounts.get(account) match
+      case None => Left(DonationError.INVALID_ACCOUNT)
       case Some(acc) =>
-        val (donated, newAcc) = donationPart.donation.earmarking match
+        val (donated, newAcc) = donationPart.donation.get.earmarking match
           case Some(earmark) => acc.donate(donationPart, earmark)
           case None          => acc.donate(donationPart)
 
         if !donated
         then Left(DonationError.INVALID_EARMARKING)
         else
-          val newAccounts = accounts.map(a =>
-            if a.name == account
-            then newAcc
-            else a
-          )
+          val newAccounts = accounts.updated(account, newAcc)
           val newDonors =
-            if donors.contains(donationPart.donation.donorId)
+            if donors.contains(donationPart.donation.get.donorId)
             then donors
             else donors.updated(donor.id, donor)
           Right(copy(accounts = newAccounts, donors = newDonors))
-      case None => Left(DonationError.INVALID_ACCOUNT)
 
-  def withdrawal(amount: BigDecimal, account: String, earmarking: Option[String]): Organisation =
-    accounts.updatedReturn(a => a.name == account)(a => a.withdrawal(amount, earmarking)) match
-      case (newAccounts, Some(donationParts)) =>
-        val expense = Expense("description", amount, earmarking, donationParts)
-        copy(accounts = newAccounts, expenses = expenses :+ expense)
-      case (newAccounts, None) => throw new IllegalArgumentException(s"Account $account does not exist")
+  def withdrawal(
+    amount: BigDecimal,
+    accountName: String,
+    description: String,
+    earmarking: Option[String],
+    config: Config
+  ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
+    getAccount(accountName) match
+      case None          => Left(WithdrawError.INVALID_ACCOUNT)
+      case Some(account) => withdrawal(amount, account, description, earmarking, config)
+
+  def getAccount(name: String): Option[Account] =
+    accounts.get(name)
+
+  def withdrawal(
+    amount: BigDecimal,
+    account: Account,
+    description: String,
+    earmarking: Option[String],
+    config: Config
+  ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
+    val (donationParts, updatedAccount) = account.withdrawal(amount, earmarking)
+
+    val newAccounts = accounts.updated(account.name, updatedAccount)
+    val expense = Expense(description, amount, earmarking, donationParts)
+    val newDonations = getDonationsAfterWithdrawal(donationParts) match
+      case Left(error)  => return Left(error)
+      case Right(value) => value
+
+    val updatedOrg = copy(accounts = newAccounts, donations = newDonations, expenses = expenses.appended(expense))
+
+    updatedOrg.getNotificationsForUtilizedDonations(donationParts, config).map(messages => (updatedOrg, messages))
+
+  private def getDonationsAfterWithdrawal(
+    donationParts: Seq[DonationPart]
+  ): Either[WithdrawError, Map[String, Donation]] =
+    donationParts.headOption match
+      case None => Right(donations)
+      case Some(donationPart) =>
+        getDonationsAfterWithdrawal(
+          donationParts.tail
+        ).map(_.updatedWith(donationPart.donationId)(optDonation =>
+          val donation = optDonation.get
+          Some(donation.copy(amountRemaining = donation.amountRemaining - donationPart.amount))
+        ))
+
+  private def getNotificationsForUtilizedDonations(
+    usedDonationParts: Seq[DonationPart],
+    config: Config
+  ): Either[WithdrawError, Seq[EmailMessage]] =
+    var remainingSeq = usedDonationParts
+    var emailMessages: Seq[EmailMessage] = Seq()
+
+    while remainingSeq.nonEmpty do
+      val donationPart = remainingSeq.head
+      remainingSeq = remainingSeq.tail
+
+      val donationIsFullyUsed = donationPart.donation.get.amountRemaining == BigDecimal(0)
+      if donationIsFullyUsed then
+        val donor = donors.get(donationPart.donation.get.donorId) match
+          case None        => return Left(WithdrawError.INVALID_DONOR)
+          case Some(donor) => donor
+        val trackingId = donor.id
+        val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+
+        emailMessages = emailMessages.appended(
+          EmailMessage(
+            donor.email,
+            f"""Your recent donation to ${name} has been fully utilized.
+               |To see more details about the status of your donation, visit the following link
+               |${trackingLink}
+               |or enter your tracking id
+               |${trackingId}
+               |on our tracking page
+               |${config.frontendUrl}""".stripMargin,
+            "Just Donate: Your donation has been utilized"
+          )
+        )
+
+    Right(emailMessages)
 
   def transfer(
     amount: BigDecimal,
@@ -99,22 +182,20 @@ case class Organisation(
     val updatedTo = toAccount.push(donationPart, earmarked)
 
     val updatedOrg = copy(
-      accounts = accounts.map(a =>
-        if a.name == fromAccount.name then updatedFrom
-        else if a.name == toAccount.name then updatedTo
-        else a
-      )
+      accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
     )
 
     val fromQueue = earmarked match
       case None             => updatedFrom.unboundDonations
       case Some(earmarking) => updatedFrom.boundDonations.find { (key, _) => key == earmarking }.get._2
     val fromQueueHasRemainingPart =
-      fromQueue.donationQueue.queue.exists(reservable => reservable.value.donation.id == donationPart.donation.id)
+      fromQueue.donationQueue.queue.exists(reservable =>
+        reservable.value.donation.get.id == donationPart.donation.get.id
+      )
 
     val emailMessage: Option[EmailMessage] =
       if !fromQueueHasRemainingPart then
-        donors.get(donationPart.donation.donorId) match
+        donors.get(donationPart.donation.get.donorId) match
           case None => return Left(TransferError.INVALID_DONOR)
           case Some(donor) =>
             val trackingId = donor.id
@@ -123,12 +204,12 @@ case class Organisation(
               EmailMessage(
                 donor.email,
                 f"""Your recent donation to ${name} has been fully transferred away from the account ${fromAccount.name}.
-               |To see more details about the status of your donation, visit the following link
-               |${trackingLink}
-               |or enter your tracking id
-               |${trackingId}
-               |on our tracking page
-               |${config.frontendUrl}""".stripMargin,
+                   |To see more details about the status of your donation, visit the following link
+                   |${trackingLink}
+                   |or enter your tracking id
+                   |${trackingId}
+                   |on our tracking page
+                   |${config.frontendUrl}""".stripMargin,
                 "Just Donate: News about your donation"
               )
             )
@@ -141,18 +222,7 @@ case class Organisation(
       }
 
   def totalBalance: BigDecimal =
-    accounts.map(_.totalBalance).sum
+    accounts.map(_._2.totalBalance).sum
 
   def totalEarmarkedBalance(earmarking: String): BigDecimal =
-    accounts.map(_.totalEarmarkedBalance(earmarking)).sum
-
-enum DonationError(val message: String):
-  case INVALID_ACCOUNT extends DonationError("Account not found")
-  case INVALID_EARMARKING extends DonationError("Earmarking not found")
-
-enum TransferError(val message: String):
-  case INVALID_ACCOUNT extends TransferError("Account not found")
-  case INSUFFICIENT_ACCOUNT_FUNDS extends TransferError("Source account has insufficient funds")
-  case NON_POSITIVE_AMOUNT extends TransferError("Amount has to be positive")
-  case SAME_SOURCE_AND_DESTINATION_ACCOUNT extends TransferError("The source and target accounts are the same")
-  case INVALID_DONOR extends TransferError("Donor not found")
+    accounts.map(_._2.totalEarmarkedBalance(earmarking)).sum
