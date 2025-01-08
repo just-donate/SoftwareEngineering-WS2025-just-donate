@@ -10,3 +10,4 @@ bin
 # the file storage path
 store
 target/
+.bsp/
