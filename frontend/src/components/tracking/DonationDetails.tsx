@@ -1,7 +1,14 @@
+import dynamic from 'next/dynamic'; // Import dynamic from Next.js
+
+// Dynamically import MapContainer and related components
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+
 import { Donation } from '@/types/types';
 import { StatusTimeline } from './StatusTimeline';
 import { customStyles } from '@/styles/custom';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'; // <-- Import Leaflet's default CSS
 
 interface DonationDetailsProps {
