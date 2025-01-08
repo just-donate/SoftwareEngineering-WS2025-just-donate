@@ -1,21 +1,20 @@
-FROM gradle:7.6-jdk17 AS builder
-
+FROM sbt:1.9.3-jdk17 AS builder
 WORKDIR /app
 
-COPY ./gradlew ./gradlew
-COPY ./gradle ./gradle
-COPY ./build.gradle ./build.gradle
-COPY ./settings.gradle ./settings.gradle
-COPY ./gradle ./gradle
+# Copy SBT build config and source
+COPY build.sbt ./
+COPY project ./project
 COPY src ./src
 
-RUN gradle clean build -x test
+# Build your fat JAR (requires sbt-assembly plugin)
+RUN sbt clean assembly
 
+# ---
 FROM openjdk:17-jdk-slim
-
 WORKDIR /app
-COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Copy the assembled JAR from the builder stage
+COPY --from=builder /app/target/scala-3.*/*.jar app.jar
 
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "app.jar"]

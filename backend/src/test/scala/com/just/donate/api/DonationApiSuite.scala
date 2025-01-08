@@ -8,12 +8,16 @@ import com.just.donate.mocks.config.AppConfigMock
 import com.just.donate.mocks.notify.EmailServiceMock
 import com.just.donate.store.MemoryStore
 import io.circe.generic.auto.*
-import munit.{ BeforeEach, CatsEffectSuite }
+import munit.{BeforeEach, CatsEffectSuite}
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 
+import java.lang.Thread.sleep
+
 class DonationApiSuite extends CatsEffectSuite:
+
+  sleep(1); // Sleep for 1 second to avoid port conflict with other tests
 
   private val donationRoute = DonationRoute.donationRoute(MemoryStore, AppConfigMock(), EmailServiceMock()).orNotFound
 
@@ -31,6 +35,6 @@ class DonationApiSuite extends CatsEffectSuite:
     yield
       assertEquals(status, Status.Ok)
       val updatedOrg = MemoryStore.load(organisationId("newRoots")).unsafeRunSync().get
-      println(updatedOrg)
+      println(">>>> ORG: " + updatedOrg)
       assert(updatedOrg.totalBalance == BigDecimal(100))
   }
