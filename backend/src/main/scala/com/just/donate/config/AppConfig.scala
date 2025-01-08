@@ -1,19 +1,25 @@
 package com.just.donate.config
 
-import com.typesafe.config.{Config as TypesafeConfig, ConfigFactory}
+import com.typesafe.config.{ Config as TypesafeConfig, ConfigFactory }
 
 import scala.util.Properties
 
-class AppConfig(private val conf: TypesafeConfig) extends Config:
-  def this() = {
-    this(
-      Properties.envOrElse("ENV", "prod") match
-        case "dev" | "development" => ConfigFactory.load("application.dev")
-        case "prod" | "production" => ConfigFactory.load()
-        case env => throw new RuntimeException(f"Unknown environment: ${env}")
-    )
-  }
+object AppConfig:
+  def apply(): AppConfig =
+    val environment = Properties.envOrElse("ENV", "prod") match
+      case "dev" | "development" => AppEnvironment.DEVELOPMENT
+      case "prod" | "production" => AppEnvironment.PRODUCTION
+      case env                   => throw new RuntimeException(f"Unknown environment: ${env}")
 
+    AppConfig(
+      environment match
+        case AppEnvironment.DEVELOPMENT => ConfigFactory.load("application.dev")
+        case AppEnvironment.PRODUCTION  => ConfigFactory.load()
+      ,
+      environment
+    )
+
+case class AppConfig(private val conf: TypesafeConfig, val environment: AppEnvironment) extends Config:
   val frontendUrl: String = getString("FRONTEND_URL")
 
   val mongoUri: String = getOptionalString("MONGO_URI").getOrElse("mongodb://localhost:27017")
@@ -36,4 +42,9 @@ class AppConfig(private val conf: TypesafeConfig) extends Config:
     else Properties.envOrNone(path).map(_.toInt)
 
   private def expected[A](getter: String => Option[A]) =
-    (path: String) => getter(path).getOrElse(throw new RuntimeException(f"Expected the config option ${path} to be set in the config file or as an environment variable."))
+    (path: String) =>
+      getter(path).getOrElse(
+        throw new RuntimeException(
+          f"Expected the config option ${path} to be set in the config file or as an environment variable."
+        )
+      )
