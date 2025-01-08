@@ -1,10 +1,9 @@
 package com.just.donate.api
 
 import cats.effect.*
-import cats.implicits.*
 import com.just.donate.config.Config
-import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
-import com.just.donate.models.{ Donation, Donor, Organisation }
+import com.just.donate.models.errors.DonationError
+import com.just.donate.models.{Donation, Donor, Organisation}
 import com.just.donate.notify.IEmailService
 import com.just.donate.store.Store
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
@@ -14,6 +13,8 @@ import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+
+import java.time.LocalDateTime
 
 object DonationRoute:
   val donationRoute: (Store, Config, IEmailService) => HttpRoutes[IO] = (store, config, emailService) =>
@@ -37,6 +38,9 @@ object DonationRoute:
         yield response).handleErrorWith {
           case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
         }
+
+      case GET -> Root / donorId =>
+        Ok()
 
   private val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
     f"""Thank you for your donation, to track your progress visit
@@ -67,3 +71,27 @@ object DonationRoute:
     amount: BigDecimal,
     earmarking: Option[String]
   )
+
+  // Define the Status case class to represent each status update
+  private[api] case class StatusResponse(
+     status: String,
+     date: LocalDateTime,
+     description: String
+  )
+
+  // Define the Donation case class to represent each donation
+  private[api] case class DonationResponse(
+     donationId: String,
+     amount: BigDecimal,
+     currency: String,
+     donorEmail: String,
+     date: LocalDateTime,
+     earmarking: String,
+     status: List[StatusResponse]
+  )
+    
+  private[api] case class DonationListResponse(
+     donations: List[DonationResponse]
+  )
+
+

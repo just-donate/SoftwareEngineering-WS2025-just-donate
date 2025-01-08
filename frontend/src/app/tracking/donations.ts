@@ -1,12 +1,19 @@
 import { Donation } from "@/types/types";
 
-export function getDonations(id: string): Donation[] | null {
+export async function getDonations(id: string): Promise<Donation[] | null> {
     // TODO: remove mockDonations
     if (!id || id === '1') {
         return null;
     }
     return mockDonations;
-    // return fetch(`/api/tracking/${id}`).then(body => body.json()).catch(_ => null);
+    // In production, you would use this:
+    // try {
+    //     const response = await fetch(`${process.env.API_URL}/api/tracking/${id}`);
+    //     if (!response.ok) return null;
+    //     return response.json();
+    // } catch (_) {
+    //     return null;
+    // }
 }
 
 export const mockDonations: Donation[] = [

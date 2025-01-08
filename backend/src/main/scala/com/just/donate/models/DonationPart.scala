@@ -29,3 +29,6 @@ case class DonationPart(amount: BigDecimal, donationId: String, donationDate: Lo
 
   def donation(using donationGetter: DonationGetter): Option[Donation] =
     donationGetter(donationId)
+  
+  def earmarking(using donationGetter: DonationGetter): Option[String] =
+    donationGetter(donationId).flatMap(_.earmarking)

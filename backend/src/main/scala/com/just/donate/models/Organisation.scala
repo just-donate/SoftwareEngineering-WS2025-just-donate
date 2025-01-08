@@ -2,7 +2,7 @@ package com.just.donate.models
 
 import com.just.donate.config.Config
 import com.just.donate.models.Types.DonationGetter
-import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
+import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
 import com.just.donate.notify.EmailMessage
 
 import java.util.UUID
@@ -14,42 +14,92 @@ case class Organisation(
   expenses: Seq[Expense] = Seq.empty,
   donors: Map[String, Donor] = Map.empty
 ):
-  def addAccount(name: String): Organisation =
-    addAccount(new Account(name))
 
-  def addAccount(account: Account): Organisation =
+  /**
+   * Add a new account to the organisation.
+   * @param name the name of the account.
+   * @return a new organisation with the account added.
+   */
+  def addAccount(name: String): Organisation =
+    val account = new Account(name)
     if accounts.contains(account.name) then this
     else copy(accounts = accounts.updated(account.name, account))
 
+  /**
+   * Remove an account from the organisation.
+   * @param name the name of the account.
+   * @return a new organisation with the account removed.
+   */
   def removeAccount(name: String): Organisation =
     if accounts.contains(name) then copy(accounts = accounts.removed(name))
     else this
 
+  /**
+   * Get an account by name.
+   * @param name the name of the account.
+   * @return an option of the account, depending on whether the account exists.
+   */
+  def getAccount(name: String): Option[Account] = accounts.get(name)
+  
+  /**
+   * Add a new earmarking to all accounts in the organisation.
+   * @param earmarking the name of the earmarking.
+   * @return a new organisation with the earmarking added to all accounts.
+   */
   def addEarmarking(earmarking: String): Organisation =
     copy(accounts = accounts.map(t => (t._1, t._2.addEarmarking(earmarking))))
 
+  /**
+   * Remove an earmarking from all accounts in the organisation.
+   * @param earmarking the name of the earmarking.
+   * @return a new organisation with the earmarking removed from all accounts.
+   */
   def removeEarmarking(earmarking: String): Organisation =
     copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmarking))))
 
-  def getExistingDonor(email: String): Option[Donor] = donors.find { case (_, d) => d.email == email }.map(_._2)
+  /**
+   * Loads an existing donor from the organisation.
+   * @param email the email of the donor.
+   * @return an option of the donor, depending on whether the donor exists.
+   */
+  def getExistingDonor(email: String): Option[Donor] = donors.find(_._2.email == email).map(_._2)
 
+  /**
+   * Get a new donor id which is not already in use.
+   * @return a new donor id.
+   */
   def getNewDonorId: String =
     var newDonorId = UUID.randomUUID().toString
-
     while donors.contains(newDonorId) do newDonorId = UUID.randomUUID().toString
-
     newDonorId
 
+  /**
+   * Get a donation by id of the currently active organisation. This function can be summoned
+   * to get the donation, when the organisation is in scope, for example inside the account.
+   *
+   * Example:
+   * `def someFunction(...)(using donationGetter: DonationGetter): Unit = { ... }`
+   * @return A function which gets a donation by id from the organisation.
+   */
   given DonationGetter = getDonation
+  private def getDonation: DonationGetter = donations.get
 
-  def getDonation: DonationGetter = donations.get
-
+  /**
+   * Donate to the organisation. This function is the entry point for donating to the organisation.
+   * @param donor the donor who is donating.
+   * @param donationPart the donation part which is being donated.
+   * @param donation the donation which is being donated.
+   * @param account the account to which the donation is being made.
+   * @return either an error or the updated organisation.
+   */
   def donate(
     donor: Donor,
     donationPart: DonationPart,
     donation: Donation,
     account: String
   ): Either[DonationError, Organisation] =
+    // We first insert the donation into the donations, then we donate to the account, this is 
+    // done to ensure that the donation is available in the organisation during the process.
     copy(donations = donations.updated(donation.id, donation)).donate(donor, donationPart, account)
 
   private def donate(
@@ -57,23 +107,31 @@ case class Organisation(
     donationPart: DonationPart,
     account: String
   ): Either[DonationError, Organisation] =
-    accounts.get(account) match
+    getAccount(account) match
       case None => Left(DonationError.INVALID_ACCOUNT)
       case Some(acc) =>
-        val (donated, newAcc) = donationPart.donation.get.earmarking match
+        val newAccount = donationPart.earmarking match
           case Some(earmark) => acc.donate(donationPart, earmark)
           case None          => acc.donate(donationPart)
 
-        if !donated
-        then Left(DonationError.INVALID_EARMARKING)
-        else
-          val newAccounts = accounts.updated(account, newAcc)
-          val newDonors =
-            if donors.contains(donationPart.donation.get.donorId)
-            then donors
-            else donors.updated(donor.id, donor)
-          Right(copy(accounts = newAccounts, donors = newDonors))
+        newAccount match
+          case Left(e) => Left(e)
+          case Right(newAcc) => 
+            val newAccounts = accounts.updated(account, newAcc)
+            val newDonors =
+              if donors.contains(donationPart.donation.get.donorId) then donors
+              else donors.updated(donor.id, donor)
+            Right(copy(accounts = newAccounts, donors = newDonors))
 
+  /**
+   * Withdraw from the organisation. This function is the entry point for withdrawing from the organisation.
+   * @param amount the amount to withdraw.
+   * @param accountName the name of the account to withdraw from.
+   * @param description the description of the withdrawal.
+   * @param earmarking the earmarking of the withdrawal.
+   * @param config the configuration of the organisation.
+   * @return either an error or the updated organisation and email messages.
+   */
   def withdrawal(
     amount: BigDecimal,
     accountName: String,
@@ -84,9 +142,6 @@ case class Organisation(
     getAccount(accountName) match
       case None          => Left(WithdrawError.INVALID_ACCOUNT)
       case Some(account) => withdrawal(amount, account, description, earmarking, config)
-
-  def getAccount(name: String): Option[Account] =
-    accounts.get(name)
 
   def withdrawal(
     amount: BigDecimal,
@@ -179,10 +234,10 @@ case class Organisation(
     if fromAccount.name == toAccount.name then return Left(TransferError.SAME_SOURCE_AND_DESTINATION_ACCOUNT)
 
     val (remaining, donationPart, earmarked, updatedFrom) = fromAccount.pull(amount)
-    val updatedTo = toAccount.push(donationPart, earmarked)
-
+    val updatedTo = toAccount.donate(donationPart, earmarked)
+    
     val updatedOrg = copy(
-      accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
+      accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo.toOption.get)
     )
 
     val fromQueue = earmarked match

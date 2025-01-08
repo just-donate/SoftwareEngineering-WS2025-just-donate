@@ -1,6 +1,7 @@
 package com.just.donate.models
 
 import com.just.donate.models.Types.DonationGetter
+import com.just.donate.models.errors.DonationError
 import com.just.donate.utils.CollectionUtils.{map2, updated, updatedReturn}
 import com.just.donate.utils.structs.ReservableQueue
 
@@ -17,11 +18,11 @@ case class Account private (
       case Some(value) =>
         if value._2.totalBalance == BigDecimal.valueOf(0) then
           copy(boundDonations = boundDonations.filterNot(_._1 == earmarking))
-        else throw new IllegalArgumentException(s"Earmarking $earmarking has a balance of ${value._2.totalBalance}")
+        else 
+          throw new IllegalArgumentException(s"Earmarking $earmarking has a balance of ${value._2.totalBalance}")
       case None => this
 
   def addEarmarking(earmarking: String): Account =
-    // boundDonations = boundDonations :+ ((earmarking, DonationQueue(name, ReservableQueue(name))))
     copy(boundDonations = boundDonations :+ ((earmarking, DonationQueue(name, ReservableQueue(name)))))
 
   def totalEarmarkedBalance(earmarking: String): BigDecimal =
@@ -91,16 +92,12 @@ case class Account private (
 
   private def totalBalanceBound: BigDecimal = boundDonations.map(_._2.totalBalance).sum
 
-  private[models] def push(donation: DonationPart, earmarking: Option[String]): Account =
+  def donate(donation: DonationPart, earmarking: Option[String] = None): Either[DonationError, Account] =
     earmarking match
-      case Some(earmark) => donate(donation, earmark)._2
-      case None          => donate(donation)._2
-
-  def donate(donation: DonationPart): (Boolean, Account) =
-    (true, copy(unboundDonations = unboundDonations.add(donation)))
-
-  // TODO: use error instead of bool
-  def donate(donation: DonationPart, earmarking: String): (Boolean, Account) =
+      case Some(earmark) => donate(donation, earmark)
+      case None          => Right(copy(unboundDonations = unboundDonations.add(donation)))
+  
+  def donate(donation: DonationPart, earmarking: String):  Either[DonationError, Account] =
     def donateRec(queues: Seq[(String, DonationQueue)]): (Boolean, Seq[(String, DonationQueue)]) = queues match
       case Nil => (false, Nil)
       case (earmarkingQueue, queue) :: tail =>
@@ -110,5 +107,5 @@ case class Account private (
           (donated, (earmarkingQueue, queue) +: newQueues)
 
     val (donated, newBoundDonations) = donateRec(boundDonations)
-    if donated then (true, copy(boundDonations = newBoundDonations))
-    else (false, this)
+    if donated then Right(copy(boundDonations = newBoundDonations))
+    else Right(this)

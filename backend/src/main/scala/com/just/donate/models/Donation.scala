@@ -14,7 +14,8 @@ case class Donation(
   amountRemaining: BigDecimal,
   amountTotal: BigDecimal,
   earmarking: Option[String] = None,
-  id: String = UUID.randomUUID().toString
+  id: String = UUID.randomUUID().toString,
+  
 ):
 
   override def toString: String = String.format("Donation from %s on %s", donorId, donationDate)
