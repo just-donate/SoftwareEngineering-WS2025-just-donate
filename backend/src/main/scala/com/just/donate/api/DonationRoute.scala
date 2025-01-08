@@ -13,6 +13,7 @@ import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+import com.just.donate.utils.Money
 
 import java.time.LocalDateTime
 
@@ -68,7 +69,7 @@ object DonationRoute:
   private[api] case class RequestDonation(
     donorName: String,
     donorEmail: String,
-    amount: BigDecimal,
+    amount: Money,
     earmarking: Option[String]
   )
 
@@ -82,7 +83,7 @@ object DonationRoute:
   // Define the Donation case class to represent each donation
   private[api] case class DonationResponse(
      donationId: String,
-     amount: BigDecimal,
+     amount: Money,
      currency: String,
      donorEmail: String,
      date: LocalDateTime,

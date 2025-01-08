@@ -12,6 +12,7 @@ import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+import com.just.donate.utils.Money
 
 object WithdrawalRoute:
 
@@ -37,4 +38,4 @@ object WithdrawalRoute:
           case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
         }
 
-  private[api] case class RequestWithdrawal(amount: BigDecimal, description: String, earmarking: Option[String])
+  private[api] case class RequestWithdrawal(amount: Money, description: String, earmarking: Option[String])

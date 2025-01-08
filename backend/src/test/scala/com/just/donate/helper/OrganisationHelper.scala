@@ -1,10 +1,11 @@
 package com.just.donate.helper
 
-import com.just.donate.models.{ Account, Organisation }
+import com.just.donate.models.{Account, Organisation}
 import cats.effect.IO
 import com.just.donate.store.MemoryStore
 import com.just.donate.models.Donor
 import com.just.donate.models.Donation
+import com.just.donate.utils.Money
 
 object OrganisationHelper:
 
@@ -27,7 +28,7 @@ object OrganisationHelper:
         .map(optOrg =>
           val org = optOrg.get
           val donor = Donor(org.getNewDonorId, "MyDonor", "mydonor@example.org")
-          val (donation, donationPart) = Donation(donor.id, BigDecimal(100))
+          val (donation, donationPart) = Donation(donor.id, Money("100"))
           org.donate(donor, donationPart, donation, "Paypal").toOption.get
         )
       _ <- MemoryStore.save(orgId, newOrg)

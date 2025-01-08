@@ -11,6 +11,7 @@ import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+import com.just.donate.utils.Money
 
 object OrganisationRoute:
 
@@ -66,6 +67,6 @@ object OrganisationRoute:
 
   private[api] case class RequestEarmarking(name: String)
 
-  private[api] case class RequestAccount(name: String, balance: BigDecimal)
+  private[api] case class RequestAccount(name: String, balance: Money)
 
-  private[api] case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])
+  private[api] case class RequestDonation(donor: String, amount: Money, earmarking: Option[String])

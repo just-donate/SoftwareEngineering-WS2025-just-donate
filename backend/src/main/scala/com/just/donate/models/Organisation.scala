@@ -4,8 +4,9 @@ import com.just.donate.config.Config
 import com.just.donate.models.Types.DonationGetter
 import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
 import com.just.donate.notify.EmailMessage
-
+import com.just.donate.utils.Money
 import java.util.UUID
+import scala.math.Ordered.orderingToOrdered
 
 case class Organisation(
   name: String,
@@ -40,7 +41,7 @@ case class Organisation(
    * @return an option of the account, depending on whether the account exists.
    */
   def getAccount(name: String): Option[Account] = accounts.get(name)
-  
+
   /**
    * Add a new earmarking to all accounts in the organisation.
    * @param earmarking the name of the earmarking.
@@ -98,7 +99,7 @@ case class Organisation(
     donation: Donation,
     account: String
   ): Either[DonationError, Organisation] =
-    // We first insert the donation into the donations, then we donate to the account, this is 
+    // We first insert the donation into the donations, then we donate to the account, this is
     // done to ensure that the donation is available in the organisation during the process.
     copy(donations = donations.updated(donation.id, donation)).donate(donor, donationPart, account)
 
@@ -116,7 +117,7 @@ case class Organisation(
 
         newAccount match
           case Left(e) => Left(e)
-          case Right(newAcc) => 
+          case Right(newAcc) =>
             val newAccounts = accounts.updated(account, newAcc)
             val newDonors =
               if donors.contains(donationPart.donation.get.donorId) then donors
@@ -133,7 +134,7 @@ case class Organisation(
    * @return either an error or the updated organisation and email messages.
    */
   def withdrawal(
-    amount: BigDecimal,
+    amount: Money,
     accountName: String,
     description: String,
     earmarking: Option[String],
@@ -144,23 +145,25 @@ case class Organisation(
       case Some(account) => withdrawal(amount, account, description, earmarking, config)
 
   def withdrawal(
-    amount: BigDecimal,
+    amount: Money,
     account: Account,
     description: String,
     earmarking: Option[String],
     config: Config
   ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
-    val (donationParts, updatedAccount) = account.withdrawal(amount, earmarking)
+    account.withdrawal(amount, earmarking) match
+      case Left(value) => Left(value)
+      case Right((donationParts, updatedAccount)) =>
 
-    val newAccounts = accounts.updated(account.name, updatedAccount)
-    val expense = Expense(description, amount, earmarking, donationParts)
-    val newDonations = getDonationsAfterWithdrawal(donationParts) match
-      case Left(error)  => return Left(error)
-      case Right(value) => value
+        val newAccounts = accounts.updated(account.name, updatedAccount)
+        val expense = Expense(description, amount, earmarking, donationParts)
+        val newDonations = getDonationsAfterWithdrawal(donationParts) match
+          case Left(error)  => return Left(error)
+          case Right(value) => value
 
-    val updatedOrg = copy(accounts = newAccounts, donations = newDonations, expenses = expenses.appended(expense))
+        val updatedOrg = copy(accounts = newAccounts, donations = newDonations, expenses = expenses.appended(expense))
 
-    updatedOrg.getNotificationsForUtilizedDonations(donationParts, config).map(messages => (updatedOrg, messages))
+        updatedOrg.getNotificationsForUtilizedDonations(donationParts, config).map(messages => (updatedOrg, messages))
 
   private def getDonationsAfterWithdrawal(
     donationParts: Seq[DonationPart]
@@ -186,7 +189,7 @@ case class Organisation(
       val donationPart = remainingSeq.head
       remainingSeq = remainingSeq.tail
 
-      val donationIsFullyUsed = donationPart.donation.get.amountRemaining == BigDecimal(0)
+      val donationIsFullyUsed = donationPart.donation.get.amountRemaining == Money.ZERO
       if donationIsFullyUsed then
         val donor = donors.get(donationPart.donation.get.donorId) match
           case None        => return Left(WithdrawError.INVALID_DONOR)
@@ -211,7 +214,7 @@ case class Organisation(
     Right(emailMessages)
 
   def transfer(
-    amount: BigDecimal,
+    amount: Money,
     fromAccount: String,
     toAccount: String,
     config: Config
@@ -222,20 +225,20 @@ case class Organisation(
       case (Some(_), None)        => Left(TransferError.INVALID_ACCOUNT)
 
   def transfer(
-    amount: BigDecimal,
+    amount: Money,
     fromAccount: Account,
     toAccount: Account,
     config: Config
   ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
     if fromAccount.totalBalance < amount then return Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
 
-    if amount <= BigDecimal(0) then return Left(TransferError.NON_POSITIVE_AMOUNT)
+    if amount <= Money.ZERO then return Left(TransferError.NON_POSITIVE_AMOUNT)
 
     if fromAccount.name == toAccount.name then return Left(TransferError.SAME_SOURCE_AND_DESTINATION_ACCOUNT)
 
     val (remaining, donationPart, earmarked, updatedFrom) = fromAccount.pull(amount)
     val updatedTo = toAccount.donate(donationPart, earmarked)
-    
+
     val updatedOrg = copy(
       accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo.toOption.get)
     )
@@ -270,14 +273,14 @@ case class Organisation(
             )
       else None
 
-    if remaining == BigDecimal(0) then Right(updatedOrg, emailMessage.toSeq)
+    if remaining == Money.ZERO then Right(updatedOrg, emailMessage.toSeq)
     else
       updatedOrg.transfer(remaining, fromAccount, toAccount, config).map {
         case (org, emailMessages) => (org, emailMessages.prependedAll(emailMessage))
       }
 
-  def totalBalance: BigDecimal =
+  def totalBalance: Money =
     accounts.map(_._2.totalBalance).sum
 
-  def totalEarmarkedBalance(earmarking: String): BigDecimal =
+  def totalEarmarkedBalance(earmarking: String): Money =
     accounts.map(_._2.totalEarmarkedBalance(earmarking)).sum

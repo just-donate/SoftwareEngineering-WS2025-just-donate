@@ -14,6 +14,7 @@ import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+import com.just.donate.utils.Money
 
 object TransferRoute:
 
@@ -42,5 +43,5 @@ object TransferRoute:
   private[api] case class RequestTransfer(
     fromAccount: String,
     toAccount: String,
-    amount: BigDecimal
+    amount: Money
   )
