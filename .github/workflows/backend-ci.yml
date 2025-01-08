@@ -23,4 +23,5 @@ jobs:
         cache: 'sbt'
     - uses: sbt/setup-sbt@v1
     - name: Run tests
+      working-directory: backend
       run: sbt -v +test
