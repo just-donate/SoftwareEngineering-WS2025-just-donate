@@ -15,10 +15,13 @@ case class Donation(
   amountTotal: Money,
   earmarking: Option[String] = None,
   id: String = UUID.randomUUID().toString,
-  
+  var statusUpdates: Seq[StatusUpdate] = Seq.empty
 ):
 
   override def toString: String = String.format("Donation from %s on %s", donorId, donationDate)
+  
+  def addStatusUpdate(status: StatusUpdate): Unit =
+    statusUpdates = statusUpdates.appended(status)
 
 object Donation:
 

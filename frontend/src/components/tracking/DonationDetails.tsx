@@ -26,11 +26,11 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onCl
           </div>
           <div>
             <p className={`${customStyles.text.body} font-semibold`}>Project:</p>
-            <p className={customStyles.colors.text}>{donation.project}</p>
+            <p className={customStyles.colors.text}>{donation.earmarking}</p>
           </div>
           <div>
             <p className={`${customStyles.text.body} font-semibold`}>Amount:</p>
-            <p className={customStyles.colors.text}>{donation.amount} {donation.currency}</p>
+            <p className={customStyles.colors.text}>{donation.amount.amount} Euro</p>
           </div>
           <div>
             <p className={`${customStyles.text.body} font-semibold`}>Date:</p>

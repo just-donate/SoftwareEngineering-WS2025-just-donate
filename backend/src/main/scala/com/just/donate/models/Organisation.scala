@@ -5,6 +5,8 @@ import com.just.donate.models.Types.DonationGetter
 import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
 import com.just.donate.notify.EmailMessage
 import com.just.donate.utils.Money
+
+import java.time.LocalDateTime
 import java.util.UUID
 import scala.math.Ordered.orderingToOrdered
 
@@ -101,6 +103,13 @@ case class Organisation(
   ): Either[DonationError, Organisation] =
     // We first insert the donation into the donations, then we donate to the account, this is
     // done to ensure that the donation is available in the organisation during the process.
+    donation.addStatusUpdate(
+      StatusUpdate(
+        LocalDateTime.now(),
+        StatusUpdate.Status.DONATED,
+        "Donation has been made and has been added to the account: " + account
+      )
+    )
     copy(donations = donations.updated(donation.id, donation)).donate(donor, donationPart, account)
 
   private def donate(
@@ -154,7 +163,6 @@ case class Organisation(
     account.withdrawal(amount, earmarking) match
       case Left(value) => Left(value)
       case Right((donationParts, updatedAccount)) =>
-
         val newAccounts = accounts.updated(account.name, updatedAccount)
         val expense = Expense(description, amount, earmarking, donationParts)
         val newDonations = getDonationsAfterWithdrawal(donationParts) match
@@ -213,6 +221,14 @@ case class Organisation(
 
     Right(emailMessages)
 
+  /**
+   * Transfer between accounts in the organisation. This function is the entry point for transferring between accounts.
+   * @param amount the amount to transfer.
+   * @param fromAccount the name of the account to transfer from.
+   * @param toAccount the name of the account to transfer to.
+   * @param config the configuration of the organisation.
+   * @return either an error or the updated organisation and email messages.
+   */
   def transfer(
     amount: Money,
     fromAccount: String,
@@ -221,9 +237,16 @@ case class Organisation(
   ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
     (getAccount(fromAccount), getAccount(toAccount)) match
       case (Some(from), Some(to)) => transfer(amount, from, to, config)
-      case (None, _)              => Left(TransferError.INVALID_ACCOUNT)
-      case (Some(_), None)        => Left(TransferError.INVALID_ACCOUNT)
+      case _                      => Left(TransferError.INVALID_ACCOUNT)
 
+  /**
+   * Transfer between accounts in the organisation. This function is the entry point for transferring between accounts.
+   * @param amount the amount to transfer.
+   * @param fromAccount the account to transfer from.
+   * @param toAccount the account to transfer to.
+   * @param config the configuration of the organisation.
+   * @return either an error or the updated organisation and email messages.
+   */
   def transfer(
     amount: Money,
     fromAccount: Account,
@@ -284,3 +307,6 @@ case class Organisation(
 
   def totalEarmarkedBalance(earmarking: String): Money =
     accounts.map(_._2.totalEarmarkedBalance(earmarking)).sum
+
+  def getDonations(donorId: String): Seq[Donation] =
+    donations.values.filter(_.donorId == donorId).toSeq

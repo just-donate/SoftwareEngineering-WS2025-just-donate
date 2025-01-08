@@ -3,17 +3,17 @@ package com.just.donate.api
 import cats.effect.*
 import com.just.donate.config.Config
 import com.just.donate.models.errors.DonationError
-import com.just.donate.models.{Donation, Donor, Organisation}
+import com.just.donate.models.{Donation, Donor, Organisation, StatusUpdate}
 import com.just.donate.notify.IEmailService
 import com.just.donate.store.Store
-import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
+import com.just.donate.utils.Money
+import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisationOps, loadOrganisation}
 import io.circe.*
 import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
-import com.just.donate.utils.Money
 
 import java.time.LocalDateTime
 
@@ -40,8 +40,20 @@ object DonationRoute:
           case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
         }
 
-      case GET -> Root / donorId =>
-        Ok()
+      case GET -> Root / organisationId / "donor" / donorId =>
+        loadOrganisation[DonationListResponse](organisationId)(store): organisation =>
+          DonationListResponse(organisation
+            .getDonations(donorId)
+            .map: donation =>
+              DonationResponse(
+                donation.id,
+                donation.amountTotal,
+                donation.donationDate,
+                donation.earmarking.getOrElse(""),
+                donation.statusUpdates.map: status =>
+                  StatusResponse(status.status.toString, status.date, status.description)
+              )
+          )
 
   private val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
     f"""Thank you for your donation, to track your progress visit
@@ -75,24 +87,20 @@ object DonationRoute:
 
   // Define the Status case class to represent each status update
   private[api] case class StatusResponse(
-     status: String,
-     date: LocalDateTime,
-     description: String
+    status: String,
+    date: LocalDateTime,
+    description: String
   )
 
   // Define the Donation case class to represent each donation
   private[api] case class DonationResponse(
-     donationId: String,
-     amount: Money,
-     currency: String,
-     donorEmail: String,
-     date: LocalDateTime,
-     earmarking: String,
-     status: List[StatusResponse]
+    donationId: String,
+    amount: Money,
+    date: LocalDateTime,
+    earmarking: String,
+    status: Seq[StatusResponse]
   )
-    
+
   private[api] case class DonationListResponse(
-     donations: List[DonationResponse]
+    donations: Seq[DonationResponse]
   )
-
-

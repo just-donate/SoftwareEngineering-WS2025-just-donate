@@ -13,6 +13,7 @@ export interface Theme {
   helpUrl: string;
   statusColors: {
     donated: string;
+    pending: string;
     inTransit: string;
     allocated: string;
     used: string;
@@ -35,6 +36,7 @@ export const themes: Record<string, Theme> = {
     helpUrl: '/help',
     statusColors: {
       donated: 'bg-green-500',
+      pending: 'bg-yellow-500',
       inTransit: 'bg-yellow-500',
       allocated: 'bg-blue-500',
       used: 'bg-purple-500',

@@ -11,6 +11,7 @@ case class StatusUpdate(
 object StatusUpdate:
 
   enum Status:
+    case DONATED
     case PENDING
     case IN_PROGRESS
     case COMPLETE

@@ -1,18 +1,25 @@
+
+
 export interface DonationStatus {
   status: string;
   date: string;
   description: string;
 }
 
-export interface Donation {
-  id: string;
+export interface Money {
   amount: number;
-  currency: string;
-  ngo: string;
+}
+
+export interface Donation {
+  donationId: string;
+  amount: Money;
   date: string;
-  project: string;
+  earmarking: string;
   status: DonationStatus[];
-  donorEmail: string;
+}
+
+export interface Donations {
+  donations: Donation[];
 }
 
 export interface Organization {

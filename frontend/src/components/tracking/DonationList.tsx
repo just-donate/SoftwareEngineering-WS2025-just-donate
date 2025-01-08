@@ -13,14 +13,14 @@ interface DonationListProps {
 export const DonationList: React.FC<DonationListProps> = ({ donations }) => {
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null);
   const { theme } = useTheme();
-
+  console.log(donations);
   return (
     <div className={theme.font}>
       <h2 className={`text-2xl font-bold mb-4 ${theme.text}`}>Your Donations</h2>
       <div className="space-y-4">
         {donations.map((donation) => (
           <DonationItem 
-            key={donation.id} 
+            key={donation.donationId} 
             donation={donation} 
             onClick={() => setSelectedDonation(donation)}
           />

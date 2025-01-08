@@ -13,6 +13,8 @@ export const DonationItem: React.FC<DonationItemProps> = ({ donation, onClick })
   const { theme } = useTheme();
   const latestStatus = donation.status[donation.status.length - 1];
 
+  console.log(latestStatus);
+
   return (
     <div 
       className={`${theme.card} rounded-lg shadow-lg p-4 mb-4 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl`}
@@ -24,9 +26,9 @@ export const DonationItem: React.FC<DonationItemProps> = ({ donation, onClick })
             <h3 className={`text-xl font-semibold ${theme.text} mr-4`}>{donation.ngo}</h3>
             <span className={`text-sm ${theme.textLight}`}>{donation.date}</span>
           </div>
-          <p className={`${theme.textLight} mt-1`}>{donation.project}</p>
+          <p className={`${theme.textLight} mt-1`}>{donation.earmarking}</p>
           <div className="flex items-center mt-2">
-            <span className={`text-base font-bold ${theme.text} mr-4`}>{donation.amount} {donation.currency}</span>
+            <span className={`text-base font-bold ${theme.text} mr-4`}>{donation.amount.amount} Euro</span>
             <span className={`text-sm ${theme.statusColors[latestStatus.status.toLowerCase() as keyof typeof theme.statusColors]} px-2 py-1 rounded-full text-white`}>
               {latestStatus.status}
             </span>
