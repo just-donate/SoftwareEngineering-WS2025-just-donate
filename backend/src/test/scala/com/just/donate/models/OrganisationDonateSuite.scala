@@ -16,8 +16,8 @@ class OrganisationDonateSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
@@ -31,8 +31,8 @@ class OrganisationDonateSuite extends FunSuite:
 
     newRoots = newRoots.addEarmarking("Education")
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("200.00"), "Education")
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("200.00"), "Education")
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
@@ -53,11 +53,11 @@ class OrganisationDonateSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
     val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
-    val donationPart2 = Donation(donor2.id, BigDecimal("150.00"))
-    newRoots = newRoots.donate(donor2, donationPart2, "Bank").toOption.get
+    val (donation2, donationPart2) = Donation(donor2.id, BigDecimal("150.00"))
+    newRoots = newRoots.donate(donor2, donationPart2, donation2, "Bank").toOption.get
 
     val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
@@ -74,11 +74,11 @@ class OrganisationDonateSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val donationPart = Donation(donor.id, BigDecimal("100.00"))
-    newRoots = newRoots.donate(donor, donationPart, "Paypal").toOption.get
+    val (donation, donationPart) = Donation(donor.id, BigDecimal("100.00"))
+    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
     val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
-    val donationPart2 = Donation(donor2.id, BigDecimal("150.00"))
-    newRoots = newRoots.donate(donor2, donationPart2, "Bank").toOption.get
+    val (donation2, donationPart2) = Donation(donor2.id, BigDecimal("150.00"))
+    newRoots = newRoots.donate(donor2, donationPart2, donation2, "Bank").toOption.get
 
     val paypalOption = newRoots.getAccount("Paypal")
     val paypal = paypalOption.getOrElse(fail("Paypal account not found"))
@@ -92,8 +92,8 @@ class OrganisationDonateSuite extends FunSuite:
 
     // Adding donation to an account with incoming flows
     val donor3 = Donor(newRoots.getNewDonorId, "Donor3", "donor3@example.org")
-    val donationPart3 = Donation(donor3.id, BigDecimal("200.00"))
-    newRoots = newRoots.donate(donor3, donationPart3, "Kenya").toOption.get
+    val (donation3, donationPart3) = Donation(donor3.id, BigDecimal("200.00"))
+    newRoots = newRoots.donate(donor3, donationPart3, donation3, "Kenya").toOption.get
 
     val kenyaOption = newRoots.getAccount("Kenya")
     val kenya = kenyaOption.getOrElse(fail("Kenya account not found"))

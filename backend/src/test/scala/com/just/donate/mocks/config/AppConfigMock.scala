@@ -1,8 +1,9 @@
 package com.just.donate.mocks.config
 
-import com.just.donate.config.Config
+import com.just.donate.config.{AppEnvironment, Config}
 
 class AppConfigMock(
+  val environment: AppEnvironment = AppEnvironment.DEVELOPMENT,
   val frontendUrl: String = "",
   val mongoUri: String = "",
   val mailSmtpHost: String = "",

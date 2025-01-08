@@ -8,9 +8,11 @@ import java.util.UUID
  * Represents a single donation. A donation can be split into multiple parts, e.g. for different purposes.
  * The donation is always made by a donor and has a date when it was made.
  */
-case class Donation(
+case class Donation (
   donorId: String,
   donationDate: LocalDateTime,
+  amountRemaining: BigDecimal,
+  amountTotal: BigDecimal,
   earmarking: Option[String] = None,
   id: String = UUID.randomUUID().toString
 ):
@@ -23,7 +25,7 @@ object Donation:
     apply(donorId, amount, LocalDateTime.now)
 
   def apply(donorId: String, amount: BigDecimal, donationDate: LocalDateTime): (Donation, DonationPart) =
-    val donation = Donation(donorId, donationDate)
+    val donation = Donation(donorId, donationDate, amount, amount)
     (donation, DonationPart(amount, donation.id, donationDate))
 
   def apply(donorId: String, amount: BigDecimal, earmarking: String): (Donation, DonationPart) =
@@ -35,5 +37,5 @@ object Donation:
     earmarking: String,
     donationDate: LocalDateTime
   ): (Donation, DonationPart) =
-    val donation = Donation(donorId, donationDate, Some(earmarking))
+    val donation = Donation(donorId, donationDate, amount, amount, Some(earmarking))
     (donation, DonationPart(amount, donation.id, donationDate))

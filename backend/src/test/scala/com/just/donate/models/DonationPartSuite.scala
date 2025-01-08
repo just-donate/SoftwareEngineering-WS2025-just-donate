@@ -5,18 +5,18 @@ import munit.FunSuite
 class DonationPartSuite extends FunSuite:
 
   test("correctly initialize with given amounts") {
-    val donationPart = Donation("Donor", BigDecimal(100))
+    val (donation, donationPart) = Donation("Donor", BigDecimal(100))
     assertEquals(donationPart.amount, BigDecimal(100))
 
-    val donationPart2 = Donation("Donor", BigDecimal(0))
+    val (donation2, donationPart2) = Donation("Donor", BigDecimal(0))
     assertEquals(donationPart2.amount, BigDecimal(0))
 
-    val donationPart3 = Donation("Donor", BigDecimal(-100))
+    val (donation3, donationPart3) = Donation("Donor", BigDecimal(-100))
     assertEquals(donationPart3.amount, BigDecimal(-100))
   }
 
   test("handle splitting with zero amount correctly") {
-    val donationPart = Donation("Donor", BigDecimal(100))
+    val (donation, donationPart) = Donation("Donor", BigDecimal(100))
     val split = donationPart.splitOf(BigDecimal(0))
 
     assert(split.split.isEmpty, "There should be no split DonationPart for zero amount")
@@ -26,7 +26,7 @@ class DonationPartSuite extends FunSuite:
   }
 
   test("split a partial amount correctly") {
-    val donationPart = Donation("Donor", BigDecimal(100))
+    val (donation, donationPart) = Donation("Donor", BigDecimal(100))
     val split = donationPart.splitOf(BigDecimal(50))
 
     assert(split.split.isDefined, "There should be a split DonationPart")
@@ -37,7 +37,7 @@ class DonationPartSuite extends FunSuite:
   }
 
   test("split the exact amount correctly") {
-    val donationPart = Donation("Donor", BigDecimal(100))
+    val (donation, donationPart) = Donation("Donor", BigDecimal(100))
     val split = donationPart.splitOf(BigDecimal(100))
 
     assert(split.split.isDefined, "Splitting the exact amount should yield a new DonationPart")
@@ -47,7 +47,7 @@ class DonationPartSuite extends FunSuite:
   }
 
   test("handle splitting more than available amount correctly") {
-    val donationPart = Donation("Donor", BigDecimal(100))
+    val (donation, donationPart)  = Donation("Donor", BigDecimal(100))
     val split = donationPart.splitOf(BigDecimal(150))
 
     // The split portion is as large as the donation itself
@@ -60,7 +60,7 @@ class DonationPartSuite extends FunSuite:
   }
 
   test("throw an IllegalStateException when splitting from an empty donation part") {
-    val donationPart = Donation("Donor", BigDecimal(0))
+    val (donation, donationPart) = Donation("Donor", BigDecimal(0))
     intercept[IllegalStateException] {
       donationPart.splitOf(BigDecimal(100))
     }
