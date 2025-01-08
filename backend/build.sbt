@@ -1,6 +1,7 @@
+
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
-ThisBuild / scalaVersion := "3.3.3"
+ThisBuild / scalaVersion := "3.3.4"
 
 ThisBuild / parallelExecution := false
 
@@ -21,9 +22,8 @@ libraryDependencies ++= Seq(
   "org.typelevel"                % "log4cats-core_3"              % "2.7.0",
   "org.slf4j"                    % "slf4j-simple"                  % "2.0.16",
 
-  // MongoDB (note: you have two versions in your Gradle build)
+  // MongoDB
   "org.mongodb.scala"            % "mongo-scala-driver_2.13"      % "5.2.1",
-  "org.mongodb.scala"            % "mongo-scala-driver_2.13"      % "4.10.0",
 
   // Circe
   "io.circe"                     % "circe-core_3"                 % "0.14.10",
