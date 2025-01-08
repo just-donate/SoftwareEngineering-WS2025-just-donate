@@ -11,15 +11,8 @@ case class Account private (
 
   def this(name: String) = this(name, Seq.empty, DonationQueue(name, ReservableQueue(name)))
 
-  def donate(donor: String, amount: BigDecimal): (Boolean, Account) =
-    val donation: DonationPart = Donation(donor, amount)
-    donate(donation)
-
   def donate(donation: DonationPart): (Boolean, Account) =
     (true, copy(unboundDonations = unboundDonations.add(donation)))
-
-  def donate(donor: String, amount: BigDecimal, earmarking: String): (Boolean, Account) =
-    donate(Donation(donor, amount, earmarking), earmarking)
 
   // TODO: use error instead of bool
   def donate(donation: DonationPart, earmarking: String): (Boolean, Account) =
@@ -85,15 +78,17 @@ case class Account private (
       case Some(donationParts) => (donationParts, copy(boundDonations = updatedFrom))
       case None                => throw new IllegalArgumentException(s"Earmarking $earmarking does not exist")
 
-  private def findQueueWithOldestDonation: (Option[String], DonationQueue) =
+  private def findQueueWithOldestDonation(using donationGetter: DonationGetter): (Option[String], DonationQueue) =
     val allQueues = (None, unboundDonations) +: boundDonations.map(t => (Some(t._1), t._2))
     allQueues
       .filter(_._2.donationQueue._2.nonEmpty)
-      .minByOption(_._2.donationQueue._2.head.value.donation.donationDate)
+      .minByOption(_._2.donationQueue._2.head.value.donation.get.donationDate)
       // TODO: change to actual error handling
       .getOrElse(throw new IllegalStateException("No donations available in any queue"))
 
-  private[models] def pull(amount: BigDecimal): (BigDecimal, DonationPart, Option[String], Account) =
+  private[models] def pull(amount: BigDecimal)(using
+    donationGetter: DonationGetter
+  ): (BigDecimal, DonationPart, Option[String], Account) =
     // TODO: change to actual error handling
     if totalBalance < amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
 

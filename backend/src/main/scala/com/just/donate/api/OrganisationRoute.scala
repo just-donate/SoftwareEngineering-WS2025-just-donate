@@ -44,7 +44,9 @@ object OrganisationRoute:
         loadAndSaveOrganisation(organisationId)(store)(_.removeEarmarking(earmarking))
 
       case GET -> Root / organisationId / "earmarking" / "list" =>
-        loadOrganisation(organisationId)(store)(_.accounts.headOption.map(_.boundDonations.map(_._1)).getOrElse(Seq()))
+        loadOrganisation(organisationId)(store)(
+          _.accounts.headOption.map(_._2.boundDonations.map(_._1)).getOrElse(Seq())
+        )
 
       case req @ POST -> Root / organisationId / "account" =>
         for
@@ -56,7 +58,7 @@ object OrganisationRoute:
         loadAndSaveOrganisation(organisationId)(store)(_.removeAccount(accountName))
 
       case GET -> Root / organisationId / "account" / "list" =>
-        loadOrganisation(organisationId)(store)(_.accounts.map(_.name))
+        loadOrganisation(organisationId)(store)(_.accounts.map(_._2.name))
 
   case class RequestOrganisation(name: String)
 
@@ -67,3 +69,4 @@ object OrganisationRoute:
   private[api] case class RequestAccount(name: String, balance: BigDecimal)
 
   private[api] case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])
+

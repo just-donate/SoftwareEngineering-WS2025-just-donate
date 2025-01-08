@@ -52,13 +52,13 @@ object DonationRoute:
     val donor = existingDonor.getOrElse(
       Donor(org.getNewDonorId, requestDonation.donorName, requestDonation.donorEmail)
     )
-    val donationPart = requestDonation.earmarking match
+    val (donation, donationPart) = requestDonation.earmarking match
       case Some(earmarking) => Donation(donor.id, requestDonation.amount, earmarking)
       case None             => Donation(donor.id, requestDonation.amount)
 
-    org.donate(donor, donationPart, accountName) match
+    org.donate(donor, donationPart, donation, accountName) match
       case Left(error)   => (org, Left(error))
-      case Right(newOrg) => (newOrg, Right(donationPart.donation.donorId))
+      case Right(newOrg) => (newOrg, Right(donor.id))
 
   private[api] case class RequestDonation(
     donorName: String,
