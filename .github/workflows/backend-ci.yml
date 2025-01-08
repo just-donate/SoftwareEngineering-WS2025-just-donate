@@ -12,51 +12,42 @@ jobs:
   build-and-test:
     runs-on: ubuntu-22.04
 
-    strategy:
-      matrix:
-        java-version: [21]          # Specify the Java version(s) you want to test against
-        sbt-version: [1.10.6]       # Specify your sbt version
-        scala-version: [3.3.4]       # Specify your Scala version
-
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout the Repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up Java
-      - name: Set up JDK ${{ matrix.java-version }}
+      # Step 2: Set up JDK 21
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java-version }}
-          distribution: 'adopt'      # You can use 'temurin', 'zulu', etc., based on your preference
+          java-version: '21'               # Use Java 17 for consistency with your Dockerfile
+          distribution: 'temurin'          # AdoptOpenJDK is now Eclipse Temurin
 
-      # Step 3: Cache sbt, Ivy, and Coursier dependencies
-      - name: Cache sbt and Ivy dependencies
+      # Step 3: Set up sbt
+      - name: Set up sbt
+        uses: cblecker/setup-sbt@v1
+        with:
+          sbt-version: '1.10.6'            # Specify your sbt version
+
+      # Step 4: Cache sbt and Coursier Dependencies
+      - name: Cache sbt and Coursier dependencies
         uses: actions/cache@v3
         with:
           path: |
             ~/.ivy2/cache
             ~/.sbt
             ~/.coursier
-          key: ${{ runner.os }}-sbt-${{ matrix.sbt-version }}-${{ hashFiles('**/build.sbt') }}-${{ hashFiles('**/project/**') }}
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}-${{ hashFiles('**/project/**') }}
           restore-keys: |
-            ${{ runner.os }}-sbt-${{ matrix.sbt-version }}-
             ${{ runner.os }}-sbt-
 
-      # Step 4: Set up Scala and sbt
-      - name: Set up Scala and sbt
-        uses: olafurpg/setup-scala@v1
-        with:
-          java-version: ${{ matrix.java-version }}
-          sbt-version: ${{ matrix.sbt-version }}
-          scala-version: ${{ matrix.scala-version }}
-
-      # Step 5: Build the project
-      - name: Build
+      # Step 5: Build the Project
+      - name: Build Project
         working-directory: backend
         run: sbt clean compile
 
-      # Step 6: Run tests
+      # Step 6: Run Tests
       - name: Run Tests
         working-directory: backend
         run: sbt test
