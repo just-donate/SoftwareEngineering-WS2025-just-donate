@@ -99,9 +99,26 @@ case class Organisation(
 
     val newAccounts = accounts.updated(account.name, updatedAccount)
     val expense = Expense(description, amount, earmarking, donationParts)
-    val updatedOrg = copy(accounts = newAccounts, expenses = expenses.appended(expense))
+    val newDonations = getDonationsAfterWithdrawal(donationParts) match
+      case Left(error)  => return Left(error)
+      case Right(value) => value
+
+    val updatedOrg = copy(accounts = newAccounts, donations = newDonations, expenses = expenses.appended(expense))
 
     updatedOrg.getNotificationsForUtilizedDonations(donationParts, config).map(messages => (updatedOrg, messages))
+
+  private def getDonationsAfterWithdrawal(
+    donationParts: Seq[DonationPart]
+  ): Either[WithdrawError, Map[String, Donation]] =
+    donationParts.headOption match
+      case None => Right(donations)
+      case Some(donationPart) =>
+        getDonationsAfterWithdrawal(
+          donationParts.tail
+        ).map(_.updatedWith(donationPart.donationId)(optDonation =>
+          val donation = optDonation.get
+          Some(donation.copy(amountRemaining = donation.amountRemaining - donationPart.amount))
+        ))
 
   private def getNotificationsForUtilizedDonations(
     usedDonationParts: Seq[DonationPart],
@@ -122,7 +139,7 @@ case class Organisation(
         val trackingId = donor.id
         val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
 
-        emailMessages.appended(
+        emailMessages = emailMessages.appended(
           EmailMessage(
             donor.email,
             f"""Your recent donation to ${name} has been fully utilized.
