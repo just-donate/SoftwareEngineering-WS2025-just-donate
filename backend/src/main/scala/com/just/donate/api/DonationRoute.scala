@@ -37,6 +37,7 @@ object DonationRoute:
         yield response).handleErrorWith {
           case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
         }
+
   private val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
     f"""Thank you for your donation, to track your progress visit
        |${linkWithId}

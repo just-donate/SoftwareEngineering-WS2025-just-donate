@@ -39,7 +39,7 @@ object TransferRoute:
           case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
         }
 
-  private case class RequestTransfer(
+  private[api] case class RequestTransfer(
     fromAccount: String,
     toAccount: String,
     amount: BigDecimal

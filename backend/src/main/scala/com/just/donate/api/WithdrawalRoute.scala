@@ -19,7 +19,7 @@ object WithdrawalRoute:
     HttpRoutes.of[IO]:
 
       case req @ POST -> Root / organisationId / "account" / accountName =>
-        for
+        (for
           donation <- req.as[RequestWithdrawal]
           emailMessages <- loadAndSaveOrganisationOps(organisationId)(store)(org =>
             org.withdrawal(donation.amount, accountName, donation.description, donation.earmarking, config) match
@@ -33,6 +33,8 @@ object WithdrawalRoute:
               emailMessages
                 .map(message => emailService.sendEmail(message.targetAddress, message.message, message.subject))
                 .sequence >> Ok()
-        yield response
+        yield response).handleErrorWith {
+          case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
+        }
 
-  private case class RequestWithdrawal(amount: BigDecimal, description: String, earmarking: Option[String])
+  private[api] case class RequestWithdrawal(amount: BigDecimal, description: String, earmarking: Option[String])
