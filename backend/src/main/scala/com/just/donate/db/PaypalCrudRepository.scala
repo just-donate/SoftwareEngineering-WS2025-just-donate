@@ -3,12 +3,8 @@ package com.just.donate.db
 import cats.effect.IO
 import com.just.donate.models.PaypalIPN
 import org.mongodb.scala.*
-import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.bson.{BsonObjectId, BsonString, ObjectId}
+import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.model.*
-import org.mongodb.scala.model.Filters.*
-import org.mongodb.scala.model.Projections.*
-import org.mongodb.scala.model.Updates.*
 
 import scala.jdk.CollectionConverters.*
 
@@ -20,17 +16,17 @@ object MongoOps:
 /**
  * Implementation of CrudRepository for PayPal IPN.
  */
-class PaypalRepository(database: MongoDatabase) extends Repository[PaypalIPN]:
+class PaypalCrudRepository(database: MongoDatabase) extends CrudRepository[PaypalIPN]:
 
   import MongoOps.*
 
   // The collection name for PayPal IPN documents
-  private val collection: MongoCollection[Document] = database.getCollection("paypal_ipn")
+  protected lazy val collection: MongoCollection[Document] = database.getCollection("paypal_ipn")
 
   /**
    * Insert a new IPN document
    */
-  override def create(ipn: PaypalIPN): IO[Unit] =
+  override def save(ipn: PaypalIPN): IO[Unit] =
     val doc = Document(
       "_id" -> ipn._id,
       "payload" -> ipn.payload
@@ -79,8 +75,20 @@ class PaypalRepository(database: MongoDatabase) extends Repository[PaypalIPN]:
   /**
    * Delete a document by its _id. Return true if something was deleted.
    */
-  override def delete(id: String): IO[Boolean] =
+  override def deleteById(id: String): IO[Unit] =
     val filter = Filters.eq("_id", new ObjectId(id))
     collection.deleteOne(filter).toIO.map { result =>
       result.nonEmpty
     }
+
+  /**
+   * Delete all IPN documents
+   */
+  override def deleteAll(): IO[Unit] = ???
+
+  /**
+   * Save multiple entities
+   * @param entities The entities to save
+   *  @return A no-result IO, signifying the side effect of saving the entities
+   */
+    override def saveAll(entities: List[PaypalIPN]): IO[Unit] = ???

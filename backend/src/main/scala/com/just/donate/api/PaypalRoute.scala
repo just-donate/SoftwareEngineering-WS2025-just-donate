@@ -1,14 +1,14 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import com.just.donate.db.PaypalRepository
+import com.just.donate.db.PaypalCrudRepository
 import com.just.donate.models.PaypalIPN
 import org.http4s.dsl.io.*
 import org.http4s.{HttpRoutes, UrlForm}
 
 object PaypalRoute:
 
-  def paypalRoute: PaypalRepository => HttpRoutes[IO] = (repo: PaypalRepository) =>
+  def paypalRoute: PaypalCrudRepository => HttpRoutes[IO] = (repo: PaypalCrudRepository) =>
     HttpRoutes.of[IO]:
       case GET -> Root =>
         // Maybe list everything from DB, or just memory buffer:
@@ -25,7 +25,7 @@ object PaypalRoute:
 
           // Create a new PaypalIPN entity and insert into DB
           newIpn = PaypalIPN(payload = formData.toString())
-          _ <- repo.create(newIpn)
+          _ <- repo.save(newIpn)
 
           resp <- Ok("IPN Payload received and stored in MongoDB")
         yield resp
