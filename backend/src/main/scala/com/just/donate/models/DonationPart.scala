@@ -25,5 +25,5 @@ case class DonationPart(amount: BigDecimal, donationId: String, donationDate: Lo
   override def compare(x: DonationPart, y: DonationPart): Int =
     x.donationDate.compareTo(y.donationDate)
 
-  def donation(using donationGetter: DonationGetter) =
+  def donation(using donationGetter: DonationGetter): Option[Donation] =
     donationGetter(donationId)

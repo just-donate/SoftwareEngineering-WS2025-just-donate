@@ -3,6 +3,7 @@ package com.just.donate.models
 import java.time.LocalDateTime
 import java.util
 import java.util.UUID
+import scala.collection.mutable
 
 /**
  * Represents a single donation. A donation can be split into multiple parts, e.g. for different purposes.
