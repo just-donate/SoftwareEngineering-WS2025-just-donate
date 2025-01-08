@@ -48,4 +48,3 @@ class EmailService(val config: Config) extends IEmailService:
           println("Email sent successfully")
       }
     yield {}
-

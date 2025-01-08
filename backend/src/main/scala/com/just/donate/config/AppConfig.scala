@@ -1,6 +1,6 @@
 package com.just.donate.config
 
-import com.typesafe.config.{ Config as TypesafeConfig, ConfigFactory }
+import com.typesafe.config.{ConfigFactory, Config as TypesafeConfig}
 
 import scala.util.Properties
 
@@ -36,11 +36,6 @@ case class AppConfig(private val conf: TypesafeConfig, val environment: AppEnvir
     then Some(conf.getString(path))
     else Properties.envOrNone(path)
 
-  private def getOptionalInt(path: String): Option[Int] =
-    if conf.hasPath(path)
-    then Some(conf.getInt(path))
-    else Properties.envOrNone(path).map(_.toInt)
-
   private def expected[A](getter: String => Option[A]) =
     (path: String) =>
       getter(path).getOrElse(
@@ -48,3 +43,8 @@ case class AppConfig(private val conf: TypesafeConfig, val environment: AppEnvir
           f"Expected the config option ${path} to be set in the config file or as an environment variable."
         )
       )
+
+  private def getOptionalInt(path: String): Option[Int] =
+    if conf.hasPath(path)
+    then Some(conf.getInt(path))
+    else Properties.envOrNone(path).map(_.toInt)

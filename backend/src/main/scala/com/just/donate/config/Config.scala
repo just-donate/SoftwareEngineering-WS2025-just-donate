@@ -8,4 +8,3 @@ trait Config:
   val mailSmtpPort: Int
   val mailAddress: String
   val mailPassword: String
-

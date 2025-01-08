@@ -6,5 +6,5 @@ case class Expense(
   earMarking: Option[String] = None,
   paidBy: Seq[DonationPart] = Seq.empty
 ):
-  
+
   def isBound: Boolean = earMarking.isDefined

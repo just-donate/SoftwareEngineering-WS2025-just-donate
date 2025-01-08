@@ -9,7 +9,7 @@ import scala.concurrent.Future
  * @tparam E The type of entity (e.g. Organisation, Donation, etc.)
  * 28.12.2024
  */
-trait Repository[E] {
+trait Repository[E]:
   /**
    * Create a new entity
    * @param entity The entity to create
@@ -44,4 +44,3 @@ trait Repository[E] {
    * @return A Future containing a boolean indicating whether the deletion was successful
    */
   def delete(id: String): IO[Boolean]
-}

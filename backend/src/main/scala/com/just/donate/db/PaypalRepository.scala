@@ -5,10 +5,10 @@ import com.just.donate.models.PaypalIPN
 import org.mongodb.scala.*
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.bson.{BsonObjectId, BsonString, ObjectId}
-import org.mongodb.scala.model.Filters.*
-import org.mongodb.scala.model.Updates.*
-import org.mongodb.scala.model.Projections.*
 import org.mongodb.scala.model.*
+import org.mongodb.scala.model.Filters.*
+import org.mongodb.scala.model.Projections.*
+import org.mongodb.scala.model.Updates.*
 
 import scala.jdk.CollectionConverters.*
 
@@ -22,7 +22,7 @@ object MongoOps:
  */
 class PaypalRepository(database: MongoDatabase) extends Repository[PaypalIPN]:
 
-  import MongoOps._
+  import MongoOps.*
 
   // The collection name for PayPal IPN documents
   private val collection: MongoCollection[Document] = database.getCollection("paypal_ipn")
@@ -32,7 +32,7 @@ class PaypalRepository(database: MongoDatabase) extends Repository[PaypalIPN]:
    */
   override def create(ipn: PaypalIPN): IO[Unit] =
     val doc = Document(
-      "_id"     -> ipn._id,
+      "_id" -> ipn._id,
       "payload" -> ipn.payload
     )
     collection.insertOne(doc).toIO.map(_ => ())
@@ -44,6 +44,16 @@ class PaypalRepository(database: MongoDatabase) extends Repository[PaypalIPN]:
     collection.find().toIO.map { docs =>
       docs.toList.map(docToPaypalIPN)
     }
+
+  /**
+   * Helper to convert a Document to a PaypalIPN case class
+   */
+  private def docToPaypalIPN(doc: Document): PaypalIPN =
+    PaypalIPN(
+      // doc("_id") can be cast to ObjectId
+      _id = doc.getObjectId("_id"),
+      payload = doc.getString("payload")
+    )
 
   /**
    * Find a single IPN document by its _id (as String)
@@ -60,7 +70,7 @@ class PaypalRepository(database: MongoDatabase) extends Repository[PaypalIPN]:
    * Update an existing IPN document by _id. Return true if something was updated.
    */
   override def update(id: String, ipn: PaypalIPN): IO[Boolean] =
-    val filter    = Filters.eq("_id", new ObjectId(id))
+    val filter = Filters.eq("_id", new ObjectId(id))
     val updateDoc = Updates.set("payload", ipn.payload)
     collection.updateOne(filter, updateDoc).toIO.map { result =>
       result.nonEmpty
@@ -74,15 +84,3 @@ class PaypalRepository(database: MongoDatabase) extends Repository[PaypalIPN]:
     collection.deleteOne(filter).toIO.map { result =>
       result.nonEmpty
     }
-
-  /**
-   * Helper to convert a Document to a PaypalIPN case class
-   */
-  private def docToPaypalIPN(doc: Document): PaypalIPN =
-    PaypalIPN(
-      // doc("_id") can be cast to ObjectId
-      _id     = doc.getObjectId("_id"),
-      payload = doc.getString("payload")
-    )
-
-

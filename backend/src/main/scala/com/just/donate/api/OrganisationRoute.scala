@@ -2,8 +2,8 @@ package com.just.donate.api
 
 import cats.effect.*
 import com.just.donate.models.Organisation
-import com.just.donate.store.{ FileStore, Store }
-import com.just.donate.utils.RouteUtils.{ loadAndSaveOrganisation, loadOrganisation }
+import com.just.donate.store.Store
+import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisation, loadOrganisation}
 import io.circe.*
 import io.circe.generic.auto.*
 import org.http4s.*
@@ -69,4 +69,3 @@ object OrganisationRoute:
   private[api] case class RequestAccount(name: String, balance: BigDecimal)
 
   private[api] case class RequestDonation(donor: String, amount: BigDecimal, earmarking: Option[String])
-

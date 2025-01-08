@@ -6,11 +6,10 @@ import io.circe.generic.auto.*
 import io.circe.jawn
 import io.circe.syntax.*
 
-import java.nio.file.{ Files, Paths }
+import java.nio.file.{Files, Paths}
 
 object FileStore extends Store:
   private val storePath = Paths.get("store")
-  private def storePathForId(id: String) = storePath.resolve(s"$id.json")
 
   override def init(): Unit = Files.createDirectories(storePath)
 
@@ -32,6 +31,8 @@ object FileStore extends Store:
           println(f"encountered error while decoding: ${e}")
           throw e
     else IO.pure(None)
+
+  private def storePathForId(id: String) = storePath.resolve(s"$id.json")
 
   override def list(): IO[List[String]] =
     if Files.exists(storePath) then

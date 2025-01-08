@@ -3,13 +3,12 @@ package com.just.donate.models
 import java.time.LocalDateTime
 import java.util
 import java.util.UUID
-import scala.collection.mutable
 
 /**
  * Represents a single donation. A donation can be split into multiple parts, e.g. for different purposes.
  * The donation is always made by a donor and has a date when it was made.
  */
-case class Donation (
+case class Donation(
   donorId: String,
   donationDate: LocalDateTime,
   amountRemaining: BigDecimal,

@@ -1,6 +1,8 @@
 package com.just.donate.models
 
-import com.just.donate.utils.structs.{ Split, Splittable }
+import com.just.donate.models.Types.DonationGetter
+import com.just.donate.utils.structs.{Split, Splittable}
+
 import java.time.LocalDateTime
 
 // TODO: when encoding and decoding json, make sure the connection between the donation and it's parts isn't lost

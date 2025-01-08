@@ -1,12 +1,11 @@
 package com.just.donate.models
 
 import com.just.donate.config.Config
-import com.just.donate.notify.IEmailService
-import com.just.donate.utils.CollectionUtils.updatedReturn
+import com.just.donate.models.Types.DonationGetter
+import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
+import com.just.donate.notify.EmailMessage
 
 import java.util.UUID
-import org.http4s.headers.`Cross-Origin-Resource-Policy`.SameSite
-import com.just.donate.notify.EmailMessage
 
 case class Organisation(
   name: String,
@@ -15,9 +14,6 @@ case class Organisation(
   expenses: Seq[Expense] = Seq.empty,
   donors: Map[String, Donor] = Map.empty
 ):
-  def getAccount(name: String): Option[Account] =
-    accounts.get(name)
-
   def addAccount(name: String): Organisation =
     addAccount(new Account(name))
 
@@ -43,8 +39,9 @@ case class Organisation(
     while donors.contains(newDonorId) do newDonorId = UUID.randomUUID().toString
 
     newDonorId
-
+  
   given DonationGetter = getDonation
+
   def getDonation: DonationGetter = donations.get
 
   def donate(
@@ -87,6 +84,9 @@ case class Organisation(
     getAccount(accountName) match
       case None          => Left(WithdrawError.INVALID_ACCOUNT)
       case Some(account) => withdrawal(amount, account, description, earmarking, config)
+
+  def getAccount(name: String): Option[Account] =
+    accounts.get(name)
 
   def withdrawal(
     amount: BigDecimal,
@@ -232,21 +232,3 @@ case class Organisation(
   def totalEarmarkedBalance(earmarking: String): BigDecimal =
     accounts.map(_._2.totalEarmarkedBalance(earmarking)).sum
 
-enum DonationError(val message: String):
-  case INVALID_ACCOUNT extends DonationError("Account not found")
-  case INVALID_EARMARKING extends DonationError("Earmarking not found")
-
-enum TransferError(val message: String):
-  case INVALID_ACCOUNT extends TransferError("Account not found")
-  case INSUFFICIENT_ACCOUNT_FUNDS extends TransferError("Source account has insufficient funds")
-  case NON_POSITIVE_AMOUNT extends TransferError("Amount has to be positive")
-  case SAME_SOURCE_AND_DESTINATION_ACCOUNT extends TransferError("The source and target accounts are the same")
-  case INVALID_DONOR extends TransferError("Donor not found")
-
-enum WithdrawError(val message: String):
-  case INVALID_ACCOUNT extends WithdrawError("Account not found")
-  case INSUFFICIENT_ACCOUNT_FUNDS extends WithdrawError("Source account has insufficient funds")
-  case INVALID_EARMARKING extends WithdrawError("Earmarking not found")
-  case INVALID_DONOR extends WithdrawError("Donor not found")
-
-type DonationGetter = String => Option[Donation]
