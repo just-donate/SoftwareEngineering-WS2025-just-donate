@@ -10,7 +10,7 @@ interface DonationDetailsProps {
 }
 
 export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onClose }) => {
-  const position = [-3.315502, 40.016154];
+  const position: [number, number] = [-3.315502, 40.016154];
 
   // Placeholder images
   const images = [
