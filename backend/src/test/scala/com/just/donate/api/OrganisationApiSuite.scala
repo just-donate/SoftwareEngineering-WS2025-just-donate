@@ -1,13 +1,17 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import com.just.donate.api.OrganisationRoute.{RequestOrganisation, ResponseOrganisation}
+import com.just.donate.api.DonationRoute.RequestDonation
+import com.just.donate.api.OrganisationRoute.{ RequestOrganisation, ResponseOrganisation }
+import com.just.donate.helper.OrganisationHelper.*
+import com.just.donate.helper.TestHelper.*
+import com.just.donate.mocks.config.AppConfigMock
+import com.just.donate.mocks.notify.EmailServiceMock
 import com.just.donate.store.MemoryStore
 import io.circe.*
 import io.circe.generic.auto.*
-import munit.CatsEffectSuite
+import munit.{ BeforeEach, CatsEffectSuite }
 import org.http4s.*
-import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.implicits.*
@@ -17,10 +21,6 @@ class OrganisationApiSuite extends CatsEffectSuite:
   private val routes = OrganisationRoute.organisationApi(MemoryStore).orNotFound
 
   override def beforeEach(context: BeforeEach): Unit = MemoryStore.init()
-
-  private def organisationId(name: String): String = name.hashCode.toString
-
-  private def uri(paths: String*): Uri = Uri.unsafeFromString(paths.mkString("/"))
 
   test("GET /organisation/list should return OK and an empty JSON list if no organisations exists") {
     val req = Request[IO](Method.GET, uri"/list")
@@ -98,7 +98,7 @@ class OrganisationApiSuite extends CatsEffectSuite:
   test("DELETE /organisation/{id} should really delete the organisation") {
     val orgRequest = RequestOrganisation("Org1")
     val reqCreate = Request[IO](Method.POST, uri"/").withEntity(orgRequest)
-    val reqDelete = Request[IO](Method.DELETE, uri(organisationId("Org1")))
+    val reqDelete = Request[IO](Method.DELETE, testUri(organisationId("Org1")))
     val reqList = Request[IO](Method.GET, uri"/list")
 
     for
@@ -134,7 +134,7 @@ class OrganisationApiSuite extends CatsEffectSuite:
   test("GET /organisation/{id}/account/list should return Ok and all accounts") {
     val orgRequest = RequestOrganisation("Org1")
     val reqCreate = Request[IO](Method.POST, uri"/").withEntity(orgRequest)
-    val reqList = Request[IO](Method.GET, uri(organisationId("Org1"), "account", "list"))
+    val reqList = Request[IO](Method.GET, testUri(organisationId("Org1"), "account", "list"))
 
     for
       respCreate <- routes.run(reqCreate)
