@@ -9,45 +9,17 @@ on:
       - main
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-22.04
+  build:
+
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the Repository
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      # Step 2: Set up JDK 21
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'               # Use Java 17 for consistency with your Dockerfile
-          distribution: 'temurin'          # AdoptOpenJDK is now Eclipse Temurin
-
-      # Step 3: Set up sbt
-      - name: Set up sbt
-        uses: cblecker/setup-sbt@v1
-        with:
-          sbt-version: '1.10.6'            # Specify your sbt version
-
-      # Step 4: Cache sbt and Coursier Dependencies
-      - name: Cache sbt and Coursier dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-            ~/.coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}-${{ hashFiles('**/project/**') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-
-
-      # Step 5: Build the Project
-      - name: Build Project
-        working-directory: backend
-        run: sbt clean compile
-
-      # Step 6: Run Tests
-      - name: Run Tests
-        working-directory: backend
-        run: sbt test
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'sbt'
+    - name: Run tests
+      run: sbt test
