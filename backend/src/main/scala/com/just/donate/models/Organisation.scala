@@ -107,40 +107,36 @@ case class Organisation(
     usedDonationParts: Seq[DonationPart],
     config: Config
   ): Either[WithdrawError, Seq[EmailMessage]] =
-    def singleHelper(donationPart: DonationPart): Either[WithdrawError, Seq[EmailMessage]] =
-      val donationHasUnusedParts = donationPart.donation.get.amountRemaining > BigDecimal(0)
+    var remainingSeq = usedDonationParts
+    var emailMessages: Seq[EmailMessage] = Seq()
 
-      if donationHasUnusedParts then Right(Seq())
-      else
+    while remainingSeq.nonEmpty do
+      val donationPart = remainingSeq.head
+      remainingSeq = remainingSeq.tail
+
+      val donationIsFullyUsed = donationPart.donation.get.amountRemaining == BigDecimal(0)
+      if donationIsFullyUsed then
         val donor = donors.get(donationPart.donation.get.donorId) match
           case None        => return Left(WithdrawError.INVALID_DONOR)
           case Some(donor) => donor
         val trackingId = donor.id
         val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
 
-        Right(
-          Seq(
-            EmailMessage(
-              donor.email,
-              f"""Your recent donation to ${name} has been fully utilized.
-                     |To see more details about the status of your donation, visit the following link
-                     |${trackingLink}
-                     |or enter your tracking id
-                     |${trackingId}
-                     |on our tracking page
-                     |${config.frontendUrl}""".stripMargin,
-              "Just Donate: Your donation has been utilized"
-            )
+        emailMessages.appended(
+          EmailMessage(
+            donor.email,
+            f"""Your recent donation to ${name} has been fully utilized.
+               |To see more details about the status of your donation, visit the following link
+               |${trackingLink}
+               |or enter your tracking id
+               |${trackingId}
+               |on our tracking page
+               |${config.frontendUrl}""".stripMargin,
+            "Just Donate: Your donation has been utilized"
           )
         )
 
-    usedDonationParts match
-      case Seq() => Right(Seq())
-      case donationPart +: tail =>
-        singleHelper(donationPart) match
-          case l @ Left(_) => l
-          case Right(emailMessages) =>
-            getNotificationsForUtilizedDonations(tail, config).map(recMessages => emailMessages :++ recMessages)
+    Right(emailMessages)
 
   def transfer(
     amount: BigDecimal,
