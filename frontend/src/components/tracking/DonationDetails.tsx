@@ -119,7 +119,7 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onCl
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <Marker position={position}>
-                <Popup>A pretty CSS3 popup. <br /> Easily customizable.</Popup>
+                <Popup>Watamu, Kenya</Popup>
               </Marker>
             </MapContainer>
           </div>
