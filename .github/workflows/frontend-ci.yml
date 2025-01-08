@@ -35,6 +35,7 @@ jobs:
           npm install --os=linux --cpu=x64 sharp
           npm install react@rc react-dom@rc leaflet --force
           npm install react-leaflet@next --force
+          npm install -D @types/leaflet
 
       - name: Build the frontend
         working-directory: ./frontend
