@@ -2,7 +2,7 @@ package com.just.donate.models
 
 import com.just.donate.config.Config
 import com.just.donate.models.Types.DonationGetter
-import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
+import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
 import com.just.donate.notify.EmailMessage
 
 import java.util.UUID
@@ -39,7 +39,7 @@ case class Organisation(
     while donors.contains(newDonorId) do newDonorId = UUID.randomUUID().toString
 
     newDonorId
-  
+
   given DonationGetter = getDonation
 
   def getDonation: DonationGetter = donations.get
@@ -101,20 +101,14 @@ case class Organisation(
     val expense = Expense(description, amount, earmarking, donationParts)
     val updatedOrg = copy(accounts = newAccounts, expenses = expenses.appended(expense))
 
-    // TODO: change the datastructure to simpify this checking process
+    updatedOrg.getNotificationsForUtilizedDonations(donationParts, config).map(messages => (updatedOrg, messages))
 
-    def singleHelper(donationPart: DonationPart, account: Account): Either[WithdrawError, Seq[EmailMessage]] =
-      val queue = earmarking match
-        case None => account.unboundDonations
-        case Some(earmarking) =>
-          account.boundDonations.find {
-            case (key, _) => key == earmarking
-          } match
-            case None        => return Left(WithdrawError.INVALID_EARMARKING)
-            case Some(entry) => entry._2
-
-      val donationHasUnusedParts =
-        queue.donationQueue.queue.exists(r => r.value.donation.get.id == donationPart.donation.get.id)
+  private def getNotificationsForUtilizedDonations(
+    usedDonationParts: Seq[DonationPart],
+    config: Config
+  ): Either[WithdrawError, Seq[EmailMessage]] =
+    def singleHelper(donationPart: DonationPart): Either[WithdrawError, Seq[EmailMessage]] =
+      val donationHasUnusedParts = donationPart.donation.get.amountRemaining > BigDecimal(0)
 
       if donationHasUnusedParts then Right(Seq())
       else
@@ -129,36 +123,24 @@ case class Organisation(
             EmailMessage(
               donor.email,
               f"""Your recent donation to ${name} has been fully utilized.
-                 |To see more details about the status of your donation, visit the following link
-                 |${trackingLink}
-                 |or enter your tracking id
-                 |${trackingId}
-                 |on our tracking page
-                 |${config.frontendUrl}""".stripMargin,
+                     |To see more details about the status of your donation, visit the following link
+                     |${trackingLink}
+                     |or enter your tracking id
+                     |${trackingId}
+                     |on our tracking page
+                     |${config.frontendUrl}""".stripMargin,
               "Just Donate: Your donation has been utilized"
             )
           )
         )
 
-    def accountHelper(donationPart: DonationPart, accounts: Seq[Account]): Either[WithdrawError, Seq[EmailMessage]] =
-      accounts match
-        case Seq() => Right(Seq())
-        case account +: tail =>
-          singleHelper(donationPart, account) match
-            case l @ Left(_) => l
-            case Right(emailMessages) =>
-              accountHelper(donationPart, tail).map(recMessages => emailMessages :++ recMessages)
-
-    def donationPartsHelper(donationParts: Seq[DonationPart]): Either[WithdrawError, Seq[EmailMessage]] =
-      donationParts match
-        case Seq() => Right(Seq())
-        case donationPart +: tail =>
-          accountHelper(donationPart, updatedOrg.accounts.values.toSeq) match
-            case l @ Left(_) => l
-            case Right(emailMessages) =>
-              donationPartsHelper(tail).map(recMessages => emailMessages :++ recMessages)
-
-    donationPartsHelper(donationParts).map(messages => (updatedOrg, messages))
+    usedDonationParts match
+      case Seq() => Right(Seq())
+      case donationPart +: tail =>
+        singleHelper(donationPart) match
+          case l @ Left(_) => l
+          case Right(emailMessages) =>
+            getNotificationsForUtilizedDonations(tail, config).map(recMessages => emailMessages :++ recMessages)
 
   def transfer(
     amount: BigDecimal,
@@ -231,4 +213,3 @@ case class Organisation(
 
   def totalEarmarkedBalance(earmarking: String): BigDecimal =
     accounts.map(_._2.totalEarmarkedBalance(earmarking)).sum
-
