@@ -1,21 +1,12 @@
-FROM gradle:7.6-jdk17 AS builder
-
+# Stage 1: Build the application using sbt-assembly
+FROM sbtscala/scala-sbt:eclipse-temurin-21.0.5_11_1.10.7_3.3.4 AS builder
 WORKDIR /app
 
-COPY ./gradlew ./gradlew
-COPY ./gradle ./gradle
-COPY ./build.gradle ./build.gradle
-COPY ./settings.gradle ./settings.gradle
-COPY ./gradle ./gradle
+# Copy SBT build config and source
+COPY build.sbt ./
+COPY project ./project
 COPY src ./src
-
-RUN gradle clean build -x test
-
-FROM openjdk:17-jdk-slim
-
-WORKDIR /app
-COPY --from=builder /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sbt", "run"]
