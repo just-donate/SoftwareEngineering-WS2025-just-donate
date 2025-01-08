@@ -2,7 +2,7 @@
 
 @orgId = 110251487
 @account = acc1
-POST http://localhost:8080/withdraw/{{ orgId }}/account/{{ account }}/withdrawal
+POST http://localhost:8080/withdraw/{{ orgId }}/account/{{ account }}
 Content-Type: application/json
 
 {

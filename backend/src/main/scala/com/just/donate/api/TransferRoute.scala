@@ -20,7 +20,7 @@ object TransferRoute:
   val transferRoute: (Store, Config, IEmailService) => HttpRoutes[IO] = (store, config, emailService) =>
     HttpRoutes.of[IO]:
 
-      case req @ POST -> Root / organisationId / "transfer" =>
+      case req @ POST -> Root / organisationId =>
         (for
           transfer <- req.as[RequestTransfer]
           emailMessages <- loadAndSaveOrganisationOps(organisationId)(store)(org =>

@@ -17,19 +17,6 @@ GET http://localhost:8080/organisation/list
 
 GET http://localhost:8080/organisation/{{ orgId }}
 
-### Create earmarking
-
-POST http://localhost:8080/organisation/{{ orgId }}/earmarking
-Content-Type: application/json
-
-{
-  "name":"proj1"
-}
-
-### List earmarkings
-
-GET http://localhost:8080/organisation/{{ orgId }}/earmarking/list
-
 ### Add account
 
 POST http://localhost:8080/organisation/{{ orgId }}/account
@@ -43,3 +30,16 @@ Content-Type: application/json
 ### List accounts
 
 GET http://localhost:8080/organisation/{{ orgId }}/account/list
+
+### Create earmarking
+
+POST http://localhost:8080/organisation/{{ orgId }}/earmarking
+Content-Type: application/json
+
+{
+  "name":"proj1"
+}
+
+### List earmarkings
+
+GET http://localhost:8080/organisation/{{ orgId }}/earmarking/list

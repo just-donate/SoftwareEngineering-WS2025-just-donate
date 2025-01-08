@@ -18,7 +18,7 @@ object WithdrawalRoute:
   val withdrawalRoute: (Store, Config, IEmailService) => HttpRoutes[IO] = (store, config, emailService) =>
     HttpRoutes.of[IO]:
 
-      case req @ POST -> Root / organisationId / "account" / accountName / "withdrawal" =>
+      case req @ POST -> Root / organisationId / "account" / accountName =>
         for
           donation <- req.as[RequestWithdrawal]
           emailMessages <- loadAndSaveOrganisationOps(organisationId)(store)(org =>
