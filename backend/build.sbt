@@ -52,6 +52,10 @@ libraryDependencies ++= Seq(
   // MongoDB
   "org.mongodb.scala"            % "mongo-scala-driver_2.13"      % "5.2.1",
 
+  // Testcontainers for Mongo
+  "com.dimafeng" %% "testcontainers-scala-mongodb" % "0.41.5" % Test,
+  "com.dimafeng" %% "testcontainers-scala-munit" % "0.41.5",
+
   // Circe
   "io.circe"                     % "circe-core_3"                 % "0.14.10",
   "io.circe"                     % "circe-generic_3"              % "0.14.10",
@@ -62,9 +66,8 @@ libraryDependencies ++= Seq(
   "com.typesafe"                 % "config"                        % "1.4.3",
 
   // Test dependencies
-  "org.typelevel"                % "munit-cats-effect_3"          % "2.0.0"   % Test,
-  "org.scalameta"                % "munit_3"                      % "1.0.4"   % Test,
-
+  "org.typelevel" % "munit-cats-effect_3" % "2.0.0" % Test,
+  "org.scalameta" % "munit_3" % "1.0.4" % Test,
 )
 
 Compile / run / mainClass := Some("com.just.donate.Server")
