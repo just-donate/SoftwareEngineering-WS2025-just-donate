@@ -1,12 +1,27 @@
+# ---------------------------------------------------------------
 # Stage 1: Build the application using sbt-assembly
+# ---------------------------------------------------------------
 FROM sbtscala/scala-sbt:eclipse-temurin-21.0.5_11_1.10.7_3.3.4 AS builder
+
 WORKDIR /app
 
-# Copy SBT build config and source
+# Copy SBT build config and sources
 COPY build.sbt ./
 COPY project ./project
 COPY src ./src
 
-EXPOSE 8080
+# Run sbt-assembly to produce the fat JAR
+RUN sbt clean assembly
 
-ENTRYPOINT ["sbt", "run"]
+# ---------------------------------------------------------------
+# Stage 2: Run the application
+# ---------------------------------------------------------------
+FROM eclipse-temurin:11-jre
+WORKDIR /app
+
+# Copy the fat JAR from the builder stage into the runtime image
+COPY --from=builder /app/target/scala-3.3.4/backend-assembly-0.1.0-SNAPSHOT.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
+    
