@@ -1,252 +1,276 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <title>Just Donate</title>
-  <style>
-    /* Basic styling for a cleaner look */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      margin: 20px;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>Just Donate</title>
+    <style>
+      /* Basic styling for a cleaner look */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        margin: 20px;
+      }
 
-    .donation-container {
-      max-width: 450px;
-      margin: auto;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+      .donation-container {
+        max-width: 450px;
+        margin: auto;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
 
-    h2 {
-      text-align: center; 
-      color: #333;
-    }
+      h2 {
+        text-align: center;
+        color: #333;
+      }
 
-    p {
-      text-align: center; 
-      color: #555; 
-      margin-bottom: 20px;
-    }
+      p {
+        text-align: center;
+        color: #555;
+        margin-bottom: 20px;
+      }
 
-    label {
-      display: block; 
-      margin-top: 15px; 
-      font-weight: bold;
-      color: #333;
-    }
+      label {
+        display: block;
+        margin-top: 15px;
+        font-weight: bold;
+        color: #333;
+      }
 
-    input[type="text"],
-    input[type="email"],
-    select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc; 
-      border-radius: 4px;
-      height: 36px;
-      box-sizing: border-box;
-    }
+      input[type="text"],
+      input[type="email"],
+      select {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        height: 36px;
+        box-sizing: border-box;
+      }
 
-    .amount-container {
-      position: relative; 
-      display: flex; 
-      align-items: center;
-    }
+      .amount-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
 
-    .amount-container span {
-      position: absolute; 
-      left: 10px; 
-      pointer-events: none;
-    }
+      .amount-container span {
+        position: absolute;
+        left: 10px;
+        pointer-events: none;
+      }
 
-    /* The Donate Now button */
-    button {
-      margin-top: 20px; 
-      width: 100%; 
-      padding: 10px; 
-      background-color: #007BFF; 
-      color: white; 
-      border: none; 
-      border-radius: 4px; 
-      font-weight: bold; 
-      cursor: pointer;
-    }
+      /* The Donate Now button */
+      button {
+        margin-top: 20px;
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+      }
 
-    button:hover {
-      background-color: #0056b3;
-    }
+      button:hover {
+        background-color: #0056b3;
+      }
 
-    .footer-text {
-      text-align: center; 
-      margin-top: 15px; 
-      font-size: 12px; 
-      color: #888;
-    }
+      .footer-text {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 12px;
+        color: #888;
+      }
 
-    .required {
-      color: red;
-    }
-  </style>
-</head>
-<body>
+      .required {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="donation-container">
+      <h2>Make a Difference with Your Donation</h2>
+      <p>
+        Your contribution brings positive change to many lives. Join us in
+        making a difference.
+      </p>
 
-<div class="donation-container">
-  <h2>Make a Difference with Your Donation</h2>
-  <p>Your contribution brings positive change to many lives. Join us in making a difference.</p>
-  
-  <!-- Donation Form (visible) -->
-  <form id="donationForm" onsubmit="return validateAndSubmit()">
-    <!-- Donor Name -->
-    <label for="name">Name</label>
-    <input 
-      type="text"
-      id="name"
-      name="name"
-      placeholder="Max Mustermann"
-    />
+      <!-- Donation Form (visible) -->
+      <form id="donationForm" onsubmit="return validateAndSubmit()">
+        <!-- Donor Name -->
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Max Mustermann" />
 
-    <!-- Donor Email (required) -->
-    <label for="email">Email <span class="required">*</span></label>
-    <input 
-      type="email"
-      id="email"
-      name="email"
-      placeholder="mustermann@beispiel.com"
-      required
-    />
+        <!-- Donor Email (required) -->
+        <label for="email">Email <span class="required">*</span></label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="mustermann@beispiel.com"
+          required
+        />
 
-    <!-- Donation Amount (required) -->
-    <label for="amount">Donation Amount <span class="required">*</span></label>
-    <div class="amount-container">
-      <span>$</span>
-      <input 
-        list="amounts" 
-        id="amount" 
-        name="amount" 
-        placeholder="0.00" 
-        required
-        oninput="formatAmount()"
-        style="padding-left: 20px;"
-      />
-      <datalist id="amounts">
-        <option value="5">
-        <option value="25">
-        <option value="50">
-        <option value="100">
-      </datalist>
+        <!-- Donation Amount (required) -->
+        <label for="amount"
+          >Donation Amount <span class="required">*</span></label
+        >
+        <div class="amount-container">
+          <span>$</span>
+          <input
+            list="amounts"
+            id="amount"
+            name="amount"
+            placeholder="0.00"
+            required
+            oninput="formatAmount()"
+            style="padding-left: 20px"
+          />
+          <datalist id="amounts">
+            <option value="5"></option>
+            <option value="25"></option>
+            <option value="50"></option>
+            <option value="100"></option>
+          </datalist>
+        </div>
+
+        <!-- Donation Purpose -->
+        <label for="purpose">Donation Purpose</label>
+        <select id="purpose" name="purpose">
+          <option value="Wherever my help is needed most">
+            Wherever my help is needed most
+          </option>
+          <option value="Beach Cleaning">Beach Cleaning</option>
+          <option value="Women Empowerment">Women Empowerment</option>
+          <option value="Community Feeding">Community Feeding</option>
+        </select>
+
+        <!-- Hidden field to show we've updated info -->
+        <input type="hidden" name="updates" value="true" />
+
+        <p style="color: black; font-size: 12px">
+          * indicates mandatory fields
+        </p>
+
+        <!-- Submit button -->
+        <button type="submit">Donate Now</button>
+      </form>
+
+      <!-- "Powered by" footer area -->
+      <p class="footer-text">
+        powered by
+        <img
+          src="logo.png"
+          alt="just-donate-logo"
+          width="100"
+          style="vertical-align: middle; position: relative; top: 3px"
+        />
+      </p>
     </div>
 
-    <!-- Donation Purpose -->
-    <label for="purpose">Donation Purpose</label>
-    <select id="purpose" name="purpose">
-      <option value="Wherever my help is needed most">Wherever my help is needed most</option>
-      <option value="Beach Cleaning">Beach Cleaning</option>
-      <option value="Women Empowerment">Women Empowerment</option>
-      <option value="Community Feeding">Community Feeding</option>
-    </select>
-
-    <!-- Hidden field to show we've updated info -->
-    <input type="hidden" name="updates" value="true" />
-
-    <p style="color: black; font-size: 12px;">* indicates mandatory fields</p>
-
-    <!-- Submit button -->
-    <button type="submit">Donate Now</button>
-  </form>
-
-  <!-- "Powered by" footer area -->
-  <p class="footer-text">
-    powered by
-    <img src="logo.png" alt="just-donate-logo" width="100" style="vertical-align: middle; position: relative; top: 3px;">
-  </p>
-</div>
-
-<!-- 
+    <!-- 
   Hidden PayPal Form (auto-submitted after we validate & transfer user data).
 -->
-<form 
-  id="paypalForm" 
-  action="https://www.sandbox.paypal.com/cgi-bin/webscr" 
-  method="post" 
-  style="display: none;"
->
-  <!-- PayPal Command -->
-  <input type="hidden" name="cmd" value="_xclick" />
+    <form
+      id="paypalForm"
+      action="https://www.sandbox.paypal.com/cgi-bin/webscr"
+      method="post"
+      style="display: none"
+    >
+      <!-- PayPal Command -->
+      <input type="hidden" name="cmd" value="_xclick" />
 
-  <!-- Sandbox Business Email -->
-  <input 
-    type="hidden" 
-    name="business" 
-    value="sb-swv8l35388930@business.example.com"
-  />
+      <!-- Sandbox Business Email -->
+      <input
+        type="hidden"
+        name="business"
+        value="sb-swv8l35388930@business.example.com"
+      />
 
-  <!-- Payment details -->
-  <input type="hidden" name="item_name" value="JustDonate - User Donation" />
-  <input type="hidden" name="currency_code" value="EUR" />
-  
-  <!-- Will set this dynamically from the user input -->
-  <input type="hidden" name="amount" id="paypalAmount" value="" />
+      <!-- Payment details -->
+      <input
+        type="hidden"
+        id="item_name_purpose"
+        name="item_name"
+        value="JustDonate - User Donation"
+      />
+      <input type="hidden" name="currency_code" value="EUR" />
 
-  <!-- Return and Cancel URLs -->
-  <input type="hidden" name="return" value="http://localhost:3001/SoftwareEngineering-WS2025-just-donate/paypal" />
-  <input type="hidden" name="cancel_return" value="http://localhost:3001/SoftwareEngineering-WS2025-just-donate/paypal" />
-  <input type="hidden" id="invoice_paypal" name="invoice" value="124" />
+      <!-- Will set this dynamically from the user input -->
+      <input type="hidden" name="amount" id="paypalAmount" value="" />
 
-  <!-- Optional invoice/order ID -->
-</form>
+      <!-- Return and Cancel URLs -->
+      <input
+        type="hidden"
+        name="return"
+        value="http://localhost:3001/SoftwareEngineering-WS2025-just-donate/paypal"
+      />
+      <input
+        type="hidden"
+        name="cancel_return"
+        value="http://localhost:3001/SoftwareEngineering-WS2025-just-donate/paypal"
+      />
+      <input type="hidden" id="invoice_paypal" name="invoice" value="124" />
 
-<script>
-  /**
-   * formatAmount() - Ensures that only valid numeric input is kept,
-   * and limits decimals to 2 places for a currency format.
-   */
-  function formatAmount() {
-    const amountInput = document.getElementById('amount');
-    let value = amountInput.value.replace(/[^0-9.]/g, '');
-    
-    // Only allow two decimal places
-    if (value.includes('.')) {
-      const parts = value.split('.');
-      parts[1] = parts[1].slice(0, 2); 
-      value = parts.join('.');
-    }
+      <!-- Optional invoice/order ID -->
+    </form>
 
-    amountInput.value = value;
-  }
+    <script>
+      /**
+       * formatAmount() - Ensures that only valid numeric input is kept,
+       * and limits decimals to 2 places for a currency format.
+       */
+      function formatAmount() {
+        const amountInput = document.getElementById("amount");
+        let value = amountInput.value.replace(/[^0-9.]/g, "");
 
-  /**
-   * validateAndSubmit() - Validates the donation form, then sets
-   * the PayPal form fields (especially amount) and submits PayPal form.
-   */
-  function validateAndSubmit() {
-    // Get references
-    const amountInput = document.getElementById('amount');
-    const amountValue = parseFloat(amountInput.value);
+        // Only allow two decimal places
+        if (value.includes(".")) {
+          const parts = value.split(".");
+          parts[1] = parts[1].slice(0, 2);
+          value = parts.join(".");
+        }
 
-    // Basic validation: amount must be > 0
-    if (isNaN(amountValue) || amountValue <= 0) {
-      alert('Please enter a valid donation amount greater than 0.');
-      return false; // stop normal form submission
-    }
-    // ----- If valid, set PayPal form amount -----
-    document.getElementById('paypalAmount').value = amountValue.toFixed(2);
+        amountInput.value = value;
+      }
 
-    const crypto = window.crypto || window.msCrypto;
-    var array = new Uint32Array(1);
+      /**
+       * validateAndSubmit() - Validates the donation form, then sets
+       * the PayPal form fields (especially amount) and submits PayPal form.
+       */
+      function validateAndSubmit() {
+        // Prevent the form's default submission behavior
+        event.preventDefault();
 
-    document.getElementById('invoice_paypal').value = crypto.getRandomValues(array);
+        // Get references
+        const amountInput = document.getElementById("amount");
+        const amountValue = parseFloat(amountInput.value);
 
-    // Submit PayPal form
-    document.getElementById('paypalForm').submit();
+        // Basic validation: amount must be > 0
+        if (isNaN(amountValue) || amountValue <= 0) {
+          alert("Please enter a valid donation amount greater than 0.");
+          return; // Exit without proceeding further
+        }
 
-    // Prevent the donation form from actually submitting to your server 
-    // (since we’re sending users to PayPal). 
-    return false;
-  }
-</script>
-</body>
+        document.getElementById('item_name_purpose').value = document.getElementById('purpose').value;
+
+        // If valid, set PayPal form amount
+        document.getElementById("paypalAmount").value = amountValue.toFixed(2);
+
+        // Generate a random invoice number
+        const crypto = window.crypto || window.msCrypto;
+        const array = new Uint32Array(1);
+        document.getElementById("invoice_paypal").value =
+          crypto.getRandomValues(array)[0];
+
+        // Submit PayPal form
+        document.getElementById("paypalForm").submit();
+      }
+    </script>
+  </body>
 </html>
