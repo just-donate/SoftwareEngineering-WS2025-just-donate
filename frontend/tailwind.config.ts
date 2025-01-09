@@ -57,6 +57,20 @@ const config: Config = {
         lg: 'var(--radius)', // Added border radius settings
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)'
+      },
+      keyframes: {
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" }
+        },
+        "pop-up": {
+          "0%": { transform: "scale(0.95)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" }
+        }
+      },
+      animation: {
+        "fade-in-slow": "fade-in 0.5s ease-in-out",
+        "pop-up-slow": "pop-up 0.5s ease-in-out"
       }
     }
   },

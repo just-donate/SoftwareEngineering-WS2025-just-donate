@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Donation } from '@/types/types'
 import { useTheme } from '@/contexts/ThemeContext'
 import { TransitSchematic } from './TransitSchematic'
 import { Heart } from 'lucide-react'
+import Cookies from 'js-cookie'
 
 interface DonationItemProps {
   donation: Donation
@@ -12,8 +13,8 @@ interface DonationItemProps {
 }
 
 const ThankYouMessage = () => (
-    <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10 animate-fade-in">
-      <div className="text-center animate-pop-up">
+    <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10 animate-fade-in-slow">
+      <div className="text-center animate-pop-up-slow">
         <Heart className="w-12 h-12 text-red-500 mx-auto mb-2" />
         <p className="text-lg font-semibold text-gray-800">Thank you for your donation!</p>
       </div>
@@ -23,14 +24,32 @@ const ThankYouMessage = () => (
 export const DonationItem: React.FC<DonationItemProps> = ({ donation, onClick }) => {
   const { theme } = useTheme()
   const [showThankYou, setShowThankYou] = useState(false)
+  const [isExiting, setIsExiting] = useState(false)
   const latestStatus = donation.status[donation.status.length - 1]
 
+  useEffect(() => {
+    const shownDonations = Cookies.get('shownDonations')
+    const shownDonationIds = shownDonations ? JSON.parse(shownDonations) : []
+    
+    if (!shownDonationIds.includes(donation.id)) {
+      setShowThankYou(true)
+      const updatedShownDonations = [...shownDonationIds, donation.id]
+      Cookies.set('shownDonations', JSON.stringify(updatedShownDonations), { expires: 365 })
+      
+      // Start exit animation after 3 seconds
+      setTimeout(() => {
+        setIsExiting(true)
+        // Actually remove the component after animation completes
+        setTimeout(() => {
+          setShowThankYou(false)
+          setIsExiting(false)
+        }, 500) // Duration matches CSS animation
+      }, 3000)
+    }
+  }, [donation.id])
+
   const handleClick = () => {
-    setShowThankYou(true)
-    setTimeout(() => {
-      setShowThankYou(false)
-      onClick()
-    }, 1500)
+    onClick()
   }
 
   return (
@@ -38,7 +57,14 @@ export const DonationItem: React.FC<DonationItemProps> = ({ donation, onClick })
           className={`${theme.card} rounded-lg shadow-lg p-4 mb-4 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl relative`}
           onClick={handleClick}
       >
-        {showThankYou && <ThankYouMessage />}
+        {showThankYou && (
+          <div className={`absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10 transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
+            <div className={`text-center transition-transform duration-500 ${isExiting ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
+              <Heart className="w-12 h-12 text-red-500 mx-auto mb-2" />
+              <p className="text-lg font-semibold text-gray-800">Thank you for your donation!</p>
+            </div>
+          </div>
+        )}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div className="flex-grow">
             <div className="flex items-center justify-between sm:justify-start">
