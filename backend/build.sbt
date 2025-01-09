@@ -1,3 +1,6 @@
+import sbtassembly.AssemblyPlugin.autoImport.*
+import sbtassembly.{MergeStrategy, PathList}
+
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.3.4"
@@ -7,6 +10,13 @@ ThisBuild / parallelExecution := false
 lazy val root = (project in file(".")).settings(
   name := "backend"
 )
+
+// Fix assembly merge strategy to avoid native-image issues
+ThisBuild / assemblyMergeStrategy := {
+  case PathList("META-INF", "native-image", _*) => MergeStrategy.discard
+  case PathList("META-INF", "versions", "9", "module-info.class") => MergeStrategy.discard
+  case x => (assembly / assemblyMergeStrategy).value(x)
+}
 
 libraryDependencies ++= Seq(
   // http4s
