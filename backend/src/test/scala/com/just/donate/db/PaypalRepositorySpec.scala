@@ -11,7 +11,7 @@ import org.testcontainers.containers.wait.strategy.Wait
 
 import java.io.File
 
-class PaypalCrudRepositorySpec
+class PaypalRepositorySpec
   extends CatsEffectSuite with TestContainerForAll {
 
   /**
@@ -63,7 +63,7 @@ class PaypalCrudRepositorySpec
       val client = MongoClient(connectionString)
       val database = client.getDatabase("test-db")
 
-      val repo = new PaypalCrudRepository(database)
+      val repo = new PaypalRepository(database.getCollection("paypal_ipn"))
 
       val collection = database.getCollection("paypal_ipn")
       collection.drop()
@@ -77,25 +77,25 @@ class PaypalCrudRepositorySpec
         _ <- repo.save(ipn2)
 
         // findAll should return both
-        all1 <- repo.findAll
+        all1 <- repo.findAll()
         _      <- IO.println(s"DEBUG: final all2 = $all1")
         _ = assertEquals(all1.size, 2, s"Expected 2 IPNs, got ${all1.size}")
 
         // findById(ipn1._id) should be Some(ipn1)
-        found1 <- repo.findById(ipn1._id.toHexString)
+        found1 <- repo.findById(ipn1._id)
         _ = assert(found1.isDefined, s"Expected to find IPN1 by ID, got None")
         _ = assertEquals(found1.get.payload, "payload-1")
 
         // update ipn2
         updatedIpn2 = ipn2.copy(payload = "updated-2")
-        updatedOk <- repo.update(ipn2._id.toHexString, updatedIpn2)
-        _ = assert(updatedOk, "Expected update() to return true")
-        found2 <- repo.findById(ipn2._id.toHexString)
+        updatedOk <- repo.update(updatedIpn2)
+        _ = assertEquals(updatedOk.payload, "updated-2")
+        found2 <- repo.findById(ipn2._id)
         _ = assertEquals(found2.get.payload, "updated-2")
 
         // delete ipn1
-        _ <- repo.deleteById(ipn1._id.toHexString)
-        all2 <- repo.findAll
+        _ <- repo.delete(ipn1._id)
+        all2 <- repo.findAll()
         _ = assertEquals(all2.size, 1)
       } yield ()
 

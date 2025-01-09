@@ -9,7 +9,7 @@ import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
 import com.just.donate.config.{ AppConfig, AppEnvironment, Config }
-import com.just.donate.db.PaypalCrudRepository
+import com.just.donate.db.PaypalRepository
 import com.just.donate.notify.{ DevEmailService, EmailService, IEmailService }
 import com.just.donate.store.FileStore
 import org.http4s.*
@@ -28,7 +28,7 @@ object Server extends IOApp:
   def run(args: List[String]): IO[ExitCode] =
     mongoResource(appConfig.mongoUri).use { client =>
       val database = client.getDatabase("just-donate")
-      val paypalRepository = new PaypalCrudRepository(database)
+      val paypalRepository = new PaypalRepository(database.getCollection("paypal-ipn"))
 
       FileStore.init()
 

@@ -2,7 +2,7 @@ package com.just.donate.api
 
 import cats.effect.IO
 import com.just.donate.*
-import com.just.donate.mocks.paypal.PaypalCrudRepositoryMock
+import com.just.donate.mocks.paypal.PaypalRepositoryMock
 import munit.CatsEffectSuite
 import org.http4s.implicits.uri
 import org.http4s.{Method, Request, Status, UrlForm}
@@ -13,7 +13,7 @@ class PaypalApiSuite extends CatsEffectSuite:
 
   sleep(1); // Sleep for 1 second to avoid port conflict with other tests
 
-  private val fakeRepo = new PaypalCrudRepositoryMock(null)
+  private val fakeRepo = new PaypalRepositoryMock(null)
 
   private val routes = PaypalRoute.paypalRoute(fakeRepo).orNotFound
 
@@ -43,7 +43,7 @@ class PaypalApiSuite extends CatsEffectSuite:
       body <- resp.as[String]
       _ <- IO(assertEquals(resp.status, Status.Ok))
       _ <- IO(assert(body.contains("IPN Payload received")))
-      allDb <- fakeRepo.findAll
+      allDb <- fakeRepo.findAll()
     } yield {
       print(body)
       assertEquals(allDb.size, 2)
