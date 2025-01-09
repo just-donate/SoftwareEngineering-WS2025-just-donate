@@ -1,3 +1,6 @@
+import sbtassembly.AssemblyPlugin.autoImport.*
+import sbtassembly.{MergeStrategy, PathList}
+
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.3.4"
@@ -8,6 +11,13 @@ lazy val root = (project in file("."))
   .settings(
     name := "backend"
   )
+
+// Fix assembly merge strategy to avoid native-image issues
+ThisBuild / assemblyMergeStrategy := {
+  case PathList("META-INF", "native-image", _*) => MergeStrategy.discard
+  case PathList("META-INF", "versions", "9", "module-info.class") => MergeStrategy.discard
+  case x => (assembly / assemblyMergeStrategy).value(x)
+}
 
 libraryDependencies ++= Seq(
   // http4s
@@ -38,7 +48,7 @@ libraryDependencies ++= Seq(
   "org.scalameta"                % "munit_3"                      % "1.0.4"   % Test,
 )
 
-Compile / run / assembly / mainClass := Some("com.just.donate.Server")
+Compile / run / mainClass := Some("com.just.donate.Server")
 Compile / packageOptions +=
   Package.ManifestAttributes("Main-Class" -> "com.just.donate.Server")
 
@@ -48,15 +58,3 @@ scalacOptions ++= Seq(
   "-Xmax-inlines",
   "100"
 )
-
-assemblyMergeStrategy in assembly := {
-  case PathList("jackson-annotations-2.10.3.jar", xs @ _*) => MergeStrategy.last
-  case PathList("jackson-core-2.10.3.jar", xs @ _*) => MergeStrategy.last
-  case PathList("jackson-databind-2.10.3.jar", xs @ _*) => MergeStrategy.last
-  case PathList("jackson-dataformat-cbor-2.10.3.jar", xs @ _*) => MergeStrategy.last
-  case PathList("jackson-datatype-jdk8-2.10.3.jar", xs @ _*) => MergeStrategy.last
-  case PathList("jackson-datatype-jsr310-2.10.3.jar", xs @ _*) => MergeStrategy.last
-  case PathList("jackson-module-parameter-names-2.10.3.jar", xs @ _*) => MergeStrategy.last
-  case PathList("jackson-module-paranamer-2.10.3.jar", xs @ _*) => MergeStrategy.last
-  case _ => MergeStrategy.first
-}
