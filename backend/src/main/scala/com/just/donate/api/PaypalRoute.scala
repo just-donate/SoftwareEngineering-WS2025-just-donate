@@ -13,7 +13,7 @@ object PaypalRoute:
       case GET -> Root =>
         // Maybe list everything from DB, or just memory buffer:
         for
-          allDb <- repo.findAll
+          allDb <- repo.findAll()
           _ <- IO.println(s"IPNs in DB: $allDb")
           resp <- Ok(allDb.mkString("\n"))
         yield resp
@@ -25,7 +25,7 @@ object PaypalRoute:
 
           // Create a new PaypalIPN entity and insert into DB
           newIpn = PaypalIPN(payload = formData.toString())
-          _ <- repo.create(newIpn)
+          _ <- repo.save(newIpn)
 
           resp <- Ok("IPN Payload received and stored in MongoDB")
         yield resp

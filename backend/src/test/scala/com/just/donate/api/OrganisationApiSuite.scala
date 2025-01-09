@@ -1,16 +1,13 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import com.just.donate.api.DonationRoute.RequestDonation
-import com.just.donate.api.OrganisationRoute.{ RequestOrganisation, ResponseOrganisation }
+import com.just.donate.api.OrganisationRoute.{RequestOrganisation, ResponseOrganisation}
 import com.just.donate.helper.OrganisationHelper.*
 import com.just.donate.helper.TestHelper.*
-import com.just.donate.mocks.config.AppConfigMock
-import com.just.donate.mocks.notify.EmailServiceMock
 import com.just.donate.store.MemoryStore
 import io.circe.*
 import io.circe.generic.auto.*
-import munit.{ BeforeEach, CatsEffectSuite }
+import munit.CatsEffectSuite
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
