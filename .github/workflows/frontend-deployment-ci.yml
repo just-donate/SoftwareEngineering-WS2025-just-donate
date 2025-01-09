@@ -39,8 +39,7 @@ jobs:
       - name: Install dependencies
         working-directory: ./frontend
         run: | 
-          npm install
-          npm install --os=linux --cpu=x64 sharp
+          npm install --force
       - name: Build
         working-directory: ./frontend
         run: npm run build
