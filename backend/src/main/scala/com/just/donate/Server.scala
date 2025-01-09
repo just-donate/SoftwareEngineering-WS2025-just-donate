@@ -28,7 +28,7 @@ object Server extends IOApp:
   def run(args: List[String]): IO[ExitCode] =
     mongoResource(appConfig.mongoUri).use { client =>
       val database = client.getDatabase("just-donate")
-      val paypalRepository = new PaypalRepository(database)
+      val paypalRepository = new PaypalRepository(database.getCollection("paypal-ipn"))
 
       FileStore.init()
 

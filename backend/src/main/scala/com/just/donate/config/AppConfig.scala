@@ -34,7 +34,7 @@ case class AppConfig(private val conf: TypesafeConfig, val environment: AppEnvir
   private def getOptionalString(path: String): Option[String] =
     if conf.hasPath(path)
     then Some(conf.getString(path))
-    else Properties.envOrNone(path)
+    else sys.env.get("MONGO_URI")
 
   private def expected[A](getter: String => Option[A]) =
     (path: String) =>
