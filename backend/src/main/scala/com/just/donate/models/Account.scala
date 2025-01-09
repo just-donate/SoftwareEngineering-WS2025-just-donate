@@ -5,6 +5,7 @@ import com.just.donate.models.errors.{DonationError, ModifyError, WithdrawError}
 import com.just.donate.utils.CollectionUtils.{map2, updated, updatedReturn}
 import com.just.donate.utils.Money
 import com.just.donate.utils.structs.ReservableQueue
+
 import scala.math.Ordered.orderingToOrdered
 
 case class Account private (
@@ -23,9 +24,10 @@ case class Account private (
   def removeEarmarking(earmarking: String): Account =
     getBoundQueue(earmarking) match
       case None => throw new IllegalArgumentException("Earmarking not found")
-      case Some(earmarkingQueue) => earmarkingQueue.totalBalance match
-        case Money.ZERO => copy(boundDonations = boundDonations.filterNot(_._1 == earmarking))
-        case _ => throw new IllegalArgumentException("Earmarking has budget")
+      case Some(earmarkingQueue) =>
+        earmarkingQueue.totalBalance match
+          case Money.ZERO => copy(boundDonations = boundDonations.filterNot(_._1 == earmarking))
+          case _          => throw new IllegalArgumentException("Earmarking has budget")
 
   def addEarmarking(earmarking: String): Account =
     copy(boundDonations = boundDonations :+ ((earmarking, DonationQueue(name, ReservableQueue(name)))))
@@ -40,7 +42,7 @@ case class Account private (
     if totalBalance < amount then Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
     earmarking match
       case Some(em) => withdrawalBound(amount, em)
-      case None => withdrawalUnbound(amount)
+      case None     => withdrawalUnbound(amount)
 
   private def withdrawalUnbound(amount: Money): Either[WithdrawError, (Seq[DonationPart], Account)] =
     // 1. Expense is unbound, withdraw from unbound donations
@@ -70,29 +72,6 @@ case class Account private (
       case Some(donationParts) => Right((donationParts, copy(boundDonations = updatedFrom)))
       case None                => Left(WithdrawError.INVALID_EARMARKING)
 
-  private[models] def pull(amount: Money)(using
-    donationGetter: DonationGetter
-  ): (Money, DonationPart, Option[String], Account) =
-    // TODO: change to actual error handling
-    if totalBalance < amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
-
-    val (earmarking, queue) = findQueueWithOldestDonation
-    val (donationPart, updatedQueue) = queue.pull(amount, Some(1))
-
-    val updatedAccount = earmarking match
-      case None    => copy(unboundDonations = updatedQueue)
-      case Some(e) => copy(boundDonations = boundDonations.updated(b => b._1 == e)((e, updatedQueue)))
-
-    (amount - donationPart.head.amount, donationPart.head, earmarking, updatedAccount)
-
-  private def findQueueWithOldestDonation(using donationGetter: DonationGetter): (Option[String], DonationQueue) =
-    val allQueues = (None, unboundDonations) +: boundDonations.map(t => (Some(t._1), t._2))
-    allQueues
-      .filter(_._2.donationQueue._2.nonEmpty)
-      .minByOption(_._2.donationQueue._2.head.value.donation.get.donationDate)
-      // TODO: change to actual error handling
-      .getOrElse(throw new IllegalStateException("No donations available in any queue"))
-
   def totalBalance: Money = totalBalanceUnbound + totalBalanceBound
 
   private def totalBalanceUnbound: Money = unboundDonations.totalBalance
@@ -116,3 +95,26 @@ case class Account private (
     val (donated, newBoundDonations) = donateRec(boundDonations)
     if donated then Right(copy(boundDonations = newBoundDonations))
     else Right(this)
+
+  private[models] def pull(amount: Money)(using
+    donationGetter: DonationGetter
+  ): (Money, DonationPart, Option[String], Account) =
+    // TODO: change to actual error handling
+    if totalBalance < amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
+
+    val (earmarking, queue) = findQueueWithOldestDonation
+    val (donationPart, updatedQueue) = queue.pull(amount, Some(1))
+
+    val updatedAccount = earmarking match
+      case None    => copy(unboundDonations = updatedQueue)
+      case Some(e) => copy(boundDonations = boundDonations.updated(b => b._1 == e)((e, updatedQueue)))
+
+    (amount - donationPart.head.amount, donationPart.head, earmarking, updatedAccount)
+
+  private def findQueueWithOldestDonation(using donationGetter: DonationGetter): (Option[String], DonationQueue) =
+    val allQueues = (None, unboundDonations) +: boundDonations.map(t => (Some(t._1), t._2))
+    allQueues
+      .filter(_._2.donationQueue._2.nonEmpty)
+      .minByOption(_._2.donationQueue._2.head.value.donation.get.donationDate)
+      // TODO: change to actual error handling
+      .getOrElse(throw new IllegalStateException("No donations available in any queue"))

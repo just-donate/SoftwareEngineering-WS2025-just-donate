@@ -38,13 +38,6 @@ case class Organisation(
     else this
 
   /**
-   * Get an account by name.
-   * @param name the name of the account.
-   * @return an option of the account, depending on whether the account exists.
-   */
-  def getAccount(name: String): Option[Account] = accounts.get(name)
-
-  /**
    * Add a new earmarking to all accounts in the organisation.
    * @param earmarking the name of the earmarking.
    * @return a new organisation with the earmarking added to all accounts.
@@ -85,6 +78,7 @@ case class Organisation(
    * @return A function which gets a donation by id from the organisation.
    */
   given DonationGetter = getDonation
+
   private def getDonation: DonationGetter = donations.get
 
   /**
@@ -106,7 +100,7 @@ case class Organisation(
     donation.addStatusUpdate(
       StatusUpdate(
         LocalDateTime.now(),
-        StatusUpdate.Status.DONATED,
+        StatusUpdate.Status.RECEIVED,
         "Donation has been made and has been added to the account: " + account
       )
     )
@@ -132,6 +126,13 @@ case class Organisation(
               if donors.contains(donationPart.donation.get.donorId) then donors
               else donors.updated(donor.id, donor)
             Right(copy(accounts = newAccounts, donors = newDonors))
+
+  /**
+   * Get an account by name.
+   * @param name the name of the account.
+   * @return an option of the account, depending on whether the account exists.
+   */
+  def getAccount(name: String): Option[Account] = accounts.get(name)
 
   /**
    * Withdraw from the organisation. This function is the entry point for withdrawing from the organisation.
@@ -172,54 +173,6 @@ case class Organisation(
         val updatedOrg = copy(accounts = newAccounts, donations = newDonations, expenses = expenses.appended(expense))
 
         updatedOrg.getNotificationsForUtilizedDonations(donationParts, config).map(messages => (updatedOrg, messages))
-
-  private def getDonationsAfterWithdrawal(
-    donationParts: Seq[DonationPart]
-  ): Either[WithdrawError, Map[String, Donation]] =
-    donationParts.headOption match
-      case None => Right(donations)
-      case Some(donationPart) =>
-        getDonationsAfterWithdrawal(
-          donationParts.tail
-        ).map(_.updatedWith(donationPart.donationId)(optDonation =>
-          val donation = optDonation.get
-          Some(donation.copy(amountRemaining = donation.amountRemaining - donationPart.amount))
-        ))
-
-  private def getNotificationsForUtilizedDonations(
-    usedDonationParts: Seq[DonationPart],
-    config: Config
-  ): Either[WithdrawError, Seq[EmailMessage]] =
-    var remainingSeq = usedDonationParts
-    var emailMessages: Seq[EmailMessage] = Seq()
-
-    while remainingSeq.nonEmpty do
-      val donationPart = remainingSeq.head
-      remainingSeq = remainingSeq.tail
-
-      val donationIsFullyUsed = donationPart.donation.get.amountRemaining == Money.ZERO
-      if donationIsFullyUsed then
-        val donor = donors.get(donationPart.donation.get.donorId) match
-          case None        => return Left(WithdrawError.INVALID_DONOR)
-          case Some(donor) => donor
-        val trackingId = donor.id
-        val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
-
-        emailMessages = emailMessages.appended(
-          EmailMessage(
-            donor.email,
-            f"""Your recent donation to ${name} has been fully utilized.
-               |To see more details about the status of your donation, visit the following link
-               |${trackingLink}
-               |or enter your tracking id
-               |${trackingId}
-               |on our tracking page
-               |${config.frontendUrl}""".stripMargin,
-            "Just Donate: Your donation has been utilized"
-          )
-        )
-
-    Right(emailMessages)
 
   /**
    * Transfer between accounts in the organisation. This function is the entry point for transferring between accounts.
@@ -310,3 +263,51 @@ case class Organisation(
 
   def getDonations(donorId: String): Seq[Donation] =
     donations.values.filter(_.donorId == donorId).toSeq
+
+  private def getDonationsAfterWithdrawal(
+    donationParts: Seq[DonationPart]
+  ): Either[WithdrawError, Map[String, Donation]] =
+    donationParts.headOption match
+      case None => Right(donations)
+      case Some(donationPart) =>
+        getDonationsAfterWithdrawal(
+          donationParts.tail
+        ).map(_.updatedWith(donationPart.donationId)(optDonation =>
+          val donation = optDonation.get
+          Some(donation.copy(amountRemaining = donation.amountRemaining - donationPart.amount))
+        ))
+
+  private def getNotificationsForUtilizedDonations(
+    usedDonationParts: Seq[DonationPart],
+    config: Config
+  ): Either[WithdrawError, Seq[EmailMessage]] =
+    var remainingSeq = usedDonationParts
+    var emailMessages: Seq[EmailMessage] = Seq()
+
+    while remainingSeq.nonEmpty do
+      val donationPart = remainingSeq.head
+      remainingSeq = remainingSeq.tail
+
+      val donationIsFullyUsed = donationPart.donation.get.amountRemaining == Money.ZERO
+      if donationIsFullyUsed then
+        val donor = donors.get(donationPart.donation.get.donorId) match
+          case None        => return Left(WithdrawError.INVALID_DONOR)
+          case Some(donor) => donor
+        val trackingId = donor.id
+        val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+
+        emailMessages = emailMessages.appended(
+          EmailMessage(
+            donor.email,
+            f"""Your recent donation to ${name} has been fully utilized.
+               |To see more details about the status of your donation, visit the following link
+               |${trackingLink}
+               |or enter your tracking id
+               |${trackingId}
+               |on our tracking page
+               |${config.frontendUrl}""".stripMargin,
+            "Just Donate: Your donation has been utilized"
+          )
+        )
+
+    Right(emailMessages)

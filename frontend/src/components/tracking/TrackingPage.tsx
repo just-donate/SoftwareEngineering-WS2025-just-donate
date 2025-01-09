@@ -1,20 +1,21 @@
 'use client'
 
-import { Theme } from '@/styles/themes';
 import { DonationList } from './DonationList';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Donation } from '@/types/types';
+import { Navigation } from '@/components/tracking/Navigation';
+import { Theme } from '@/styles/themes';
 
 interface TrackingPageClientProps {
     donations: Donation[] | null;
-    trackingId: string;
+    theme: Theme;
 }
 
-export function TrackingPageClient({ donations, trackingId }: TrackingPageClientProps) {
-    const { theme } = useTheme();
-    
+export function TrackingPageClient({ donations, theme }: TrackingPageClientProps) {
+
     return (
         <div className={`min-h-screen ${theme.background}`}>
+            <Navigation links={[{ link: '/help', name: 'Help' }]} />
             <main className={`${theme.text}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     {donations ? (

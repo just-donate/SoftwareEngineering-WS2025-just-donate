@@ -4,7 +4,7 @@ import com.just.donate.models.{Donation, DonationPart}
 import com.just.donate.utils.Money
 import munit.FunSuite
 
-class ReservableQueueSuite extends FunSuite {
+class ReservableQueueSuite extends FunSuite:
 
   test("add and reserve the exact amount") {
     var queue = ReservableQueue("MainAccount")
@@ -180,4 +180,3 @@ class ReservableQueueSuite extends FunSuite {
     assert(reservable.isReservedBy("ContextA"), "Newly added resource should now be reserved by ContextA")
     assertEquals(reservable.value.amount, Money("50"))
   }
-}

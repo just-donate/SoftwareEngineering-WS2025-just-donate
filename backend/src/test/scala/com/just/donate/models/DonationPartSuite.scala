@@ -48,7 +48,7 @@ class DonationPartSuite extends FunSuite:
   }
 
   test("handle splitting more than available amount correctly") {
-    val (donation, donationPart)  = Donation("Donor", Money("100"))
+    val (donation, donationPart) = Donation("Donor", Money("100"))
     val split = donationPart.splitOf(Money("150"))
 
     // The split portion is as large as the donation itself

@@ -10,10 +10,8 @@ import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
 import com.just.donate.config.{AppConfig, AppEnvironment, Config}
 import com.just.donate.db.PaypalRepository
-import com.just.donate.models.{Donation, Donor, Organisation}
 import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
 import com.just.donate.store.FileStore
-import com.just.donate.utils.Money
 import org.http4s.*
 import org.http4s.ember.server.*
 import org.http4s.implicits.*
@@ -22,11 +20,9 @@ import org.mongodb.scala.*
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
 
-import cats.effect.unsafe.implicits.global
-
 object Server extends IOApp:
 
-/*
+  /*
   var org = Organisation("Just-Donate")
   org = org.addAccount("Paypal")
   org = org.addAccount("Stripe")
@@ -52,7 +48,7 @@ object Server extends IOApp:
   org = org.donate(donor2, donation._2, donation._1, "Paypal").toOption.get
 
   FileStore.save(org.name.hashCode.toString, org).unsafeRunSync()
-*/
+   */
   private val appConfig: Config = AppConfig()
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 

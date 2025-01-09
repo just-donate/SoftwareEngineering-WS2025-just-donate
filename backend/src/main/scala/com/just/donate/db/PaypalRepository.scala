@@ -46,16 +46,6 @@ class PaypalRepository(database: MongoDatabase) extends Repository[PaypalIPN]:
     }
 
   /**
-   * Helper to convert a Document to a PaypalIPN case class
-   */
-  private def docToPaypalIPN(doc: Document): PaypalIPN =
-    PaypalIPN(
-      // doc("_id") can be cast to ObjectId
-      _id = doc.getObjectId("_id"),
-      payload = doc.getString("payload")
-    )
-
-  /**
    * Find a single IPN document by its _id (as String)
    */
   override def findById(id: String): IO[Option[PaypalIPN]] =
@@ -65,6 +55,16 @@ class PaypalRepository(database: MongoDatabase) extends Repository[PaypalIPN]:
       // If none found, we get an empty sequence => None
       docs.headOption.map(docToPaypalIPN)
     }
+
+  /**
+   * Helper to convert a Document to a PaypalIPN case class
+   */
+  private def docToPaypalIPN(doc: Document): PaypalIPN =
+    PaypalIPN(
+      // doc("_id") can be cast to ObjectId
+      _id = doc.getObjectId("_id"),
+      payload = doc.getString("payload")
+    )
 
   /**
    * Update an existing IPN document by _id. Return true if something was updated.

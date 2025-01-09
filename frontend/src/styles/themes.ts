@@ -12,10 +12,14 @@ export interface Theme {
   ngoUrl: string;
   helpUrl: string;
   statusColors: {
-    donated: string;
-    pending: string;
-    inTransit: string;
+    announced: string;
+    pending_confirmation: string;
+    confirmed: string;
+    received: string;
+    in_transfer: string;
+    processing: string;
     allocated: string;
+    awaiting_utilization: string;
     used: string;
   };
 }
@@ -35,12 +39,15 @@ export const themes: Record<string, Theme> = {
     ngoUrl: 'https://www.globalgiving.org',
     helpUrl: '/help',
     statusColors: {
-      donated: 'bg-green-500',
-      pending: 'bg-yellow-500',
-      inTransit: 'bg-yellow-500',
-      allocated: 'bg-blue-500',
-      used: 'bg-purple-500',
+      announced: 'bg-green-500',
+      pending_confirmation: 'bg-yellow-500',
+      confirmed: 'bg-blue-500',
+      received: 'bg-purple-500',
+      in_transfer: 'bg-yellow-500',
+      processing: 'bg-blue-500',
+      allocated: 'bg-purple-500',
+      awaiting_utilization: 'bg-yellow-500',
+      used: 'bg-green-500',
     },
   },
 };
-

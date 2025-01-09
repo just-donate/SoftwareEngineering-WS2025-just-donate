@@ -1,6 +1,7 @@
 import { Donation } from '../../types/types';
 import { StatusTimeline } from './StatusTimeline';
 import { customStyles } from '../../styles/custom';
+import { dateFormatter } from '@/lib/utils';
 
 interface DonationDetailsProps {
   donation: Donation;
@@ -8,6 +9,10 @@ interface DonationDetailsProps {
 }
 
 export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onClose }) => {
+
+  console.log(donation);
+  console.log(donation.organisation);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className={`${customStyles.layout.card} ${customStyles.colors.card} max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
@@ -22,11 +27,11 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onCl
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <p className={`${customStyles.text.body} font-semibold`}>NGO:</p>
-            <p className={customStyles.colors.text}>{donation.ngo}</p>
+            <p className={customStyles.colors.text}>{donation.organisation}</p>
           </div>
           <div>
             <p className={`${customStyles.text.body} font-semibold`}>Project:</p>
-            <p className={customStyles.colors.text}>{donation.earmarking}</p>
+            <p className={customStyles.colors.text}>{donation.earmarking || "General Purpose Donation"}</p>
           </div>
           <div>
             <p className={`${customStyles.text.body} font-semibold`}>Amount:</p>
@@ -34,7 +39,7 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onCl
           </div>
           <div>
             <p className={`${customStyles.text.body} font-semibold`}>Date:</p>
-            <p className={customStyles.colors.text}>{donation.date}</p>
+            <p className={customStyles.colors.text}>{dateFormatter.format(new Date(donation.date))}</p>
           </div>
         </div>
         <StatusTimeline status={donation.status} />

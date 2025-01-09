@@ -1,7 +1,7 @@
 package com.just.donate.utils.structs
 
-import com.just.donate.utils.Money
 import com.just.donate.models.DonationPart
+import com.just.donate.utils.Money
 
 case class ReservableQueue(
   context: String,

@@ -1,11 +1,11 @@
 package com.just.donate.models
 
 import com.just.donate.models.Types.DonationGetter
+import com.just.donate.utils.Money
 import com.just.donate.utils.structs.{Split, Splittable}
-import scala.math.Ordered.orderingToOrdered
 
 import java.time.LocalDateTime
-import com.just.donate.utils.Money
+import scala.math.Ordered.orderingToOrdered
 // TODO: when encoding and decoding json, make sure the connection between the donation and it's parts isn't lost
 case class DonationPart(amount: Money, donationId: String, donationDate: LocalDateTime)
     extends Splittable[DonationPart, Money]
@@ -30,6 +30,6 @@ case class DonationPart(amount: Money, donationId: String, donationDate: LocalDa
 
   def donation(using donationGetter: DonationGetter): Option[Donation] =
     donationGetter(donationId)
-  
+
   def earmarking(using donationGetter: DonationGetter): Option[String] =
     donationGetter(donationId).flatMap(_.earmarking)

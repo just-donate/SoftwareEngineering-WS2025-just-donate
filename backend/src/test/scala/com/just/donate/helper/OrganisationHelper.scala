@@ -1,10 +1,8 @@
 package com.just.donate.helper
 
-import com.just.donate.models.{Account, Organisation}
 import cats.effect.IO
+import com.just.donate.models.{Account, Donation, Donor, Organisation}
 import com.just.donate.store.MemoryStore
-import com.just.donate.models.Donor
-import com.just.donate.models.Donation
 import com.just.donate.utils.Money
 
 object OrganisationHelper:
@@ -12,7 +10,7 @@ object OrganisationHelper:
   // Helper method to set up a new Organisation with accounts and flows
   def createNewRoots(): Organisation =
     var newRoots = Organisation("New Roots")
-    
+
     newRoots = newRoots.addAccount("Paypal")
     newRoots = newRoots.addAccount("Better Place")
     newRoots = newRoots.addAccount("Bank")

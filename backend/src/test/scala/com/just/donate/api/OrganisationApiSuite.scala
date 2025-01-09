@@ -1,17 +1,13 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import com.just.donate.api.DonationRoute.RequestDonation
 import com.just.donate.api.OrganisationRoute.{RequestOrganisation, ResponseOrganisation}
 import com.just.donate.helper.OrganisationHelper.*
 import com.just.donate.helper.TestHelper.*
-import com.just.donate.mocks.config.AppConfigMock
-import com.just.donate.mocks.notify.EmailServiceMock
 import com.just.donate.store.MemoryStore
-import com.just.donate.utils.Money
 import io.circe.*
 import io.circe.generic.auto.*
-import munit.{BeforeEach, CatsEffectSuite}
+import munit.CatsEffectSuite
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
@@ -120,7 +116,8 @@ class OrganisationApiSuite extends CatsEffectSuite:
   }
 
   test("POST /organisation/{id}/account should return NotFound if org does not exist") {
-    val requestJson = Json.obj("name" -> Json.fromString("AccName"), "balance" -> Json.obj("amount" -> Json.fromString("100")))
+    val requestJson =
+      Json.obj("name" -> Json.fromString("AccName"), "balance" -> Json.obj("amount" -> Json.fromString("100")))
     val req = Request[IO](Method.POST, uri"/00000/account").withEntity(requestJson)
     for resp <- routes.run(req)
     yield assertEquals(resp.status, Status.NotFound)

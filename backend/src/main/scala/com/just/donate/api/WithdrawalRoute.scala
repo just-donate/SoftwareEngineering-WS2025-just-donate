@@ -5,6 +5,7 @@ import cats.implicits.*
 import com.just.donate.config.Config
 import com.just.donate.notify.IEmailService
 import com.just.donate.store.Store
+import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
 import io.circe.*
 import io.circe.generic.auto.*
@@ -12,7 +13,6 @@ import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
-import com.just.donate.utils.Money
 
 object WithdrawalRoute:
 

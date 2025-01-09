@@ -53,11 +53,7 @@ const config: Config = {
           '5': 'hsl(var(--chart-5))'
         }
       },
-      borderRadius: {
-        lg: 'var(--radius)', // Added border radius settings
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
-      }
+
     }
   },
   plugins: [require("tailwindcss-animate")], // Added plugin

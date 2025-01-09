@@ -3,7 +3,7 @@ package com.just.donate.api
 import cats.effect.*
 import com.just.donate.config.Config
 import com.just.donate.models.errors.DonationError
-import com.just.donate.models.{Donation, Donor, Organisation, StatusUpdate}
+import com.just.donate.models.{Donation, Donor, Organisation}
 import com.just.donate.notify.IEmailService
 import com.just.donate.store.Store
 import com.just.donate.utils.Money
@@ -31,7 +31,7 @@ object DonationRoute:
             case None                      => BadRequest("Organisation not found")
             case Some(Left(donationError)) => BadRequest(donationError.message)
             case Some(Right(trackingId)) =>
-              val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+              val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId"
               emailService.sendEmail(
                 requestDonation.donorEmail,
                 emailTemplate(trackingLink, trackingId, config.frontendUrl)
@@ -42,26 +42,28 @@ object DonationRoute:
 
       case GET -> Root / organisationId / "donor" / donorId =>
         loadOrganisation[DonationListResponse](organisationId)(store): organisation =>
-          DonationListResponse(organisation
-            .getDonations(donorId)
-            .map: donation =>
-              DonationResponse(
-                donation.id,
-                donation.amountTotal,
-                donation.donationDate,
-                donation.earmarking.getOrElse(""),
-                donation.statusUpdates.map: status =>
-                  StatusResponse(status.status.toString, status.date, status.description)
-              )
+          DonationListResponse(
+            organisation
+              .getDonations(donorId)
+              .map: donation =>
+                DonationResponse(
+                  donation.id,
+                  donation.amountTotal,
+                  organisation.name,
+                  donation.donationDate,
+                  donation.earmarking.getOrElse(""),
+                  donation.statusUpdates.map: status =>
+                    StatusResponse(status.status.toString.toLowerCase, status.date, status.description)
+                )
           )
 
   private val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
     f"""Thank you for your donation, to track your progress visit
-       |${linkWithId}
+       |$linkWithId
        |or enter your tracking id
-       |${id}
+       |$id
        |on our tracking page
-       |${link}""".stripMargin
+       |$link""".stripMargin
 
   private def organisationMapper(requestDonation: RequestDonation, accountName: String)(
     org: Organisation
@@ -96,6 +98,7 @@ object DonationRoute:
   private[api] case class DonationResponse(
     donationId: String,
     amount: Money,
+    organisation: String,
     date: LocalDateTime,
     earmarking: String,
     status: Seq[StatusResponse]

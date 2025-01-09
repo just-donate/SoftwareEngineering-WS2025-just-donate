@@ -1,10 +1,10 @@
 package com.just.donate.models
 
 import com.just.donate.helper.OrganisationHelper.createNewRoots
-import munit.FunSuite
 import com.just.donate.mocks.config.AppConfigMock
 import com.just.donate.models.errors.TransferError
 import com.just.donate.utils.Money
+import munit.FunSuite
 
 class OrganisationTransferSuite extends FunSuite:
 

@@ -3,6 +3,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import Link from 'next/link';
 import Image from 'next/image';
 import logo from '@/assets/logo_white_small.png';
+import router from 'next/router';
 
 interface NavigationProps {
   links: {
@@ -13,6 +14,10 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({ links }) => {
   const { theme } = useTheme();
+
+  const clickLink = (link: string) => {
+    router.push(link);
+  }
 
   return (
       <nav className={`${theme.primary} shadow`}>
@@ -26,13 +31,14 @@ export const Navigation: React.FC<NavigationProps> = ({ links }) => {
             </div>
             <div className="ml-auto flex space-x-4">
               {links.map((link, index) => (
-                  <a
+                  <Link
                       key={index}
                       href={link.link}
                       className={`text-white hover:opacity-80 transition-opacity`}
+                      onClick={() => clickLink(link.link)}
                   >
                     {link.name}
-                  </a>
+                  </Link>
               ))}
             </div>
           </div>

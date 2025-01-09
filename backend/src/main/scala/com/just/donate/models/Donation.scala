@@ -1,9 +1,11 @@
 package com.just.donate.models
 
+import com.just.donate.utils.Money
+
 import java.time.LocalDateTime
 import java.util
 import java.util.UUID
-import com.just.donate.utils.Money
+
 /**
  * Represents a single donation. A donation can be split into multiple parts, e.g. for different purposes.
  * The donation is always made by a donor and has a date when it was made.
@@ -19,7 +21,7 @@ case class Donation(
 ):
 
   override def toString: String = String.format("Donation from %s on %s", donorId, donationDate)
-  
+
   def addStatusUpdate(status: StatusUpdate): Unit =
     statusUpdates = statusUpdates.appended(status)
 

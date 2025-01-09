@@ -25,7 +25,8 @@ class TransferApiSuite extends CatsEffectSuite:
 
   test("POST /transfer/organisationId should return OK and update the organisation") {
     val req =
-      Request[IO](Method.POST, testUri(organisationId("newRoots"))).withEntity(RequestTransfer("Paypal", "Bank", Money("100")))
+      Request[IO](Method.POST, testUri(organisationId("newRoots")))
+        .withEntity(RequestTransfer("Paypal", "Bank", Money("100")))
     for
       _ <- addPaypalDonation
       resp <- transferRoute.run(req)

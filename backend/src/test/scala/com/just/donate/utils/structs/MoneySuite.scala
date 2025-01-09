@@ -3,14 +3,14 @@ package com.just.donate.utils.structs
 import com.just.donate.utils.Money
 import com.just.donate.utils.Money.ZERO
 import munit.FunSuite
+
 import scala.math.Ordered.orderingToOrdered
 
-class MoneySuite extends FunSuite {
+class MoneySuite extends FunSuite:
 
   // Helper method to assert Money equality
-  def assertMoneyEquals(expected: String, actual: Money): Unit = {
+  def assertMoneyEquals(expected: String, actual: Money): Unit =
     assertEquals(actual.getAmount, expected)
-  }
 
   // Test the apply method with various inputs
   test("Money.apply should trim spaces and leading zeros") {
@@ -197,7 +197,6 @@ class MoneySuite extends FunSuite {
 
   // Test Numeric trait integration
   test("Money should work with Numeric trait operations") {
-    import Money._
 
     val numeric = implicitly[Numeric[Money]]
 
@@ -245,16 +244,14 @@ class MoneySuite extends FunSuite {
   test("Money.unapply should allow pattern matching") {
     val m = Money("123.45")
 
-    m match {
+    m match
       case Money(amount) => assertEquals(amount, "123.45")
-      case _ => fail("Pattern matching failed")
-    }
+      case _             => fail("Pattern matching failed")
 
     val mZero = Money("0")
-    mZero match {
+    mZero match
       case Money(amount) => assertEquals(amount, "0.0")
-      case _ => fail("Pattern matching failed for zero")
-    }
+      case _             => fail("Pattern matching failed for zero")
   }
 
   // Test ZERO constant
@@ -374,4 +371,3 @@ class MoneySuite extends FunSuite {
     assertNotEquals(m1, m4)
     assertNotEquals(m1.hashCode(), m4.hashCode())
   }
-}
