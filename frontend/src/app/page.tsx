@@ -34,7 +34,7 @@ export default function SearchPage() {
 
   return (
       <div className={`h-screen ${theme.background}`} style={{ backgroundImage: 'url(https://lirp.cdn-website.com/58002456/dms3rep/multi/opt/IMG_6410-358b77c4-976cb433-1920w.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-        <Navigation links={[]} />
+        <Navigation links={[{ link: '/organization/', name: 'Organization Login' }]} />
         <main className={`${theme.text} max-w-4xl mx-auto px-4 flex flex-col items-center justify-center h-[calc(100%-4rem)]`}>
           <div className={`${theme.card} p-6 rounded-lg shadow-lg w-full max-w-2xl mb-6`}>
             <h2 className="text-2xl font-bold mb-4">Welcome to JustDonate</h2>
