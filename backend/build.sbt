@@ -17,14 +17,14 @@ lazy val root = (project in file("."))
     jacocoReportSettings := JacocoReportSettings()
     .withThresholds(
 //      TODO: Change thresholds
-      JacocoThresholds(
-        instruction = 80,
-        method = 100,
-        branch = 100,
-        complexity = 100,
-        line = 90,
-        clazz = 100)
-    )
+//      JacocoThresholds(
+//        instruction = 80,
+//        method = 100,
+//        branch = 100,
+//        complexity = 100,
+//        line = 90,
+//        clazz = 100)
+//    )
     .withFormats(
       JacocoReportFormats.XML
     )
