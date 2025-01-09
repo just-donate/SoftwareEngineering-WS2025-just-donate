@@ -68,6 +68,7 @@ libraryDependencies ++= Seq(
   // Test dependencies
   "org.typelevel" % "munit-cats-effect_3" % "2.0.0" % Test,
   "org.scalameta" % "munit_3" % "1.0.4" % Test,
+  "org.mockito" % "mockito-scala_2.13" % "1.17.37" % Test,
 )
 
 Compile / run / mainClass := Some("com.just.donate.Server")
