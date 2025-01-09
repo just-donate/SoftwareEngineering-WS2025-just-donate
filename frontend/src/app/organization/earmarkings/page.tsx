@@ -15,7 +15,7 @@ export default function EarmarkingsPage() {
       const newEarmarking: Earmarking = {
         id: Date.now().toString(),
         name: newEarmarkingName,
-        organizationId: '1', // This should be the actual organization ID
+        organizationId: '591671920',
       }
       setEarmarkings([...earmarkings, newEarmarking])
       setNewEarmarkingName('')
