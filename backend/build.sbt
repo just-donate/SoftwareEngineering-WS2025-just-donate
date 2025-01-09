@@ -1,3 +1,4 @@
+import com.github.sbt.jacoco.JacocoPlugin.autoImport.{JacocoReportSettings, jacocoReportSettings}
 import sbtassembly.AssemblyPlugin.autoImport.*
 import sbtassembly.{MergeStrategy, PathList}
 
@@ -8,9 +9,26 @@ ThisBuild / scalaVersion := "3.3.4"
 ThisBuild / parallelExecution := false
 
 lazy val root = (project in file("."))
+  .enablePlugins(JacocoPlugin)
   .settings(
-    name := "backend"
+    name := "backend",
   )
+  .settings(
+    jacocoReportSettings := JacocoReportSettings()
+    .withThresholds(
+//      TODO: Change thresholds
+      JacocoThresholds(
+        instruction = 80,
+        method = 100,
+        branch = 100,
+        complexity = 100,
+        line = 90,
+        clazz = 100)
+    )
+    .withFormats(
+      JacocoReportFormats.XML
+    )
+    .withTitle("jacoco"))
 
 // Fix assembly merge strategy to avoid native-image issues
 ThisBuild / assemblyMergeStrategy := {
@@ -46,6 +64,7 @@ libraryDependencies ++= Seq(
   // Test dependencies
   "org.typelevel"                % "munit-cats-effect_3"          % "2.0.0"   % Test,
   "org.scalameta"                % "munit_3"                      % "1.0.4"   % Test,
+
 )
 
 Compile / run / mainClass := Some("com.just.donate.Server")
