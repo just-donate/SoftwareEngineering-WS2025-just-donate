@@ -4,7 +4,7 @@ import type { Config } from 'jest';
 const config: Config = {
   testEnvironment: 'jest-environment-jsdom',
   collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts', '!src/**/*.config.ts'],
+  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
 
   // Use ts-jest to transform .ts or .tsx files
   transform: {
