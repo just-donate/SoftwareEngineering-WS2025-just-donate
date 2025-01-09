@@ -12,7 +12,6 @@ interface TrackingPageClientProps {
 }
 
 export function TrackingPageClient({ donations, theme }: TrackingPageClientProps) {
-
     return (
         <div className={`min-h-screen ${theme.background}`}>
             <Navigation links={[{ link: '/help', name: 'Help' }]} />
@@ -23,7 +22,9 @@ export function TrackingPageClient({ donations, theme }: TrackingPageClientProps
                     ) : (
                         <div className="text-center py-12">
                             <h2 className="text-2xl font-semibold">No donations found</h2>
-                            <p className="mt-2">The tracking ID you provided could not be found.</p>
+                            <p className={`mt-2 ${theme.textLight}`}>
+                                The tracking ID you provided could not be found.
+                            </p>
                         </div>
                     )}
                 </div>

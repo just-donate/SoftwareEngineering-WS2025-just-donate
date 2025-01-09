@@ -8,10 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Badge } from "../../../components/organization/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../../components/organization/ui/dialog"
 import { Textarea } from "../../../components/organization/ui/textarea"
-import { mockDonations } from '../../tracking/donations'
+
 
 export default function DonationsPage() {
 
+  const mockDonations: Donation[] = []
   const [donations] = useState<Donation[]>(mockDonations)
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null)
   const [updateContent, setUpdateContent] = useState('')
@@ -47,9 +48,9 @@ export default function DonationsPage() {
               {donations.map((donation) => {
                 const latestStatus = donation.status[donation.status.length - 1];
                 return (
-                  <TableRow key={donation.id}>
+                  <TableRow key={donation.donationId}>
                     <TableCell>{donation.donorEmail}</TableCell>
-                  <TableCell>${donation.amount}</TableCell>
+                  <TableCell>${donation.amount.amount}</TableCell>
                   <TableCell>
                     <Badge>
                       {latestStatus.status}

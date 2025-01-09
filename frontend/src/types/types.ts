@@ -12,6 +12,7 @@ export interface Money {
 
 export interface Donation {
   donationId: string;
+  donorEmail: string;
   amount: Money;
   organisation: string;
   date: string;

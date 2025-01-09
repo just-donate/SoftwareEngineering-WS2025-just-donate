@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 import { BankAccount } from '../../types/types'
 
 interface TreeNodeProps {
@@ -11,6 +12,7 @@ interface TreeNodeProps {
 }
 
 const TreeNode: React.FC<TreeNodeProps> = React.memo(({ account, x, y, width, height, onPositionChange }) => {
+  const theme = useTheme()
   const nodeRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -23,11 +25,18 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({ account, x, y, width, he
   return (
     <div 
       ref={nodeRef}
-      className="absolute bg-white border rounded-md p-2"
-      style={{ left: x, top: y, width, height }}
+      className="absolute rounded-md p-2"
+      style={{ 
+        left: x, 
+        top: y, 
+        width, 
+        height,
+        backgroundColor: theme.theme.card,
+        color: theme.theme.text
+      }}
     >
       <div className="font-semibold">{account.name}</div>
-      <div className="text-sm text-gray-500">${account.balance}</div>
+      <div className="text-sm" style={{ color: theme.theme.text }}>${account.balance}</div>
     </div>
   )
 })

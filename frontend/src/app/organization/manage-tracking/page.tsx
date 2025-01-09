@@ -7,6 +7,7 @@ import { Theme, themes } from '../../../styles/themes'
 import { useTheme } from '@/contexts/ThemeContext'
 
 export default function ManageTrackingPage() {
+
   const { theme, updateTheme } = useTheme()
   const [themeString, setThemeString] = useState('')
   const [error, setError] = useState('')
