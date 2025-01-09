@@ -12,15 +12,6 @@ interface DonationItemProps {
   onClick: () => void
 }
 
-const ThankYouMessage = () => (
-    <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10 animate-fade-in-slow">
-      <div className="text-center animate-pop-up-slow">
-        <Heart className="w-12 h-12 text-red-500 mx-auto mb-2" />
-        <p className="text-lg font-semibold text-gray-800">Thank you for your donation!</p>
-      </div>
-    </div>
-)
-
 export const DonationItem: React.FC<DonationItemProps> = ({ donation, onClick }) => {
   const { theme } = useTheme()
   const [showThankYou, setShowThankYou] = useState(false)
