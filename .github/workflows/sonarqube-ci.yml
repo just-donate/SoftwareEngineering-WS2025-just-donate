@@ -27,7 +27,7 @@ jobs:
       - name: Install & test frontend
         run: |
           cd frontend
-          npm ci
+          npm ci --force
           npm run test
 
       - name: SonarQube Scan
