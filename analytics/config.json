@@ -1,0 +1,28 @@
+{
+
+    "type" : "seerene-application-import-configuration",
+    "version" : "1",
+
+    "author-anonymization": true,
+
+    "components" : {
+
+        "repository": {
+
+            "justDonate" : {
+
+                "vcs-type" : "git",
+
+                "credentials-key" : "seerene-key",
+
+                "repo-url" : "git@github.com:just-donate/SoftwareEngineering-WS2025-just-donate.git",
+
+                "prefix" : ""
+
+            }
+
+        }
+
+    }
+
+}
