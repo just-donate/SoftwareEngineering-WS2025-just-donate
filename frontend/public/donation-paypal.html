@@ -167,7 +167,6 @@
 
 <!-- 
   Hidden PayPal Form (auto-submitted after we validate & transfer user data).
-  Note: If you have a different currency or business email, adjust these values.
 -->
 <form 
   id="paypalForm" 
@@ -233,10 +232,6 @@
       alert('Please enter a valid donation amount greater than 0.');
       return false; // stop normal form submission
     }
-
-    // If you also want to ensure email is not blank or is valid, 
-    // you can rely on "required" attribute or do further checks here.
-
     // ----- If valid, set PayPal form amount -----
     document.getElementById('paypalAmount').value = amountValue.toFixed(2);
 
