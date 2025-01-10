@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { Transaction, BankAccount, Earmarking } from '@/types/types'
+import { Transaction, BankAccount, Earmarking, Money } from '@/types/types'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -28,19 +28,21 @@ export async function getTransactions(orgId: string): Promise<Transaction[]> {
 
 export async function createTransfer(
   orgId: string,
-  fromAccountId: string,
-  toAccountId: string,
-  amount: string
+  fromAccount: string,
+  toAccount: string,
+  amount: {
+    amount: string,
+  },
 ) {
   try {
-    const response = await fetch(`${API_URL}/organisation/${orgId}/transaction/transfer`, {
+    const response = await fetch(`${API_URL}/transfer/${orgId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        fromAccountId,
-        toAccountId,
+        fromAccount,
+        toAccount,
         amount
       }),
     })
@@ -61,20 +63,20 @@ export async function createTransfer(
 
 export async function createWithdrawal(
   orgId: string,
-  fromAccountId: string,
-  earmarkingId: string,
-  amount: string,
+  fromAccount: string,
+  earmarking: string,
+  amount: Money,
   description: string
 ) {
   try {
-    const response = await fetch(`${API_URL}/organisation/${orgId}/transaction/withdrawal`, {
+    const response = await fetch(`${API_URL}/withdraw/${orgId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        fromAccountId,
-        earmarkingId,
+        fromAccount,
+        earmarking,
         amount,
         description
       }),

@@ -43,19 +43,25 @@ object DonationRoute:
       case GET -> Root / organisationId / "donor" / donorId =>
         loadOrganisation[DonationListResponse](organisationId)(store): organisation =>
           DonationListResponse(
-            organisation
-              .getDonations(donorId)
-              .map: donation =>
-                DonationResponse(
-                  donation.id,
-                  donation.amountTotal,
-                  organisation.name,
-                  donation.donationDate,
-                  donation.earmarking.getOrElse(""),
-                  donation.statusUpdates.map: status =>
-                    StatusResponse(status.status.toString.toLowerCase, status.date, status.description)
-                )
+            organisation.getDonations(donorId).map(toResponseDonation(organisationId))
           )
+
+      case GET -> Root / organisationId / "donations" =>
+        loadOrganisation[DonationListResponse](organisationId)(store): organisation =>
+          DonationListResponse(
+            organisation.getDonations.map(toResponseDonation(organisationId))
+          )
+
+  private def toResponseDonation(organisationId: String)(donation: Donation): DonationResponse =
+    DonationResponse(
+      donation.id,
+      donation.amountTotal,
+      organisationId,
+      donation.donationDate,
+      donation.earmarking.getOrElse(""),
+      donation.statusUpdates.map: status =>
+        StatusResponse(status.status.toString.toLowerCase, status.date, status.description)
+    )
 
   private val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
     f"""Thank you for your donation, to track your progress visit

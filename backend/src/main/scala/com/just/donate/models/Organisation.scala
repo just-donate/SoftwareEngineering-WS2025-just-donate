@@ -56,6 +56,9 @@ case class Organisation(
   def removeEarmarking(earmarking: String): Organisation =
     copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmarking))))
 
+  
+  def getDonations: Seq[Donation] = donations.values.toSeq
+  
   /**
    * Loads an existing donor from the organisation.
    * @param email the email of the donor.

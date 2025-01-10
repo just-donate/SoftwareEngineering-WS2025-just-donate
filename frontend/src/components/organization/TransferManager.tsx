@@ -30,7 +30,7 @@ export default function TransferManager({
     }
 
     try {
-      const result = await createTransfer(organizationId, fromAccount, toAccount, amount)
+      const result = await createTransfer(organizationId, fromAccount, toAccount, { amount: amount })
 
       if (result.success) {
         setAmount('')

@@ -34,7 +34,7 @@ export default function WithdrawalManager({
     }
 
     try {
-      const result = await createWithdrawal(organizationId, fromAccount, earmarking, amount, description)
+      const result = await createWithdrawal(organizationId, fromAccount, earmarking, { amount: amount }, description)
 
       if (result.success) {
         setAmount('')

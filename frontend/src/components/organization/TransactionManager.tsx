@@ -38,8 +38,8 @@ export default function TransactionManager({
 
     try {
       const result = transactionType === 'transfer'
-        ? await createTransfer(organizationId, fromAccount, toAccount, amount)
-        : await createWithdrawal(organizationId, fromAccount, earmarking, amount, Date.now().toString())
+        ? await createTransfer(organizationId, fromAccount, toAccount, { amount: amount })
+        : await createWithdrawal(organizationId, fromAccount, earmarking, { amount: amount }, Date.now().toString())
 
       if (result.success) {
         // Optimistically update the UI

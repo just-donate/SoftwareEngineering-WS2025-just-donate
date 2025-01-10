@@ -50,6 +50,7 @@ object Server extends IOApp:
   FileStore.save(org.name.hashCode.toString, org).unsafeRunSync()
    */
   private val appConfig: Config = AppConfig()
+
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   def run(args: List[String]): IO[ExitCode] =

@@ -7,7 +7,7 @@ export interface DonationStatus {
 }
 
 export interface Money {
-  amount: number;
+  amount: string;
 }
 
 export interface Donation {
