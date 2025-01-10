@@ -1,43 +1,47 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card"
-import { Earmarking } from '@/types/types'
-import { createEarmarking } from '@/app/actions/earmarking'
+import { useState } from 'react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Earmarking } from '@/types/types';
+import { createEarmarking } from '@/app/actions/earmarking';
 
 interface EarmarkingManagerProps {
-  initialEarmarkings: Earmarking[]
-  organizationId: string
+  initialEarmarkings: Earmarking[];
+  organizationId: string;
 }
 
-export default function EarmarkingManager({ initialEarmarkings, organizationId }: EarmarkingManagerProps) {
-  const [earmarkings, setEarmarkings] = useState<Earmarking[]>(initialEarmarkings)
-  const [newEarmarkingName, setNewEarmarkingName] = useState('')
-  const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+export default function EarmarkingManager({
+  initialEarmarkings,
+  organizationId,
+}: EarmarkingManagerProps) {
+  const [earmarkings, setEarmarkings] =
+    useState<Earmarking[]>(initialEarmarkings);
+  const [newEarmarkingName, setNewEarmarkingName] = useState('');
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const addEarmarking = async () => {
-    if (!newEarmarkingName) return
+    if (!newEarmarkingName) return;
 
-    const result = await createEarmarking(organizationId, newEarmarkingName)
-    
+    const result = await createEarmarking(organizationId, newEarmarkingName);
+
     if (result.success) {
       // Optimistically update the UI
       const newEarmarking: Earmarking = {
-        name: newEarmarkingName
-      }
-      setEarmarkings([...earmarkings, newEarmarking])
-      setNewEarmarkingName('')
-      setSuccessMessage('Earmarking created successfully!')
-      setError('')
-      setTimeout(() => setSuccessMessage(''), 3000)
+        name: newEarmarkingName,
+      };
+      setEarmarkings([...earmarkings, newEarmarking]);
+      setNewEarmarkingName('');
+      setSuccessMessage('Earmarking created successfully!');
+      setError('');
+      setTimeout(() => setSuccessMessage(''), 3000);
     } else {
-      setError(result.error || 'Failed to create earmarking')
-      setSuccessMessage('')
+      setError(result.error || 'Failed to create earmarking');
+      setSuccessMessage('');
     }
-  }
+  };
 
   return (
     <div>
@@ -56,11 +60,13 @@ export default function EarmarkingManager({ initialEarmarkings, organizationId }
               <Button onClick={addEarmarking}>Add</Button>
             </div>
             {error && <div className="text-red-500">{error}</div>}
-            {successMessage && <div className="text-green-500">{successMessage}</div>}
+            {successMessage && (
+              <div className="text-green-500">{successMessage}</div>
+            )}
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Existing Earmarkings</CardTitle>
@@ -76,5 +82,5 @@ export default function EarmarkingManager({ initialEarmarkings, organizationId }
         </CardContent>
       </Card>
     </div>
-  )
-} 
+  );
+}

@@ -1,20 +1,19 @@
-'use server'
+'use server';
 
-import { revalidatePath } from 'next/cache'
-import { Theme, themes } from '@/styles/themes'
-import fs from 'fs/promises'
-import path from 'path'
+import { revalidatePath } from 'next/cache';
+import { Theme } from '@/styles/themes';
+import fs from 'fs/promises';
 
-const THEME_FILE_PATH = './src/styles/saved_theme.json'
+const THEME_FILE_PATH = './src/styles/saved_theme.json';
 
 export async function getTheme(): Promise<Theme | null> {
   try {
-    const themeData = await fs.readFile(THEME_FILE_PATH, 'utf-8')
-    return JSON.parse(themeData)
+    const themeData = await fs.readFile(THEME_FILE_PATH, 'utf-8');
+    return JSON.parse(themeData);
   } catch (error) {
     // If file doesn't exist or there's an error reading it, return null
-    console.error('Failed to fetch theme:', error)
-    return null
+    console.error('Failed to fetch theme:', error);
+    return null;
   }
 }
 
@@ -22,27 +21,27 @@ export async function updateTheme(theme: Theme) {
   try {
     // Validate theme structure
     if (!isValidTheme(theme)) {
-      throw new Error('Invalid theme structure')
+      throw new Error('Invalid theme structure');
     }
 
     // Save theme to file
-    await fs.writeFile(THEME_FILE_PATH, JSON.stringify(theme, null, 2))
-    
+    await fs.writeFile(THEME_FILE_PATH, JSON.stringify(theme, null, 2));
+
     // Revalidate all pages that might use the theme
-    revalidatePath('/')
-    
-    return { success: true }
+    revalidatePath('/');
+
+    return { success: true };
   } catch (error) {
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to save theme' 
-    }
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to save theme',
+    };
   }
 }
 
-function isValidTheme(theme: any): theme is Theme {
-  if (!theme || typeof theme !== 'object') return false
-  
+function isValidTheme(theme: Partial<Theme>): theme is Theme {
+  if (!theme || typeof theme !== 'object') return false;
+
   try {
     return (
       typeof theme.primary === 'string' &&
@@ -68,8 +67,8 @@ function isValidTheme(theme: any): theme is Theme {
       typeof theme.statusColors.allocated === 'string' &&
       typeof theme.statusColors.awaiting_utilization === 'string' &&
       typeof theme.statusColors.used === 'string'
-    )
+    );
   } catch {
-    return false
+    return false;
   }
-} 
+}

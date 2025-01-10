@@ -1,5 +1,3 @@
-
-
 export interface DonationStatus {
   status: string;
   date: string;
@@ -49,6 +47,6 @@ export interface Photo {
 }
 
 export interface BankAccount {
-  name: string
-  balance: Money
-} 
+  name: string;
+  balance: Money;
+}

@@ -1,49 +1,54 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { Button } from "../../../components/organization/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "../../../components/organization/ui/card"
-import { Theme, themes } from '../../../styles/themes'
-import { useTheme } from '@/contexts/ThemeContext'
+import React, { useState, useEffect } from 'react';
+import { Button } from '../../../components/organization/ui/button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from '../../../components/organization/ui/card';
+import { Theme } from '../../../styles/themes';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function ManageTrackingPage() {
-
-  const { theme, updateTheme } = useTheme()
-  const [themeString, setThemeString] = useState('')
-  const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  const { theme, updateTheme } = useTheme();
+  const [themeString, setThemeString] = useState('');
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    setThemeString(formatThemeToString(theme))
-  }, [theme])
+    setThemeString(formatThemeToString(theme));
+  }, [theme]);
 
   const formatThemeToString = (theme: Theme): string => {
-    return JSON.stringify(theme, null, 2)
-  }
+    return JSON.stringify(theme, null, 2);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setThemeString(e.target.value)
-  }
+    setThemeString(e.target.value);
+  };
 
   const handleSave = async () => {
     try {
-      const parsedTheme = JSON.parse(themeString)
+      const parsedTheme = JSON.parse(themeString);
 
       if (isValidTheme(parsedTheme)) {
-        await updateTheme(parsedTheme)
-        setError('')
-        setSuccessMessage('Theme successfully saved!')
-        setTimeout(() => setSuccessMessage(''), 3000)
+        await updateTheme(parsedTheme);
+        setError('');
+        setSuccessMessage('Theme successfully saved!');
+        setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        throw new Error('Invalid theme structure')
+        throw new Error('Invalid theme structure');
       }
     } catch (error) {
-      setError('Invalid theme format. Please enter a valid JSON string.')
-      setSuccessMessage('')
+      console.error(error);
+      setError('Invalid theme format. Please enter a valid JSON string.');
+      setSuccessMessage('');
     }
-  }
+  };
 
-  const isValidTheme = (theme: any): theme is Theme => {
+  const isValidTheme = (theme: Partial<Theme>): theme is Theme => {
     return (
       typeof theme.primary === 'string' &&
       typeof theme.secondary === 'string' &&
@@ -67,8 +72,8 @@ export default function ManageTrackingPage() {
       typeof theme.statusColors.allocated === 'string' &&
       typeof theme.statusColors.awaiting_utilization === 'string' &&
       typeof theme.statusColors.used === 'string'
-    )
-  }
+    );
+  };
 
   return (
     <div>
@@ -86,11 +91,13 @@ export default function ManageTrackingPage() {
               className="mb-2 w-full h-[60vh] p-2 border rounded"
             />
             {error && <div className="text-red-500">{error}</div>}
-            {successMessage && <div className="text-green-500">{successMessage}</div>}
+            {successMessage && (
+              <div className="text-green-500">{successMessage}</div>
+            )}
             <Button onClick={handleSave}>Save</Button>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

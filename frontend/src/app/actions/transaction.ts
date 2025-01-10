@@ -1,28 +1,31 @@
-'use server'
+'use server';
 
-import { revalidatePath } from 'next/cache'
-import { Transaction, BankAccount, Earmarking, Money } from '@/types/types'
+import { revalidatePath } from 'next/cache';
+import { Transaction, Money } from '@/types/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not set')
+  throw new Error('NEXT_PUBLIC_API_URL is not set');
 }
 
 export async function getTransactions(orgId: string): Promise<Transaction[]> {
   try {
-    const response = await fetch(`${API_URL}/organisation/${orgId}/transaction/list`, {
-      cache: 'no-store'
-    })
-    
+    const response = await fetch(
+      `${API_URL}/organisation/${orgId}/transaction/list`,
+      {
+        cache: 'no-store',
+      },
+    );
+
     if (!response.ok) {
-      throw new Error('Failed to fetch transactions')
+      throw new Error('Failed to fetch transactions');
     }
-    
-    return response.json()
+
+    return response.json();
   } catch (error) {
-    console.error('Failed to fetch transactions:', error)
-    return []
+    console.error('Failed to fetch transactions:', error);
+    return [];
   }
 }
 
@@ -31,7 +34,7 @@ export async function createTransfer(
   fromAccount: string,
   toAccount: string,
   amount: {
-    amount: string,
+    amount: string;
   },
 ) {
   try {
@@ -43,21 +46,22 @@ export async function createTransfer(
       body: JSON.stringify({
         fromAccount,
         toAccount,
-        amount
+        amount,
       }),
-    })
+    });
 
     if (!response.ok) {
-      throw new Error('Failed to create transfer')
+      throw new Error('Failed to create transfer');
     }
 
-    revalidatePath('/organization/transactions/transfer')
-    return { success: true }
+    revalidatePath('/organization/transactions/transfer');
+    return { success: true };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create transfer'
-    }
+      error:
+        error instanceof Error ? error.message : 'Failed to create transfer',
+    };
   }
 }
 
@@ -66,7 +70,7 @@ export async function createWithdrawal(
   fromAccount: string,
   earmarking: string,
   amount: Money,
-  description: string
+  description: string,
 ) {
   try {
     const response = await fetch(`${API_URL}/withdraw/${orgId}`, {
@@ -78,20 +82,21 @@ export async function createWithdrawal(
         fromAccount,
         earmarking,
         amount,
-        description
+        description,
       }),
-    })
+    });
 
     if (!response.ok) {
-      throw new Error('Failed to create withdrawal')
+      throw new Error('Failed to create withdrawal');
     }
 
-    revalidatePath('/organization/transactions/withdrawal')
-    return { success: true }
+    revalidatePath('/organization/transactions/withdrawal');
+    return { success: true };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create withdrawal'
-    }
+      error:
+        error instanceof Error ? error.message : 'Failed to create withdrawal',
+    };
   }
-} 
+}

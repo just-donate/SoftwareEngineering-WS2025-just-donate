@@ -1,58 +1,69 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card"
-import { BankAccount } from '@/types/types'
-import { createTransfer } from '@/app/actions/transaction'
+import { useState } from 'react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { BankAccount } from '@/types/types';
+import { createTransfer } from '@/app/actions/transaction';
 
 interface TransferManagerProps {
-  accounts: BankAccount[]
-  organizationId: string
+  accounts: BankAccount[];
+  organizationId: string;
 }
 
-export default function TransferManager({ 
+export default function TransferManager({
   accounts,
-  organizationId
+  organizationId,
 }: TransferManagerProps) {
-  const [amount, setAmount] = useState('')
-  const [fromAccount, setFromAccount] = useState('')
-  const [toAccount, setToAccount] = useState('')
-  const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  const [amount, setAmount] = useState('');
+  const [fromAccount, setFromAccount] = useState('');
+  const [toAccount, setToAccount] = useState('');
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const createNewTransfer = async () => {
     if (!amount || !fromAccount || !toAccount) {
-      setError('Please fill in all required fields')
-      return
+      setError('Please fill in all required fields');
+      return;
     }
 
     try {
-      const result = await createTransfer(organizationId, fromAccount, toAccount, { amount: amount })
+      const result = await createTransfer(
+        organizationId,
+        fromAccount,
+        toAccount,
+        { amount: amount },
+      );
 
       if (result.success) {
-        setAmount('')
-        setFromAccount('')
-        setToAccount('')
-        setSuccessMessage('Transfer created successfully!')
-        setError('')
-        setTimeout(() => setSuccessMessage(''), 3000)
+        setAmount('');
+        setFromAccount('');
+        setToAccount('');
+        setSuccessMessage('Transfer created successfully!');
+        setError('');
+        setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        setError(result.error || 'Failed to create transfer')
+        setError(result.error || 'Failed to create transfer');
       }
-    } catch (error) {
-      setError('An error occurred while creating the transfer')
+    } catch {
+      setError('An error occurred while creating the transfer');
     }
-  }
+  };
 
   const isValidTransfer = (from: string, to: string): boolean => {
-    const fromAcc = accounts.find(a => a.name === from)
-    const toAcc = accounts.find(a => a.name === to)
-    if (!fromAcc || !toAcc) return false
-    return true
-  }
+    const fromAcc = accounts.find((a) => a.name === from);
+    const toAcc = accounts.find((a) => a.name === to);
+    if (!fromAcc || !toAcc) return false;
+    return true;
+  };
 
   return (
     <Card>
@@ -82,17 +93,18 @@ export default function TransferManager({
             </SelectContent>
           </Select>
 
-          <Select 
-            onValueChange={setToAccount}
-            disabled={!fromAccount}
-          >
+          <Select onValueChange={setToAccount} disabled={!fromAccount}>
             <SelectTrigger>
               <SelectValue placeholder="To account" />
             </SelectTrigger>
             <SelectContent>
               {accounts
-                .filter(account => account.name !== fromAccount && isValidTransfer(fromAccount, account.name))
-                .map(account => (
+                .filter(
+                  (account) =>
+                    account.name !== fromAccount &&
+                    isValidTransfer(fromAccount, account.name),
+                )
+                .map((account) => (
                   <SelectItem key={account.name} value={account.name}>
                     {account.name} ({account.balance.amount})
                   </SelectItem>
@@ -101,11 +113,13 @@ export default function TransferManager({
           </Select>
 
           {error && <div className="text-red-500">{error}</div>}
-          {successMessage && <div className="text-green-500">{successMessage}</div>}
-          
+          {successMessage && (
+            <div className="text-green-500">{successMessage}</div>
+          )}
+
           <Button onClick={createNewTransfer}>Create Transfer</Button>
         </div>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}
