@@ -21,8 +21,8 @@ import Image from 'next/image';
 
 // Mock data for demonstration
 const mockEarmarkings: Earmarking[] = [
-  { id: '1', name: 'Project A', organizationId: '1' },
-  { id: '2', name: 'Project B', organizationId: '1' },
+  { name: 'Project A' },
+  { name: 'Project B' },
 ];
 
 const mockPhotos: Photo[] = [
@@ -92,7 +92,7 @@ export default function GalleryPage() {
               </SelectTrigger>
               <SelectContent>
                 {earmarkings.map((earmarking) => (
-                  <SelectItem key={earmarking.id} value={earmarking.id}>
+                  <SelectItem key={earmarking.name} value={earmarking.name}>
                     {earmarking.name}
                   </SelectItem>
                 ))}
@@ -118,7 +118,7 @@ export default function GalleryPage() {
               <div key={photo.id} className="relative aspect-square">
                 <Image
                   src={photo.url}
-                  alt={`Photo for ${earmarkings.find((e) => e.id === photo.earmarkingId)?.name}`}
+                  alt={`Photo for ${earmarkings.find((e) => e.name === photo.earmarkingId)?.name}`}
                   fill
                   className="object-cover rounded-md"
                 />

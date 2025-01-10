@@ -8,9 +8,9 @@ import { TrackingPageClient } from '@/components/tracking/TrackingPage';
 export default async function Tracking({
   searchParams,
 }: {
-  searchParams: { id: string };
+  searchParams: Promise<{ id: string }>;
 }) {
-  const { id } = searchParams;
+  const { id } = await searchParams;
   const donations = await getDonations(id);
   const theme = (await getTheme()) || themes.default;
 
