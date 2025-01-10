@@ -1,18 +1,22 @@
-// jest.config.ts
-import type { Config } from 'jest';
+/**
+ * For a detailed explanation regarding each configuration property, visit:
+ * https://jestjs.io/docs/configuration
+ */
+
+import type { Config } from "jest";
+import nextJest from "next/jest.js";
+
+const createJestConfig = nextJest({
+    dir: "./",
+});
 
 const config: Config = {
-  testEnvironment: 'jest-environment-jsdom',
-  collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
+    clearMocks: true,
+    collectCoverage: true,
+    collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.d.ts"],
+    coverageDirectory: "coverage",
 
-  // Use ts-jest to transform .ts or .tsx files
-  transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
-  },
-
-  // Typically "v8" is a good choice for coverage with TS
-  coverageProvider: 'v8',
+    testEnvironment: "jsdom",
 };
 
-export default config;
+export default createJestConfig(config);
