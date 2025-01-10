@@ -1,3 +1,6 @@
+import com.github.sbt.jacoco.JacocoPlugin.autoImport.{JacocoReportSettings, jacocoReportSettings}
+import sbtassembly.AssemblyPlugin.autoImport.*
+import sbtassembly.{MergeStrategy, PathList}
 
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
@@ -6,9 +9,33 @@ ThisBuild / scalaVersion := "3.3.4"
 ThisBuild / parallelExecution := false
 
 lazy val root = (project in file("."))
+  .enablePlugins(JacocoPlugin)
   .settings(
-    name := "backend"
+    name := "backend",
   )
+  .settings(
+    jacocoReportSettings := JacocoReportSettings()
+//    .withThresholds(
+//      TODO: Change thresholds
+//      JacocoThresholds(
+//        instruction = 80,
+//        method = 100,
+//        branch = 100,
+//        complexity = 100,
+//        line = 90,
+//        clazz = 100)
+//    )
+    .withFormats(
+      JacocoReportFormats.XML
+    )
+    .withTitle("jacoco"))
+
+// Fix assembly merge strategy to avoid native-image issues
+ThisBuild / assemblyMergeStrategy := {
+  case PathList("META-INF", "native-image", _*) => MergeStrategy.discard
+  case PathList("META-INF", "versions", "9", "module-info.class") => MergeStrategy.discard
+  case x => (assembly / assemblyMergeStrategy).value(x)
+}
 
 libraryDependencies ++= Seq(
   // http4s
@@ -25,6 +52,10 @@ libraryDependencies ++= Seq(
   // MongoDB
   "org.mongodb.scala"            % "mongo-scala-driver_2.13"      % "5.2.1",
 
+  // Testcontainers for Mongo
+  "com.dimafeng" %% "testcontainers-scala-mongodb" % "0.41.5" % Test,
+  "com.dimafeng" %% "testcontainers-scala-munit" % "0.41.5",
+
   // Circe
   "io.circe"                     % "circe-core_3"                 % "0.14.10",
   "io.circe"                     % "circe-generic_3"              % "0.14.10",
@@ -35,8 +66,9 @@ libraryDependencies ++= Seq(
   "com.typesafe"                 % "config"                        % "1.4.3",
 
   // Test dependencies
-  "org.typelevel"                % "munit-cats-effect_3"          % "2.0.0"   % Test,
-  "org.scalameta"                % "munit_3"                      % "1.0.4"   % Test,
+  "org.typelevel" % "munit-cats-effect_3" % "2.0.0" % Test,
+  "org.scalameta" % "munit_3" % "1.0.4" % Test,
+  "org.mockito" % "mockito-scala_2.13" % "1.17.37" % Test,
 )
 
 Compile / run / mainClass := Some("com.just.donate.Server")

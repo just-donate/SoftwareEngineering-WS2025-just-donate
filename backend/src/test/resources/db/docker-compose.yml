@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  mongo_1:
+    image: mongo:6.0.3
+    ports:
+      - "27017:27017"
+    command: --bind_ip_all
+    # Optional healthcheck
+    healthcheck:
+      test: ["CMD", "mongo", "--username", "root", "--password", "root", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
