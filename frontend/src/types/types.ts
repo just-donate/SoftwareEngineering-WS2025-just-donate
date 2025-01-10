@@ -33,16 +33,7 @@ export interface Earmarking {
   name: string;
 }
 
-export interface BankAccount {
-  id: string;
-  name: string;
-  balance: number;
-  organizationId: string;
-  parentIds: string[];
-}
-
 export interface Transaction {
-  id: string;
   amount: number;
   fromAccountId: string;
   toAccountId: string | null;
@@ -57,12 +48,7 @@ export interface Photo {
   uploadDate: string;
 }
 
-
-
-
 export interface BankAccount {
-  id: string
   name: string
-  balance: number
-  parentIds: string[]
+  balance: Money
 } 

@@ -9,7 +9,8 @@ const navItems = [
   { href: '/organization/dashboard', label: 'Dashboard' },
   { href: '/organization/earmarkings', label: 'Earmarkings' },
   { href: '/organization/bank-accounts', label: 'Bank Accounts' },
-  { href: '/organization/transactions', label: 'Transactions' },
+  { href: '/organization/transactions/transfer', label: 'Transfer' },
+  { href: '/organization/transactions/withdrawal', label: 'Withdrawal' },
   { href: '/organization/donations', label: 'Donations' },
   { href: '/organization/gallery', label: 'Gallery' },
   { href: '/organization/manage-tracking', label: 'Tracking Page'}

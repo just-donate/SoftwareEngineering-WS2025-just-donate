@@ -63,6 +63,9 @@ object OrganisationRoute:
       case DELETE -> Root / organisationId / "account" / accountName =>
         loadAndSaveOrganisation(organisationId)(store)(_.removeAccount(accountName))
 
+      case GET -> Root / organisationId / "transaction" / "list" =>
+        Ok(Seq.empty)
+
   case class RequestOrganisation(name: String)
 
   private[api] case class ResponseOrganisation(organisationId: String, name: String)
