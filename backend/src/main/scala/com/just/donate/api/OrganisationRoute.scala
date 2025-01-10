@@ -46,20 +46,22 @@ object OrganisationRoute:
 
       case GET -> Root / organisationId / "earmarking" / "list" =>
         loadOrganisation(organisationId)(store)(
-          _.accounts.headOption.map(_._2.boundDonations.map(_._1)).getOrElse(Seq())
+          _.accounts.headOption.map(
+            _._2.boundDonations.map(_._1).map(ResponseEarmarking(_))
+          ).getOrElse(Seq())
         )
+
+      case GET -> Root / organisationId / "account" / "list" =>
+        loadOrganisation(organisationId)(store)(_.accounts.map(a => ResponseAccount(a._1, a._2.totalBalance)).toSeq)
 
       case req @ POST -> Root / organisationId / "account" =>
         for
           account <- req.as[RequestAccount]
-          response <- loadAndSaveOrganisation(organisationId)(store)(_.addAccount(account.name))
+          response <- loadAndSaveOrganisation(organisationId)(store)(_.addAccount(account.name, account.balance))
         yield response
 
       case DELETE -> Root / organisationId / "account" / accountName =>
         loadAndSaveOrganisation(organisationId)(store)(_.removeAccount(accountName))
-
-      case GET -> Root / organisationId / "account" / "list" =>
-        loadOrganisation(organisationId)(store)(_.accounts.map(_._2.name))
 
   case class RequestOrganisation(name: String)
 
@@ -67,6 +69,10 @@ object OrganisationRoute:
 
   private[api] case class RequestEarmarking(name: String)
 
+  private[api] case class ResponseEarmarking(name: String)
+
   private[api] case class RequestAccount(name: String, balance: Money)
+
+  private[api] case class ResponseAccount(name: String, balance: Money)
 
   private[api] case class RequestDonation(donor: String, amount: Money, earmarking: Option[String])

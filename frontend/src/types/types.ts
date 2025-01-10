@@ -30,9 +30,7 @@ export interface Organization {
 }
 
 export interface Earmarking {
-  id: string;
   name: string;
-  organizationId: string;
 }
 
 export interface BankAccount {

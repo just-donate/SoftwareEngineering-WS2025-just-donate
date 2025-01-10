@@ -18,15 +18,18 @@ case class Organisation(
   donors: Map[String, Donor] = Map.empty
 ):
 
+  private def getEarmarkings: Set[String] = accounts.values.flatMap(_.boundDonations.map(_._1)).toSet
+  
   /**
    * Add a new account to the organisation.
    * @param name the name of the account.
    * @return a new organisation with the account added.
    */
-  def addAccount(name: String): Organisation =
-    val account = new Account(name)
-    if accounts.contains(account.name) then this
-    else copy(accounts = accounts.updated(account.name, account))
+  def addAccount(name: String, initialBalance: Money): Organisation =
+    val initialAccount = getEarmarkings.foldLeft(new Account(name))(_.addEarmarking(_))
+    // TODO add initial balance
+    if accounts.contains(initialAccount.name) then this
+    else copy(accounts = accounts.updated(initialAccount.name, initialAccount))
 
   /**
    * Remove an account from the organisation.
