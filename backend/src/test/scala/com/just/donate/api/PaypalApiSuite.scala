@@ -1,11 +1,14 @@
 package com.just.donate.api
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import com.just.donate.*
+import com.just.donate.mocks.client.MockHttpClient
 import com.just.donate.mocks.paypal.PaypalRepositoryMock
 import munit.CatsEffectSuite
+import org.http4s.client.Client
 import org.http4s.implicits.uri
-import org.http4s.{Method, Request, Status, UrlForm}
+import org.http4s.{Method, Request, Response, Status, UrlForm}
+import scala.concurrent.duration._
 
 import java.lang.Thread.sleep
 
@@ -15,39 +18,69 @@ class PaypalApiSuite extends CatsEffectSuite:
 
   private val fakeRepo = new PaypalRepositoryMock(null)
 
-  private val routes = PaypalRoute.paypalRoute(fakeRepo).orNotFound
+  override def beforeEach(context: BeforeEach): Unit = {
+    fakeRepo.reset()
+  }
 
-  test("GET / should list all IPNs in the DB") {
-    val req = Request[IO](Method.GET, uri"/")
-    print(req)
+  test("POST / should handle PayPal IPN verification is Verified") {
+    val mockClientResource: Resource[IO, Client[IO]] = MockHttpClient.resource {
+      case req if req.uri.toString.contains("paypal.com") =>
+        Resource.pure(Response[IO](Status.Ok).withEntity("VERIFIED"))
+      case req if req.uri.toString.contains("error.com") =>
+        Resource.pure(Response[IO](Status.InternalServerError))
+    }
+    val formData = UrlForm("txn_id" -> "ABC123", "custom" -> "Something")
+    val rawBody = "txn_id=ABC123&custom=Something"
 
-    for {
-      resp <- routes.run(req)
-      body <- resp.as[String] // extract the body as a string
-    } yield {
-      assertEquals(resp.status, Status.Ok)
-      assert(body.contains("test"))
+    mockClientResource.use { mockClient =>
+      val routes = PaypalRoute.paypalRoute(fakeRepo, mockClient).orNotFound
+
+      val req = Request[IO](Method.POST, uri"/").withEntity(formData)
+
+      for {
+        resp <- routes.run(req)
+        body <- resp.as[String]
+        _ <- IO.sleep(100.milli) // Sleep to allow async processing to complete
+        _ <- IO {
+          assertEquals(resp.status, Status.Ok)
+        }
+        allDb <- fakeRepo.findAll()
+      } yield {
+        assertEquals(body, "")
+        assertEquals(allDb.length, 2)
+        assertEquals(allDb.tail.head.payload, rawBody)
+      }
     }
   }
 
-  test("POST / should insert a new IPN into the repo") {
-    // TODO: Test further to check whether a new donation is generated in the correct account in Organization
-    // Make a form-data POST
+  test("POST / should handle PayPal IPN verification when the response is not Verified") {
+    val mockClientResource: Resource[IO, Client[IO]] = MockHttpClient.resource {
+      case req if req.uri.toString.contains("paypal.com") =>
+        Resource.pure(Response[IO](Status.Ok).withEntity("INVALID"))
+      case req if req.uri.toString.contains("error.com") =>
+        Resource.pure(Response[IO](Status.InternalServerError))
+    }
+
     val formData = UrlForm("txn_id" -> "ABC123", "custom" -> "Something")
+    val rawBody = "txn_id=ABC123&custom=Something"
 
-    val req = Request[IO](Method.POST, uri"/")
-      .withEntity(formData) // http4s knows how to encode UrlForm
+    mockClientResource.use { mockClient =>
+      val routes = PaypalRoute.paypalRoute(fakeRepo, mockClient).orNotFound
 
-    for {
-      resp <- routes.run(req)
-      body <- resp.as[String]
-      _ <- IO(assertEquals(resp.status, Status.Ok))
-      _ <- IO(assert(body.contains("IPN Payload received")))
-      allDb <- fakeRepo.findAll()
-    } yield {
-      print(body)
-      assertEquals(allDb.size, 2)
-      assert(allDb.tail.head.payload.contains("txn_id -> Chain(ABC123)"))
-      assert(allDb.tail.head.payload.contains("custom -> Chain(Something)"))
+      val req = Request[IO](Method.POST, uri"/").withEntity(formData)
+
+      for {
+        resp <- routes.run(req)
+        body <- resp.as[String]
+        _ <- IO.sleep(100.milli) // Sleep to allow async processing to complete
+        _ <- IO {
+          assertEquals(resp.status, Status.Ok)
+        }
+        allDb <- fakeRepo.findAll()
+      } yield {
+        assertEquals(body, "")
+        assertEquals(allDb.length, 1)
+        assertEquals(allDb.head.payload, "test")
+      }
     }
   }

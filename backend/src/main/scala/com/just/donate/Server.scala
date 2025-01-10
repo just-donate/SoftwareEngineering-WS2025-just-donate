@@ -8,11 +8,13 @@ import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
-import com.just.donate.config.{ AppConfig, AppEnvironment, Config }
+import com.just.donate.config.{AppConfig, AppEnvironment, Config}
 import com.just.donate.db.PaypalRepository
-import com.just.donate.notify.{ DevEmailService, EmailService, IEmailService }
+import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
 import com.just.donate.store.FileStore
 import org.http4s.*
+import org.http4s.client.Client
+import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.*
 import org.http4s.implicits.*
 import org.http4s.server.Router
@@ -26,8 +28,12 @@ object Server extends IOApp:
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   def run(args: List[String]): IO[ExitCode] =
-    mongoResource(appConfig.mongoUri).use { client =>
-      val database = client.getDatabase("just-donate")
+    mongoResource(appConfig.mongoUri).flatMap { mongoClient =>
+      httpClientResource.map { httpClient =>
+        (mongoClient, httpClient)
+      }
+    }.use { client =>
+      val database = client._1.getDatabase("just-donate")
       val paypalRepository = new PaypalRepository(database.getCollection("paypal-ipn"))
 
       FileStore.init()
@@ -42,8 +48,10 @@ object Server extends IOApp:
         "transfer" -> transferRoute(FileStore, appConfig, emailService),
         "withdraw" -> withdrawalRoute(FileStore, appConfig, emailService),
         "notify" -> notificationRoute(appConfig),
-        "paypal-ipn" -> paypalRoute(paypalRepository)
+        "paypal-ipn" -> paypalRoute(paypalRepository, client._2)
       ).orNotFound
+
+      val httpClient = Client
 
       EmberServerBuilder
         .default[IO]
@@ -58,3 +66,6 @@ object Server extends IOApp:
   /** Acquire and safely release the Mongo client (using Resource). */
   private def mongoResource(uri: String): Resource[IO, MongoClient] =
     Resource.make(IO(MongoClient(uri)))(client => IO(client.close()))
+
+  def httpClientResource: Resource[IO, Client[IO]] =
+    EmberClientBuilder.default[IO].build
