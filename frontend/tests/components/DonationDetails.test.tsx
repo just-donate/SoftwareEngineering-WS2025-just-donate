@@ -13,14 +13,16 @@ jest.mock('../../src/components/tracking/StatusTimeline', () => {
   };
 });
 
+
+
 describe('DonationDetails Component', () => {
   const mockDonation = {
-    id: '1',
+    donationId: '1',
+    organisation: 'Test Organisation',
+    earmarking: 'General Purpose',
     donorEmail: 'donor@example.com',
-    ngo: 'Test NGO',
     project: 'Test Project',
-    amount: 100,
-    currency: 'USD',
+    amount: { amount: '100.0' },
     date: '2023-01-01',
     status: [
       {

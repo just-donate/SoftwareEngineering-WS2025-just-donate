@@ -20,6 +20,8 @@ const mockStatus = [
   },
 ];
 
+
+
 describe('StatusTimeline Component', () => {
   it('renders status items correctly', () => {
     render(
@@ -30,19 +32,19 @@ describe('StatusTimeline Component', () => {
 
     // Check if the status items are rendered
     expect(screen.getByText(/Donated/i)).toBeInTheDocument();
-    expect(screen.getByText(/2023-07-20/i)).toBeInTheDocument();
+    expect(screen.getByText(/July 20, 2023 at 02:00 AM/i)).toBeInTheDocument();
     expect(screen.getByText(/Donation received/i)).toBeInTheDocument();
 
     expect(screen.getByText(/Allocated/i)).toBeInTheDocument();
-    expect(screen.getByText(/2023-07-21/i)).toBeInTheDocument();
+    expect(screen.getByText(/July 21, 2023 at 02:00 AM/i)).toBeInTheDocument();
     expect(screen.getByText(/Funds sent to project/i)).toBeInTheDocument();
 
     expect(screen.getByText(/In Use/i)).toBeInTheDocument();
-    expect(screen.getByText(/2023-07-22/i)).toBeInTheDocument();
+    expect(screen.getByText(/July 22, 2023 at 02:00 AM/i)).toBeInTheDocument();
     expect(screen.getByText(/Funds are inuse/i)).toBeInTheDocument();
 
     expect(screen.getByText(/Processed/i)).toBeInTheDocument();
-    expect(screen.getByText(/2023-07-23/i)).toBeInTheDocument();
+    expect(screen.getByText(/July 23, 2023 at 02:00 AM/i)).toBeInTheDocument();
     expect(screen.getByText(/Donation used by NGO/i)).toBeInTheDocument();
   });
 });

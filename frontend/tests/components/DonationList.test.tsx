@@ -7,12 +7,11 @@ import '@testing-library/jest-dom'; // Import jest-dom
 // Mock donation data
 const mockDonations = [
   {
-    id: '1',
+    donationId: '1',
     donorEmail: 'donor1@example.com',
-    ngo: 'Test NGO 1',
-    project: 'Test Project 1',
-    amount: 100,
-    currency: 'USD',
+    organisation: 'Test NGO 1',
+    earmarking: 'General Purpose 1',
+    amount: { amount: '100.0' },
     date: '2023-01-01',
     status: [
       {
@@ -23,12 +22,11 @@ const mockDonations = [
     ],
   },
   {
-    id: '2',
+    donationId: '2',
     donorEmail: 'donor2@example.com',
-    ngo: 'Test NGO 2',
-    project: 'Test Project 2',
-    amount: 200,
-    currency: 'USD',
+    organisation: 'Test NGO 2',
+    earmarking: 'General Purpose 2',
+    amount: { amount: '200.0' },
     date: '2023-01-02',
     status: [
       {
@@ -50,13 +48,13 @@ describe('DonationList Component', () => {
 
     // Check if the donation items are rendered
     expect(screen.getByText(/Test NGO 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/Test Project 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/100 USD/i)).toBeInTheDocument();
+    expect(screen.getByText(/General Purpose 1/i)).toBeInTheDocument();
+    expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
     expect(screen.getByText(/Completed/i)).toBeInTheDocument();
 
     expect(screen.getByText(/Test NGO 2/i)).toBeInTheDocument();
-    expect(screen.getByText(/Test Project 2/i)).toBeInTheDocument();
-    expect(screen.getByText(/200 USD/i)).toBeInTheDocument();
+    expect(screen.getByText(/General Purpose 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/200.0 Euro/i)).toBeInTheDocument();
     expect(screen.getByText(/Pending/i)).toBeInTheDocument();
   });
 
