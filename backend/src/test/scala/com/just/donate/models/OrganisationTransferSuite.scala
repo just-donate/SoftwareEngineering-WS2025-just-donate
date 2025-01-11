@@ -8,11 +8,15 @@ import munit.FunSuite
 
 class OrganisationTransferSuite extends FunSuite:
 
+  val donor1Email = "donor1@example.org"
+  val amountHundred = "100.00"
+  val amountOneFifty = "150.00"
+
   test("transfer money between accounts") {
     var newRoots = createNewRoots()
 
-    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val (donation, donationPart) = Donation(donor.id, Money("100.00"))
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+    val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
     newRoots = newRoots.transfer(Money("50.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
 
@@ -23,12 +27,12 @@ class OrganisationTransferSuite extends FunSuite:
   test("not transfer money if the source account does not have enough balance") {
     var newRoots = createNewRoots()
 
-    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val (donation, donationPart) = Donation(donor.id, Money("100.00"))
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+    val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
-      newRoots.transfer(Money("150.00"), "Paypal", "Bank", AppConfigMock()),
+      newRoots.transfer(Money(amountOneFifty), "Paypal", "Bank", AppConfigMock()),
       Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
     )
   }
@@ -36,8 +40,8 @@ class OrganisationTransferSuite extends FunSuite:
   test("not transfer money if the source account does not exist") {
     var newRoots = createNewRoots()
 
-    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val (donation, donationPart) = Donation(donor.id, Money("100.00"))
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+    val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
@@ -49,8 +53,8 @@ class OrganisationTransferSuite extends FunSuite:
   test("not transfer money if the destination account does not exist") {
     var newRoots = createNewRoots()
 
-    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val (donation, donationPart) = Donation(donor.id, Money("100.00"))
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+    val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
@@ -62,8 +66,8 @@ class OrganisationTransferSuite extends FunSuite:
   test("not transfer money if the amount is negative") {
     var newRoots = createNewRoots()
 
-    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val (donation, donationPart) = Donation(donor.id, Money("100.00"))
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+    val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
@@ -75,8 +79,8 @@ class OrganisationTransferSuite extends FunSuite:
   test("not transfer money if the amount is zero") {
     var newRoots = createNewRoots()
 
-    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val (donation, donationPart) = Donation(donor.id, Money("100.00"))
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+    val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
@@ -88,8 +92,8 @@ class OrganisationTransferSuite extends FunSuite:
   test("not transfer money if the source account is the same as the destination account") {
     var newRoots = createNewRoots()
 
-    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val (donation, donationPart) = Donation(donor.id, Money("100.00"))
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+    val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     assertEquals(
@@ -102,21 +106,21 @@ class OrganisationTransferSuite extends FunSuite:
     var newRoots = createNewRoots()
 
     newRoots = newRoots.addEarmarking("Education")
-    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money("200.00"), "Education")
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
-    newRoots = newRoots.transfer(Money("100.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
+    newRoots = newRoots.transfer(Money(amountHundred), "Paypal", "Bank", AppConfigMock()).toOption.get._1
 
-    assertEquals(newRoots.getAccount("Paypal").get.totalBalance, Money("100.00"))
-    assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money("100.00"))
+    assertEquals(newRoots.getAccount("Paypal").get.totalBalance, Money(amountHundred))
+    assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money(amountHundred))
 
     assertEquals(
       newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Education"),
-      Money("100.00")
+      Money(amountHundred)
     )
     assertEquals(
       newRoots.getAccount("Bank").get.totalEarmarkedBalance("Education"),
-      Money("100.00")
+      Money(amountHundred)
     )
   }
 
@@ -125,11 +129,11 @@ class OrganisationTransferSuite extends FunSuite:
     newRoots = newRoots.addEarmarking("Education")
     newRoots = newRoots.addEarmarking("Health")
 
-    val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-    val (donation, donationPart) = Donation(donor.id, Money("100.00"), "Education")
+    val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+    val (donation, donationPart) = Donation(donor.id, Money(amountHundred), "Education")
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
     val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
-    val (donation2, donationPart2) = Donation(donor2.id, Money("150.00"), "Health")
+    val (donation2, donationPart2) = Donation(donor2.id, Money(amountOneFifty), "Health")
     newRoots = newRoots.donate(donor2, donationPart2, donation2, "Paypal").toOption.get
 
     newRoots = newRoots.transfer(Money("50.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
@@ -144,7 +148,7 @@ class OrganisationTransferSuite extends FunSuite:
     )
     assertEquals(
       newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Health"),
-      Money("150.00")
+      Money(amountOneFifty)
     )
 
     // The oldest donation (Education) is the one partially transferred
@@ -165,9 +169,9 @@ class OrganisationTransferSuite extends FunSuite:
   //   newRoots = newRoots.addEarmarking("Education")
   //   newRoots = newRoots.addEarmarking("Health")
   //
-  //   val donor = Donor(newRoots.getNewDonorId, "Donor1", "donor1@example.org")
-  //   val (donation, donationPart) = Donation(donor.id, Money("100.00"), "Education")
-  //   val (donation2, donationPart2) = Donation(donor.id, Money("150.00"), "Education")
+  //   val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+  //   val (donation, donationPart) = Donation(donor.id, Money(amountHundred), "Education")
+  //   val (donation2, donationPart2) = Donation(donor.id, Money(amountOneFifty), "Education")
   //   newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
   //   newRoots = newRoots.donate(donor, donationPart2, donation2, "Paypal").toOption.get
   //
