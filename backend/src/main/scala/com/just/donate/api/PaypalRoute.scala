@@ -1,14 +1,15 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import com.just.donate.db.PaypalRepository
+import com.just.donate.db.mongo.MongoPaypalRepository
+import com.just.donate.db.mongo.MongoPaypalRepository
 import com.just.donate.models.PaypalIPN
 import org.http4s.dsl.io.*
 import org.http4s.{HttpRoutes, UrlForm}
 
 object PaypalRoute:
 
-  def paypalRoute: PaypalRepository => HttpRoutes[IO] = (repo: PaypalRepository) =>
+  def paypalRoute: MongoPaypalRepository => HttpRoutes[IO] = (repo: MongoPaypalRepository) =>
     HttpRoutes.of[IO]:
       case GET -> Root =>
         // Maybe list everything from DB, or just memory buffer:

@@ -18,11 +18,13 @@ case class Organisation(
   donors: Map[String, Donor] = Map.empty,
   theme: Option[ThemeConfig] = None
 ):
+
+  def id: String = math.abs(name.hashCode).toString
+
+  def getEarmarkings: Set[String] = accounts.values.flatMap(_.boundDonations.map(_._1)).toSet
   
   def setTheme(theme: ThemeConfig): Organisation = copy(theme = Some(theme))
 
-  private def getEarmarkings: Set[String] = accounts.values.flatMap(_.boundDonations.map(_._1)).toSet
-  
   /**
    * Add a new account to the organisation.
    * @param name the name of the account.
@@ -59,9 +61,9 @@ case class Organisation(
   def removeEarmarking(earmarking: String): Organisation =
     copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmarking))))
 
-  
+
   def getDonations: Seq[Donation] = donations.values.toSeq
-  
+
   /**
    * Loads an existing donor from the organisation.
    * @param email the email of the donor.

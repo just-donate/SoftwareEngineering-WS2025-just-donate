@@ -2,10 +2,10 @@ package com.just.donate.api
 
 import cats.effect.*
 import com.just.donate.config.Config
-import com.just.donate.models.errors.DonationError
+import com.just.donate.db.Repository
+import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
 import com.just.donate.models.{Donation, Donor, Organisation}
 import com.just.donate.notify.IEmailService
-import com.just.donate.store.Store
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisationOps, loadOrganisation}
 import io.circe.*
@@ -18,39 +18,41 @@ import org.http4s.dsl.io.*
 import java.time.LocalDateTime
 
 object DonationRoute:
-  val donationRoute: (Store, Config, IEmailService) => HttpRoutes[IO] = (store, config, emailService) =>
-    HttpRoutes.of[IO]:
 
-      case req @ POST -> Root / organisationId / "account" / accountName =>
-        (for
-          requestDonation <- req.as[RequestDonation]
-          trackingId <- loadAndSaveOrganisationOps(organisationId)(store)(
-            organisationMapper(requestDonation, accountName)
-          )
-          response <- trackingId match
-            case None                      => BadRequest("Organisation not found")
-            case Some(Left(donationError)) => BadRequest(donationError.message)
-            case Some(Right(trackingId)) =>
-              val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId"
-              emailService.sendEmail(
-                requestDonation.donorEmail,
-                emailTemplate(trackingLink, trackingId, config.frontendUrl)
-              ) >> Ok()
-        yield response).handleErrorWith {
-          case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
-        }
+  val donationRoute: (Repository[String, Organisation], Config, IEmailService) => HttpRoutes[IO] =
+    (repository, config, emailService) =>
+      HttpRoutes.of[IO]:
 
-      case GET -> Root / organisationId / "donor" / donorId =>
-        loadOrganisation[DonationListResponse](organisationId)(store): organisation =>
-          DonationListResponse(
-            organisation.getDonations(donorId).map(toResponseDonation(organisationId))
-          )
+        case req @ POST -> Root / organisationId / "account" / accountName =>
+          (for
+            requestDonation <- req.as[RequestDonation]
+            trackingId <- loadAndSaveOrganisationOps(organisationId)(repository)(
+              organisationMapper(requestDonation, accountName)
+            )
+            response <- trackingId match
+              case None                      => BadRequest("Organisation not found")
+              case Some(Left(donationError)) => BadRequest(donationError.message)
+              case Some(Right(trackingId)) =>
+                val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId"
+                emailService.sendEmail(
+                  requestDonation.donorEmail,
+                  emailTemplate(trackingLink, trackingId, config.frontendUrl)
+                ) >> Ok()
+          yield response).handleErrorWith {
+            case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
+          }
 
-      case GET -> Root / organisationId / "donations" =>
-        loadOrganisation[DonationListResponse](organisationId)(store): organisation =>
-          DonationListResponse(
-            organisation.getDonations.map(toResponseDonation(organisationId))
-          )
+        case GET -> Root / organisationId / "donor" / donorId =>
+          loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
+            DonationListResponse(
+              organisation.getDonations(donorId).map(toResponseDonation(organisationId))
+            )
+
+        case GET -> Root / organisationId / "donations" =>
+          loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
+            DonationListResponse(
+              organisation.getDonations.map(toResponseDonation(organisationId))
+            )
 
   private def toResponseDonation(organisationId: String)(donation: Donation): DonationResponse =
     DonationResponse(

@@ -1,14 +1,13 @@
 package com.just.donate.db
 
+import com.just.donate.db.mongo.MongoRepository.ObservableOps
 import munit.CatsEffectSuite
 import org.mockito.Mockito.*
 import org.mongodb.scala.*
 
 import scala.concurrent.Future
 
-class MongoOpsTest extends CatsEffectSuite {
-
-  import MongoOps.*
+class MongoOpsTest extends CatsEffectSuite:
 
   test("ObservableOps.toIO should handle an empty Observable") {
     val mockObservable = mock(classOf[Observable[String]])
@@ -130,7 +129,3 @@ class MongoOpsTest extends CatsEffectSuite {
 
     resultIO.assertEquals(elements)
   }
-}
-
-
-

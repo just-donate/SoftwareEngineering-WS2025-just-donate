@@ -2,9 +2,9 @@ package com.just.donate.api
 
 import cats.effect.IO
 import com.just.donate.api.OrganisationRoute.{RequestOrganisation, ResponseOrganisation}
+import com.just.donate.db.memory.MemoryOrganisationRepository
 import com.just.donate.helper.OrganisationHelper.*
 import com.just.donate.helper.TestHelper.*
-import com.just.donate.store.MemoryStore
 import io.circe.*
 import io.circe.generic.auto.*
 import munit.CatsEffectSuite
@@ -15,9 +15,11 @@ import org.http4s.implicits.*
 
 class OrganisationApiSuite extends CatsEffectSuite:
 
-  private val routes = OrganisationRoute.organisationApi(MemoryStore).orNotFound
+  private val repo = MemoryOrganisationRepository()
 
-  override def beforeEach(context: BeforeEach): Unit = MemoryStore.init()
+  private val routes = OrganisationRoute.organisationApi(repo).orNotFound
+
+  override def beforeEach(context: BeforeEach): Unit = repo.clear().unsafeRunSync()
 
   test("GET /organisation/list should return OK and an empty JSON list if no organisations exists") {
     val req = Request[IO](Method.GET, uri"/list")
