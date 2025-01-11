@@ -34,7 +34,7 @@ export const DonationItem: React.FC<DonationItemProps> = ({ donation, onClick })
           setShowThankYou(false)
           setIsExiting(false)
         }, 500)
-      }, 3000)
+      }, 2000)
     }
   }, [donation.donationId])
 
@@ -44,7 +44,7 @@ export const DonationItem: React.FC<DonationItemProps> = ({ donation, onClick })
       onClick={onClick}
     >
       {showThankYou && (
-        <div className={`absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10 transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute rounded-lg inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10 transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
           <div className={`text-center transition-transform duration-500 ${isExiting ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
             <Heart className="w-12 h-12 text-red-500 mx-auto mb-2" />
             <p className="text-lg font-semibold text-gray-800">Thank you for your donation!</p>

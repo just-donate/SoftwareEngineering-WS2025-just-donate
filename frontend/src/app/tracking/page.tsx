@@ -41,7 +41,7 @@ export default function TrackingPage() {
       <Navigation links={[]} />
       <main className={`${theme.text}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {donationList ? (
+          {donationList && donationList.length > 0 ? (
             <DonationList donations={donationList} />
           ) : (
             <div className="text-center py-12">
