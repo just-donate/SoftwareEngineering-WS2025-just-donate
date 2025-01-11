@@ -1,6 +1,7 @@
-import { Donation } from '../../types/types';
+import { Donation } from '@/types/types';
 import { StatusTimeline } from './StatusTimeline';
-import { customStyles } from '../../styles/custom';
+import { customStyles } from '@/styles/custom';
+import { DonationMap } from './DonationMap';
 
 interface DonationDetailsProps {
   donation: Donation;
@@ -8,17 +9,28 @@ interface DonationDetailsProps {
 }
 
 export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onClose }) => {
+  const position: [number, number] = [-3.315502, 40.016154];
+
+  // Placeholder images
+  const images = [
+    'https://via.placeholder.com/300x200?text=Image+1',
+    'https://via.placeholder.com/300x200?text=Image+2',
+  ];
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className={`${customStyles.layout.card} ${customStyles.colors.card} max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
+        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className={customStyles.text.heading}>Donation Details</h2>
-          <button onClick={onClose} className={`${customStyles.button.base} ${customStyles.button.secondary}`}>
+          <button onClick={onClose} className={`${customStyles.button.base} ${customStyles.button.secondary}`} data-testid="close-button">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
+
+        {/* Basic info in a grid */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <p className={`${customStyles.text.body} font-semibold`}>NGO:</p>
@@ -37,7 +49,34 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onCl
             <p className={customStyles.colors.text}>{donation.date}</p>
           </div>
         </div>
-        <StatusTimeline status={donation.status} />
+
+        {/* Timeline and images side by side */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Column 1: Status Timeline */}
+          <div>
+            <StatusTimeline status={donation.status} />
+          </div>
+
+          {/* Column 2: Two placeholder images */}
+          <div>
+            <p className={`${customStyles.text.body} font-semibold mb-2`}>Project Photos</p>
+            <div className="grid grid-cols-2 gap-2">
+              {images.map((url, i) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt={`Project photo ${i + 1}`}
+                  className="w-full h-auto rounded shadow"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Map */}
+        <div className="my-4">
+          <DonationMap position={position} popupText="Watamu, Kenya" />
+        </div>
       </div>
     </div>
   );
