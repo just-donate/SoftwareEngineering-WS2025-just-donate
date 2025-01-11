@@ -1,33 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Earmarking } from '@/types/types';
-import { createEarmarking } from '@/app/actions/earmarking';
 
 interface EarmarkingManagerProps {
   initialEarmarkings: Earmarking[];
   organizationId: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function EarmarkingManager({
   initialEarmarkings,
   organizationId,
 }: EarmarkingManagerProps) {
-  const [earmarkings, setEarmarkings] =
-    useState<Earmarking[]>(initialEarmarkings);
+  const [earmarkings, setEarmarkings] = useState<Earmarking[]>(initialEarmarkings);
   const [newEarmarkingName, setNewEarmarkingName] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  useEffect(() => {
+    setEarmarkings(initialEarmarkings);
+  }, [initialEarmarkings]);
+
   const addEarmarking = async () => {
     if (!newEarmarkingName) return;
 
-    const result = await createEarmarking(organizationId, newEarmarkingName);
+    try {
+      const response = await fetch(`${API_URL}/organisation/${organizationId}/earmarking`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newEarmarkingName }),
+      });
 
-    if (result.success) {
+      if (!response.ok) {
+        throw new Error('Failed to create earmarking');
+      }
+
       // Optimistically update the UI
       const newEarmarking: Earmarking = {
         name: newEarmarkingName,
@@ -37,8 +51,8 @@ export default function EarmarkingManager({
       setSuccessMessage('Earmarking created successfully!');
       setError('');
       setTimeout(() => setSuccessMessage(''), 3000);
-    } else {
-      setError(result.error || 'Failed to create earmarking');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to create earmarking');
       setSuccessMessage('');
     }
   };

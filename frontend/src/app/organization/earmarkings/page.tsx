@@ -1,10 +1,33 @@
-import { getEarmarkings } from '@/app/actions/earmarking';
-import EarmarkingManager from '@/components/organization/EarmarkingManager';
+'use client';
 
-export default async function EarmarkingsPage() {
-  // TODO: Get the organization ID from the session/context
+import { useState, useEffect } from 'react';
+import EarmarkingManager from '@/components/organization/EarmarkingManager';
+import { Earmarking } from '@/types/types';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+async function fetchEarmarkings(orgId: string): Promise<Earmarking[]> {
+  try {
+    const response = await fetch(`${API_URL}/organisation/${orgId}/earmarking/list`);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch earmarkings');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Failed to fetch earmarkings:', error);
+    return [];
+  }
+}
+
+export default function EarmarkingsPage() {
+  const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);
   const organizationId = '591671920';
-  const earmarkings = await getEarmarkings(organizationId);
+
+  useEffect(() => {
+    fetchEarmarkings(organizationId).then(setEarmarkings);
+  }, [organizationId]);
 
   return (
     <div>
