@@ -1,7 +1,7 @@
 name: SonarQube CI
 
 env:
-  NEXT_PUBLIC_API_URL: http://localhost:8080
+  NEXT_PUBLIC_API_URL: https://just-donate-api-556297337052.europe-west3.run.app
 
 on:
   push:
