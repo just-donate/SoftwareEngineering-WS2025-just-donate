@@ -29,7 +29,7 @@ export const customStyles = {
   },
   // Animations
   animation: {
-    hover: 'transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1',
+    hover:
+      'transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1',
   },
 };
-

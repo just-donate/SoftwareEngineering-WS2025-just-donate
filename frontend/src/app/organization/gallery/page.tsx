@@ -1,36 +1,62 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Earmarking, Photo } from '../../../types/types'
-import { Button } from "../../../components/organization/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "../../../components/organization/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/organization/ui/select"
-import { Input } from "../../../components/organization/ui/input"
-import Image from 'next/image'
+import { useState } from 'react';
+import { Earmarking, Photo } from '../../../types/types';
+import { Button } from '../../../components/organization/ui/button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from '../../../components/organization/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../components/organization/ui/select';
+import { Input } from '../../../components/organization/ui/input';
+import Image from 'next/image';
 
 // Mock data for demonstration
 const mockEarmarkings: Earmarking[] = [
-  { id: '1', name: 'Project A', organizationId: '1' },
-  { id: '2', name: 'Project B', organizationId: '1' },
-]
+  { name: 'Project A' },
+  { name: 'Project B' },
+];
 
 const mockPhotos: Photo[] = [
-  { id: '1', url: 'https://placeholder.pics/svg/200', earmarkingId: '1', uploadDate: '2023-06-01' },
-  { id: '2', url: 'https://placeholder.pics/svg/200', earmarkingId: '1', uploadDate: '2023-06-02' },
-  { id: '3', url: 'https://placeholder.pics/svg/200', earmarkingId: '2', uploadDate: '2023-06-03' },
-]
+  {
+    id: '1',
+    url: 'https://placeholder.pics/svg/200',
+    earmarkingId: '1',
+    uploadDate: '2023-06-01',
+  },
+  {
+    id: '2',
+    url: 'https://placeholder.pics/svg/200',
+    earmarkingId: '1',
+    uploadDate: '2023-06-02',
+  },
+  {
+    id: '3',
+    url: 'https://placeholder.pics/svg/200',
+    earmarkingId: '2',
+    uploadDate: '2023-06-03',
+  },
+];
 
 export default function GalleryPage() {
-  const [earmarkings] = useState<Earmarking[]>(mockEarmarkings)
-  const [photos, setPhotos] = useState<Photo[]>(mockPhotos)
-  const [selectedEarmarking, setSelectedEarmarking] = useState<string>('')
-  const [file, setFile] = useState<File | null>(null)
+  const [earmarkings] = useState<Earmarking[]>(mockEarmarkings);
+  const [photos, setPhotos] = useState<Photo[]>(mockPhotos);
+  const [selectedEarmarking, setSelectedEarmarking] = useState<string>('');
+  const [file, setFile] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFile(e.target.files[0])
+      setFile(e.target.files[0]);
     }
-  }
+  };
 
   const handleUpload = () => {
     if (file && selectedEarmarking) {
@@ -41,15 +67,15 @@ export default function GalleryPage() {
         url: URL.createObjectURL(file),
         earmarkingId: selectedEarmarking,
         uploadDate: new Date().toISOString().split('T')[0],
-      }
-      setPhotos([...photos, newPhoto])
-      setFile(null)
+      };
+      setPhotos([...photos, newPhoto]);
+      setFile(null);
     }
-  }
+  };
 
   const filteredPhotos = selectedEarmarking
-    ? photos.filter(photo => photo.earmarkingId === selectedEarmarking)
-    : photos
+    ? photos.filter((photo) => photo.earmarkingId === selectedEarmarking)
+    : photos;
 
   return (
     <div className="container mx-auto p-4">
@@ -65,15 +91,18 @@ export default function GalleryPage() {
                 <SelectValue placeholder="Select Earmarking" />
               </SelectTrigger>
               <SelectContent>
-                {earmarkings.map(earmarking => (
-                  <SelectItem key={earmarking.id} value={earmarking.id}>
+                {earmarkings.map((earmarking) => (
+                  <SelectItem key={earmarking.name} value={earmarking.name}>
                     {earmarking.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Input type="file" onChange={handleFileChange} accept="image/*" />
-            <Button onClick={handleUpload} disabled={!file || !selectedEarmarking}>
+            <Button
+              onClick={handleUpload}
+              disabled={!file || !selectedEarmarking}
+            >
               Upload Photo
             </Button>
           </div>
@@ -85,11 +114,11 @@ export default function GalleryPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredPhotos.map(photo => (
+            {filteredPhotos.map((photo) => (
               <div key={photo.id} className="relative aspect-square">
                 <Image
                   src={photo.url}
-                  alt={`Photo for ${earmarkings.find(e => e.id === photo.earmarkingId)?.name}`}
+                  alt={`Photo for ${earmarkings.find((e) => e.name === photo.earmarkingId)?.name}`}
                   fill
                   className="object-cover rounded-md"
                 />
@@ -99,6 +128,5 @@ export default function GalleryPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

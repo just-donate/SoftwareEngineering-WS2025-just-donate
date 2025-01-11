@@ -14,7 +14,13 @@ const mockDonations = [
     amount: 100,
     currency: 'USD',
     date: '2023-01-01',
-    status: [{ status: 'Completed', date: '2023-01-01', description: 'Donation completed successfully' }],
+    status: [
+      {
+        status: 'Completed',
+        date: '2023-01-01',
+        description: 'Donation completed successfully',
+      },
+    ],
   },
   {
     id: '2',
@@ -24,7 +30,13 @@ const mockDonations = [
     amount: 200,
     currency: 'USD',
     date: '2023-01-02',
-    status: [{ status: 'Pending', date: '2023-01-02', description: 'Donation is pending' }],
+    status: [
+      {
+        status: 'Pending',
+        date: '2023-01-02',
+        description: 'Donation is pending',
+      },
+    ],
   },
 ];
 
@@ -33,7 +45,7 @@ describe('DonationList Component', () => {
     render(
       <ThemeProvider>
         <DonationList donations={mockDonations} />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     // Check if the donation items are rendered
@@ -52,7 +64,7 @@ describe('DonationList Component', () => {
     render(
       <ThemeProvider>
         <DonationList donations={mockDonations} />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     // Simulate a click on the first donation item
