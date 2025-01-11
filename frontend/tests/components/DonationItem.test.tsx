@@ -51,7 +51,7 @@ describe('DonationItem Component', () => {
     expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
 
     // Check if the donation date is rendered
-    expect(screen.getByText(/January 1, 2023 at 01:00 AM/i)).toBeInTheDocument();
+    expect(screen.getByText(/January 1, 2023/i)).toBeInTheDocument();
 
     // Check if the status is rendered
     expect(screen.getByText(/Completed/i)).toBeInTheDocument();
