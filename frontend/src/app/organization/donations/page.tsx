@@ -16,7 +16,7 @@ async function fetchDonations(orgId: string): Promise<Donation[]> {
       console.error(
         'Failed to fetch donations:',
         error.response?.status,
-        error.response?.statusText
+        error.response?.statusText,
       );
     } else {
       // Non-Axios error handling

@@ -74,7 +74,9 @@ export const useTheme = () => {
 
 export async function getTheme(organizationId: string): Promise<Theme | null> {
   try {
-    const response = await axiosInstance.get<string>(`/organisation/${organizationId}/theme`);
+    const response = await axiosInstance.get<string>(
+      `/organisation/${organizationId}/theme`,
+    );
     return JSON.parse(response.data);
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -94,7 +96,7 @@ export async function saveTheme(organizationId: string, theme: Theme) {
     if (!isValidTheme(theme)) {
       throw new Error('Invalid theme structure');
     }
-  
+
     const response = await axiosInstance.post(
       `/organisation/${organizationId}/theme`,
       theme,
@@ -102,9 +104,9 @@ export async function saveTheme(organizationId: string, theme: Theme) {
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      },
     );
-  
+
     // No need to check response.ok; Axios throws an error for non-2xx statuses.
     return { success: true };
   } catch (error) {
