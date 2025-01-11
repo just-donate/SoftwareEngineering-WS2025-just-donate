@@ -1,18 +1,47 @@
+'use client';
+
 import TransactionManager from '@/components/organization/TransactionManager';
 import { fetchEarmarkings } from '../earmarkings/earmarkings';
 import { fetchBankAccounts } from '../bank-accounts/bank-accounts';
 import { fetchTransactions } from './transactions';
+import { useEffect, useState } from 'react';
+import { Transaction, BankAccount, Earmarking } from '@/types/types';
 
-export default async function TransactionsPage() {
+export default function TransactionsPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   // TODO: Get the organization ID from the session/context
   const organizationId = '591671920';
 
-  // Fetch all required data in parallel
-  const [transactions, accounts, earmarkings] = await Promise.all([
-    fetchTransactions(organizationId),
-    fetchBankAccounts(organizationId),
-    fetchEarmarkings(organizationId),
-  ]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [transactionsData, accountsData, earmarkingsData] =
+          await Promise.all([
+            fetchTransactions(organizationId),
+            fetchBankAccounts(organizationId),
+            fetchEarmarkings(organizationId),
+          ]);
+
+        setTransactions(transactionsData);
+        setAccounts(accountsData);
+        setEarmarkings(earmarkingsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [organizationId]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>

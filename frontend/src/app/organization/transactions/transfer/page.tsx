@@ -1,11 +1,35 @@
+'use client';
+
 import TransferManager from '@/components/organization/TransferManager';
 import { fetchBankAccounts } from '../../bank-accounts/bank-accounts';
+import { useEffect, useState } from 'react';
+import { BankAccount } from '@/types/types';
 
-export default async function TransferPage() {
+export default function TransferPage() {
+  const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   // TODO: Get the organization ID from the session/context
   const organizationId = '591671920';
 
-  const accounts = await fetchBankAccounts(organizationId);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const accountsData = await fetchBankAccounts(organizationId);
+        setAccounts(accountsData);
+      } catch (error) {
+        console.error('Error fetching accounts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [organizationId]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
