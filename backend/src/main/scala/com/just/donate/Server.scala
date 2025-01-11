@@ -1,6 +1,7 @@
 package com.just.donate
 
 import cats.effect.*
+import cats.effect.unsafe.implicits.global
 import com.comcast.ip4s.*
 import com.just.donate.api.DonationRoute.donationRoute
 import com.just.donate.api.NotificationRoute.notificationRoute
@@ -23,7 +24,7 @@ import org.http4s.server.middleware.CORS
 import org.mongodb.scala.*
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
-import cats.effect.unsafe.implicits.global
+
 import scala.concurrent.duration.DurationInt
 
 object Server extends IOApp:
@@ -39,66 +40,54 @@ object Server extends IOApp:
       }
     }.use { client =>
       val database = client._1.getDatabase("just-donate")
-      val paypalRepository = new PaypalRepository(database.getCollection("paypal-ipn"))
 
-      FileStore.init()
-    val mongoClient = MongoClient()
-    val database: MongoDatabase = mongoClient.getDatabase("just-donate")
+      val organisationCollection = database.getCollection("organisations")
+      val paypalCollection = database.getCollection("paypal_ipn")
 
-    val organisationCollection = database.getCollection("organisations")
-    val paypalCollection = database.getCollection("paypal_ipn")
+      val organisationRepository = MongoOrganisationRepository(organisationCollection)
+      val paypalRepository = MongoPaypalRepository(paypalCollection)
 
-    val organisationRepository = MongoOrganisationRepository(organisationCollection)
-    val paypalRepository = MongoPaypalRepository(paypalCollection)
+      val defaultOrg = Organisation("Just-Donate")
+      val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
+      if org.isEmpty then
+        organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
 
-    val defaultOrg = Organisation("Just-Donate")
-    val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
-    if org.isEmpty then
-      organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
-
-    val emailService: IEmailService = appConfig.environment match
-      case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
-      case AppEnvironment.PRODUCTION  => new EmailService(appConfig)
+      val emailService: IEmailService = appConfig.environment match
+        case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
+        case AppEnvironment.PRODUCTION => new EmailService(appConfig)
 
       val httpApp: HttpApp[IO] = Router(
-        "organisation" -> organisationApi(FileStore),
-        "donate" -> donationRoute(FileStore, appConfig, emailService),
-        "transfer" -> transferRoute(FileStore, appConfig, emailService),
-        "withdraw" -> withdrawalRoute(FileStore, appConfig, emailService),
+        "organisation" -> organisationApi(organisationRepository),
+        "donate" -> donationRoute(organisationRepository, appConfig, emailService),
+        "transfer" -> transferRoute(organisationRepository, appConfig, emailService),
+        "withdraw" -> withdrawalRoute(organisationRepository, appConfig, emailService),
         "notify" -> notificationRoute(appConfig),
         "paypal-ipn" -> paypalRoute(paypalRepository, client._2)
       ).orNotFound
-    val httpApp: HttpApp[IO] = Router(
-      "organisation" -> organisationApi(organisationRepository),
-      "donate" -> donationRoute(organisationRepository, appConfig, emailService),
-      "transfer" -> transferRoute(organisationRepository, appConfig, emailService),
-      "withdraw" -> withdrawalRoute(organisationRepository, appConfig, emailService),
-      "notify" -> notificationRoute(appConfig),
-      "paypal-ipn" -> paypalRoute(paypalRepository)
-    ).orNotFound
+
 
       val corsService = CORS.policy
         .withAllowOriginHost(Set(
           Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)),
-          Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None),
-          Origin.Host(Uri.Scheme.https, Uri.RegName("ipnpb.sandbox.paypal.com"), None)
+          Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None)
         ))
         .withAllowMethodsIn(Set(Method.GET, Method.POST))
         .withAllowCredentials(false)
         .withMaxAge(1.days)
         .apply(httpApp)
 
-    for
-      service <- corsService
-      server <- EmberServerBuilder
-        .default[IO]
-        .withHost(ipv4"0.0.0.0")
-        .withPort(port"8080")
-        .withHttpApp(service)
-        .build
-        .use(_ => IO.never)
-        .as(ExitCode.Success)
-    yield server
+      for {
+        service <- corsService
+        server <- EmberServerBuilder
+          .default[IO]
+          .withHost(ipv4"0.0.0.0")
+          .withPort(port"8080")
+          .withHttpApp(service)
+          .build
+          .use(_ => IO.never)
+          .as(ExitCode.Success)
+        } yield server   
+    }
 
 
   /** Acquire and safely release the Mongo client (using Resource). */
