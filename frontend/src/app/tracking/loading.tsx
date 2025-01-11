@@ -1,10 +1,9 @@
-'use client'
+'use client';
 
 import { useTheme } from '../../contexts/ThemeContext';
 import { Navigation } from '@/components/tracking/Navigation';
 
 export default function TrackingLoading() {
-
   const { theme } = useTheme();
 
   return (
@@ -18,5 +17,3 @@ export default function TrackingLoading() {
     </div>
   );
 }
-
-

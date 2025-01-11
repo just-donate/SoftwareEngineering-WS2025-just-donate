@@ -1,41 +1,37 @@
 package com.just.donate.helper
 
-import com.just.donate.models.{ Account, Organisation }
 import cats.effect.IO
-import com.just.donate.store.MemoryStore
-import com.just.donate.models.Donor
-import com.just.donate.models.Donation
+import com.just.donate.db.Repository
+import com.just.donate.models.{Account, Donation, Donor, Organisation}
+import com.just.donate.utils.Money
 
 object OrganisationHelper:
 
+  val NEW_ROOTS = "New Roots"
+
   // Helper method to set up a new Organisation with accounts and flows
   def createNewRoots(): Organisation =
-    var newRoots = Organisation("New Roots")
+    var newRoots = Organisation(NEW_ROOTS)
 
-    val paypal = new Account("Paypal")
-    val betterPlace = new Account("Better Place")
-    val bank = new Account("Bank")
-    val kenya = new Account("Kenya")
-
-    newRoots = newRoots.addAccount(paypal)
-    newRoots = newRoots.addAccount(betterPlace)
-    newRoots = newRoots.addAccount(bank)
-    newRoots = newRoots.addAccount(kenya)
+    newRoots = newRoots.addAccount("Paypal")
+    newRoots = newRoots.addAccount("Better Place")
+    newRoots = newRoots.addAccount("Bank")
+    newRoots = newRoots.addAccount("Kenya")
 
     newRoots
 
-  def addPaypalDonation: IO[Unit] =
-    val orgId = organisationId("newRoots")
+  def addPaypalDonation(repo: Repository[String, Organisation]): IO[Unit] =
+    val orgId = organisationId(NEW_ROOTS)
     for
-      newOrg <- MemoryStore
-        .load(orgId)
+      newOrg <- repo
+        .findById(orgId)
         .map(optOrg =>
           val org = optOrg.get
           val donor = Donor(org.getNewDonorId, "MyDonor", "mydonor@example.org")
-          val (donation, donationPart) = Donation(donor.id, BigDecimal(100))
+          val (donation, donationPart) = Donation(donor.id, Money("100"))
           org.donate(donor, donationPart, donation, "Paypal").toOption.get
         )
-      _ <- MemoryStore.save(orgId, newOrg)
+      _ <- repo.save(newOrg)
     yield ()
 
-  def organisationId(name: String): String = name.hashCode.toString
+  def organisationId(name: String): String = Organisation(name).id

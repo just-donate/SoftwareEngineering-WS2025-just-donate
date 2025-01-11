@@ -1,8 +1,13 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { Button } from "../../../components/organization/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "../../../components/organization/ui/card"
+import Link from 'next/link';
+import { Button } from '../../../components/organization/ui/button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from '../../../components/organization/ui/card';
 
 export default function DashboardPage() {
   return (
@@ -71,6 +76,5 @@ export default function DashboardPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

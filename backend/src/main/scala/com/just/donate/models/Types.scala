@@ -6,4 +6,3 @@ package com.just.donate.models
 object Types:
 
   type DonationGetter = String => Option[Donation]
-

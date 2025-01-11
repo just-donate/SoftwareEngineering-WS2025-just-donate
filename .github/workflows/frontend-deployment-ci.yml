@@ -1,6 +1,9 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
+env:
+  NEXT_PUBLIC_API_URL: https://just-donate-api-556297337052.europe-west3.run.app
+
 on:
   # Runs on pushes targeting the default branch
   push:

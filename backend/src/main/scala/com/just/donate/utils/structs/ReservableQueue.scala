@@ -1,6 +1,7 @@
 package com.just.donate.utils.structs
 
 import com.just.donate.models.DonationPart
+import com.just.donate.utils.Money
 
 case class ReservableQueue(
   context: String,
@@ -17,7 +18,7 @@ case class ReservableQueue(
     val (polled, newQueue) = pollUnreserved(queue)
     (polled, ReservableQueue(context, newQueue))
 
-  def pollUnreserved(s: BigDecimal, limit: Option[Int]): (Seq[DonationPart], Option[BigDecimal], ReservableQueue) =
+  def pollUnreserved(s: Money, limit: Option[Int]): (Seq[DonationPart], Option[Money], ReservableQueue) =
     val (ts, ss, newQueue) = pollUnreserved(s, queue, limit)
     (ts, ss, ReservableQueue(context, newQueue))
 
@@ -33,7 +34,7 @@ case class ReservableQueue(
   def isFullyReserved: Boolean =
     queue.forall(_.isReserved)
 
-  def reserve(s: BigDecimal, context: String): (Option[BigDecimal], ReservableQueue) =
+  def reserve(s: Money, context: String): (Option[Money], ReservableQueue) =
     val (ss, newQueue) = reserve(s, context, queue)
     (ss, ReservableQueue(context, newQueue))
 
@@ -49,10 +50,10 @@ case class ReservableQueue(
         (polled, head +: newQueue)
 
   private def pollUnreserved(
-    s: BigDecimal,
+    s: Money,
     inner: Seq[Reservable],
     limit: Option[Int]
-  ): (Seq[DonationPart], Option[BigDecimal], Seq[Reservable]) =
+  ): (Seq[DonationPart], Option[Money], Seq[Reservable]) =
     limit match
       case Some(value) if value <= 0 => (Seq.empty, Some(s), inner)
       case _ =>
@@ -76,7 +77,7 @@ case class ReservableQueue(
               // Other cases should not happen
               case _ => throw new IllegalStateException("Should not happen?")
 
-  private def reserve(s: BigDecimal, context: String, inner: Seq[Reservable]): (Option[BigDecimal], Seq[Reservable]) =
+  private def reserve(s: Money, context: String, inner: Seq[Reservable]): (Option[Money], Seq[Reservable]) =
     inner match
       case Nil => (Some(s), inner)
       case head +: tail if head.isReserved =>

@@ -9,5 +9,5 @@ class AppConfigMock(
   val mailSmtpHost: String = "",
   val mailSmtpPort: Int = 0,
   val mailAddress: String = "",
-  val mailPassword: String = "",
+  val mailPassword: String = ""
 ) extends Config
