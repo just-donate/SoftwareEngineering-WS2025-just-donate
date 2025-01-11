@@ -1,7 +1,8 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { DonationItem } from '../../src/components/tracking/DonationItem';
 import { ThemeProvider } from '../../src/contexts/ThemeContext';
+import Cookies from 'js-cookie'; // Import js-cookie
 import '@testing-library/jest-dom'; // Import jest-dom
 
 // Mock donation data
@@ -19,6 +20,11 @@ const mockDonation = {
 const mockOnClick = jest.fn();
 
 describe('DonationItem Component', () => {
+  beforeEach(() => {
+    // Clear cookies before each test
+    Cookies.remove('shownDonations');
+  });
+
   it('renders donation details correctly', () => {
     render(
       <ThemeProvider>
@@ -40,6 +46,22 @@ describe('DonationItem Component', () => {
     
     // Check if the status is rendered
     expect(screen.getByText(/Completed/i)).toBeInTheDocument();
+  });
+
+  it('shows thank you message when the item is rendered', async () => {
+    render(
+      <ThemeProvider>
+        <DonationItem donation={mockDonation} onClick={mockOnClick} />
+      </ThemeProvider>
+    );
+
+    // Check if the thank you message is displayed
+    expect(screen.getByText(/Thank you for your donation!/i)).toBeInTheDocument();
+
+    // Wait for the thank you message to exit
+    await waitFor(() => {
+      expect(screen.queryByText(/Thank you for your donation!/i)).not.toBeInTheDocument();
+    }, { timeout: 4000 }); // Increase timeout if necessary
   });
 
   it('calls onClick when the item is clicked', () => {

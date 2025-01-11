@@ -4,10 +4,12 @@ import { StatusTimeline } from '../../src/components/tracking/StatusTimeline';
 import { ThemeProvider } from '../../src/contexts/ThemeContext';
 import '@testing-library/jest-dom'; // Import jest-dom
 
-// Mock status data
+// Mock status data including 'allocated', 'in use', and 'used'
 const mockStatus = [
-    { status: 'Donated', date: '2023-07-20', description: 'Donation received' },
-    { status: 'Processed', date: '2023-07-22', description: 'Donation by NGO' },
+  { status: 'Donated', date: '2023-07-20', description: 'Donation received' },
+  { status: 'Allocated', date: '2023-07-21', description: 'Funds sent to project' },
+  { status: 'In Use', date: '2023-07-22', description: 'Funds are inuse' },
+  { status: 'Processed', date: '2023-07-23', description: 'Donation used by NGO' },
 ];
 
 describe('StatusTimeline Component', () => {
@@ -17,18 +19,22 @@ describe('StatusTimeline Component', () => {
         <StatusTimeline status={mockStatus} />
       </ThemeProvider>
     );
-    
-    // Check if the status items are rendered
-    const completedItems = screen.getAllByText(/Donated/i);
-    expect(completedItems.length).toBe(1); // Expect only one "Donated" status
 
+    // Check if the status items are rendered
+    expect(screen.getByText(/Donated/i)).toBeInTheDocument();
     expect(screen.getByText(/2023-07-20/i)).toBeInTheDocument();
     expect(screen.getByText(/Donation received/i)).toBeInTheDocument();
 
-    const pendingItems = screen.getAllByText(/Processed/i);
-    expect(pendingItems.length).toBe(1); // Expect only one "Processed" status
+    expect(screen.getByText(/Allocated/i)).toBeInTheDocument();
+    expect(screen.getByText(/2023-07-21/i)).toBeInTheDocument();
+    expect(screen.getByText(/Funds sent to project/i)).toBeInTheDocument();
 
+    expect(screen.getByText(/In Use/i)).toBeInTheDocument();
     expect(screen.getByText(/2023-07-22/i)).toBeInTheDocument();
-    expect(screen.getByText(/Donation by NGO/i)).toBeInTheDocument();
+    expect(screen.getByText(/Funds are inuse/i)).toBeInTheDocument();
+
+    expect(screen.getByText(/Processed/i)).toBeInTheDocument();
+    expect(screen.getByText(/2023-07-23/i)).toBeInTheDocument();
+    expect(screen.getByText(/Donation used by NGO/i)).toBeInTheDocument();
   });
 }); 

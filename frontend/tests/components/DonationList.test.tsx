@@ -48,7 +48,7 @@ describe('DonationList Component', () => {
     expect(screen.getByText(/Pending/i)).toBeInTheDocument();
   });
 
-  it('opens donation details when an item is clicked', async () => {
+  it('opens and closes donation details when an item is clicked', async () => {
     render(
       <ThemeProvider>
         <DonationList donations={mockDonations} />
@@ -60,7 +60,15 @@ describe('DonationList Component', () => {
 
     // Wait for the donation details to be displayed
     await waitFor(() => {
-      expect(screen.getByText(/Donation Details/i)).toBeInTheDocument();
+      expect(screen.getByText(/Donation Details/i)).toBeInTheDocument(); // Check if DonationDetails is rendered
+    });
+
+    // Simulate closing the donation details using the close button
+    fireEvent.click(screen.getByTestId('close-button')); // Use the data-testid to select the button
+
+    // Wait for the donation details to be removed
+    await waitFor(() => {
+      expect(screen.queryByText(/Donation Details/i)).not.toBeInTheDocument(); // Check if DonationDetails is removed
     });
   });
-}); 
+});
