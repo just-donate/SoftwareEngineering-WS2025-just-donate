@@ -26,8 +26,8 @@ class WithdrawlApiSpec extends CatsEffectSuite:
 
   test("POST /withdraw/organisationId/account/accountName should return OK and update the organisation") {
     val req =
-      Request[IO](Method.POST, testUri(organisationId("newRoots"), "account", "Paypal"))
-        .withEntity(RequestWithdrawal(Money("100"), "test-description", None))
+      Request[IO](Method.POST, testUri(organisationId("newRoots")))
+        .withEntity(RequestWithdrawal("Paypal", Money("100"), "test-description", None))
     for
       _ <- addPaypalDonation
       resp <- withdrawRoute.run(req)

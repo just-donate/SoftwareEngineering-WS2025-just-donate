@@ -25,7 +25,7 @@ case class Organisation(
    * @param name the name of the account.
    * @return a new organisation with the account added.
    */
-  def addAccount(name: String, initialBalance: Money): Organisation =
+  def addAccount(name: String, initialBalance: Money = Money.ZERO): Organisation =
     val initialAccount = getEarmarkings.foldLeft(new Account(name))(_.addEarmarking(_))
     // TODO add initial balance
     if accounts.contains(initialAccount.name) then this
