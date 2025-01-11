@@ -16,6 +16,8 @@ import com.just.donate.models.Organisation
 import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
 import com.just.donate.security.AuthMiddleware
 import org.http4s.*
+import org.http4s.client.Client
+import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.*
 import org.http4s.headers.Origin
 import org.http4s.implicits.*
@@ -34,7 +36,11 @@ object Server extends IOApp:
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   def run(args: List[String]): IO[ExitCode] =
-    mongoResource(appConfig.mongoUri).use { client =>
+    mongoResource(appConfig.mongoUri).flatMap { mongoClient =>
+      httpClientResource.map { httpClient =>
+        (mongoClient, httpClient)
+      }
+    }.use { client =>
       val database = client.getDatabase("just-donate")
 
       val organisationCollection = database.getCollection("organisations")
@@ -76,7 +82,7 @@ object Server extends IOApp:
         "transfer" -> securedTransferRoute,
         "withdraw" -> securedWithdrawalRoute,
         "notify" -> securedNotificationRoute,
-        "paypal-ipn" -> paypalRoute(paypalRepository)
+        "paypal-ipn" -> paypalRoute(paypalRepository, client._2)
       ).orNotFound
 
       val corsService = CORS.policy
@@ -107,3 +113,7 @@ object Server extends IOApp:
   /** Acquire and safely release the Mongo client (using Resource). */
   private def mongoResource(uri: String): Resource[IO, MongoClient] =
     Resource.make(IO(MongoClient(uri)))(client => IO(client.close()))
+
+  /** Acquire and safely release the HTTP client (using Resource). */
+  private def httpClientResource: Resource[IO, Client[IO]] =
+    EmberClientBuilder.default[IO].build

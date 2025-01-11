@@ -14,4 +14,6 @@ class MongoPaypalRepositoryMock(collection: MongoCollection[Document]) extends M
     stored = stored :+ ipn
     ipn
   }
+  
+  def reset(): Unit = stored = PaypalIPN(payload="test") :: Nil
 }
