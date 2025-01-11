@@ -14,7 +14,7 @@ import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 
-class WithdrawlApiSpec extends CatsEffectSuite:
+class WithdrawalApiSpec extends CatsEffectSuite:
 
   private val withdrawRoute =
     WithdrawalRoute.withdrawalRoute(MemoryStore, AppConfigMock(), EmailServiceMock()).orNotFound
