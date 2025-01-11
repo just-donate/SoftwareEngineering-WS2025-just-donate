@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from './ui/input';
 import {
   Select,
@@ -19,15 +19,20 @@ interface DonationsListProps {
 export default function DonationsList({
   initialDonations,
 }: DonationsListProps) {
+  const [donations, setDonations] = useState<Donation[]>(initialDonations);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
+  useEffect(() => {
+    setDonations(initialDonations);
+  }, [initialDonations]);
+
   // Get unique status values from all donations
   const uniqueStatuses = Array.from(
-    new Set(initialDonations.flatMap((d) => d.status.map((s) => s.status))),
+    new Set(donations.flatMap((d) => d.status.map((s) => s.status))),
   );
 
-  const filteredDonations = initialDonations.filter((donation) => {
+  const filteredDonations = donations.filter((donation) => {
     const matchesSearch =
       donation.donationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       donation.organisation.toLowerCase().includes(searchTerm.toLowerCase()) ||

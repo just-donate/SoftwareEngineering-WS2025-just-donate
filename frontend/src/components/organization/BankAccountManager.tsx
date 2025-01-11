@@ -1,11 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount } from '@/types/types';
-import { createBankAccount } from '@/app/actions/bank-account';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_URL) {
+  throw new Error('NEXT_PUBLIC_API_URL is not set');
+}
 
 interface BankAccountManagerProps {
   initialAccounts: BankAccount[];
@@ -17,6 +22,11 @@ export default function BankAccountManager({
   organizationId,
 }: BankAccountManagerProps) {
   const [accounts, setAccounts] = useState<BankAccount[]>(initialAccounts);
+
+  useEffect(() => {
+    setAccounts(initialAccounts);
+  }, [initialAccounts]);
+
   const [newAccountName, setNewAccountName] = useState('');
   const [newAccountAmount, setNewAccountAmount] = useState('');
   const [error, setError] = useState('');
@@ -25,13 +35,24 @@ export default function BankAccountManager({
   const addBankAccount = async () => {
     if (!newAccountName || !newAccountAmount) return;
 
-    const result = await createBankAccount(
-      organizationId,
-      newAccountName,
-      newAccountAmount,
-    );
+    try {
+      const response = await fetch(`${API_URL}/organisation/${organizationId}/account`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newAccountName,
+          balance: {
+            amount: newAccountAmount,
+          },
+        }),
+      });
 
-    if (result.success) {
+      if (!response.ok) {
+        throw new Error('Failed to create bank account');
+      }
+
       // Optimistically update the UI
       const newAccount: BankAccount = {
         name: newAccountName,
@@ -45,8 +66,8 @@ export default function BankAccountManager({
       setSuccessMessage('Bank account created successfully!');
       setError('');
       setTimeout(() => setSuccessMessage(''), 3000);
-    } else {
-      setError(result.error || 'Failed to create bank account');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to create bank account');
       setSuccessMessage('');
     }
   };
