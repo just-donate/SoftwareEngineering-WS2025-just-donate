@@ -8,8 +8,9 @@ import {
   CardTitle,
   CardContent,
 } from '../../../components/organization/ui/card';
+import withAuth from '../api/RequiresAuth';
 
-export default function DashboardPage() {
+function DashboardPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Organization Dashboard</h1>
@@ -78,3 +79,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+export default withAuth(DashboardPage)

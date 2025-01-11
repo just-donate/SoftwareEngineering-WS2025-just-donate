@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import BankAccountManager from '@/components/organization/BankAccountManager';
 import { BankAccount } from '@/types/types';
 import { fetchBankAccounts } from './bank-accounts';
+import withAuth from '../api/RequiresAuth';
 
-export default function BankAccountsPage() {
+function BankAccountsPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   // TODO: Get the organization ID from the session/context
   const organizationId = '591671920';
@@ -24,3 +25,5 @@ export default function BankAccountsPage() {
     </div>
   );
 }
+
+export default withAuth(BankAccountsPage)

@@ -1,12 +1,13 @@
 package com.just.donate.config
 
+import com.just.donate.config.AppEnvironment.DEVELOPMENT
 import com.typesafe.config.{ConfigFactory, Config as TypesafeConfig}
 
 import scala.util.Properties
 
 object AppConfig:
   def apply(): AppConfig =
-    val environment = Properties.envOrElse("ENV", "prod") match
+    val environment = Properties.envOrElse("ENV", "dev") match
       case "dev" | "development" => AppEnvironment.DEVELOPMENT
       case "prod" | "production" => AppEnvironment.PRODUCTION
       case env                   => throw new RuntimeException(f"Unknown environment: ${env}")
@@ -19,7 +20,7 @@ object AppConfig:
       environment
     )
 
-case class AppConfig(private val conf: TypesafeConfig, val environment: AppEnvironment) extends Config:
+case class AppConfig(private val conf: TypesafeConfig, environment: AppEnvironment) extends Config:
   val frontendUrl: String = getString("FRONTEND_URL")
 
   val mongoUri: String = getOptionalString("MONGO_URI").getOrElse("mongodb://localhost:27017")

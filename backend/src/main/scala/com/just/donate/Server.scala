@@ -1,8 +1,10 @@
 package com.just.donate
 
 import cats.effect.*
+import cats.effect.unsafe.implicits.global
 import com.comcast.ip4s.*
 import com.just.donate.api.DonationRoute.donationRoute
+import com.just.donate.api.{LoginRoute, LogoutRoute}
 import com.just.donate.api.NotificationRoute.notificationRoute
 import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
@@ -12,6 +14,7 @@ import com.just.donate.config.{AppConfig, AppEnvironment, Config}
 import com.just.donate.db.mongo.{MongoOrganisationRepository, MongoPaypalRepository}
 import com.just.donate.models.Organisation
 import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
+import com.just.donate.security.AuthMiddleware
 import org.http4s.*
 import org.http4s.ember.server.*
 import org.http4s.headers.Origin
@@ -21,7 +24,7 @@ import org.http4s.server.middleware.CORS
 import org.mongodb.scala.*
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
-import cats.effect.unsafe.implicits.global
+
 import scala.concurrent.duration.DurationInt
 
 object Server extends IOApp:
@@ -42,15 +45,19 @@ object Server extends IOApp:
 
       val defaultOrg = Organisation("Just-Donate")
       val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
-      if org.isEmpty then
-        organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
+      if org.isEmpty then organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
 
       val emailService: IEmailService = appConfig.environment match
         case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
-        case AppEnvironment.PRODUCTION => new EmailService(appConfig)
+        case AppEnvironment.PRODUCTION  => new EmailService(appConfig)
+
+      val securedOrganisationApi: HttpRoutes[IO] = AuthMiddleware.apply(organisationApi(organisationRepository))
+      val securedLogoutRoute: HttpRoutes[IO] = AuthMiddleware.apply(LogoutRoute.logoutRoute(appConfig))
 
       val httpApp: HttpApp[IO] = Router(
-        "organisation" -> organisationApi(organisationRepository),
+        "login" -> LoginRoute.loginRoute(appConfig),
+        "logout" -> securedLogoutRoute,
+        "organisation" -> securedOrganisationApi,
         "donate" -> donationRoute(organisationRepository, appConfig, emailService),
         "transfer" -> transferRoute(organisationRepository, appConfig, emailService),
         "withdraw" -> withdrawalRoute(organisationRepository, appConfig, emailService),
@@ -58,14 +65,15 @@ object Server extends IOApp:
         "paypal-ipn" -> paypalRoute(paypalRepository)
       ).orNotFound
 
-
       val corsService = CORS.policy
-        .withAllowOriginHost(Set(
-          Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)),
-          Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None)
-        ))
+        .withAllowOriginHost(
+          Set(
+            Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)),
+            Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None)
+          )
+        )
         .withAllowMethodsIn(Set(Method.GET, Method.POST))
-        .withAllowCredentials(false)
+        .withAllowCredentials(true)
         .withMaxAge(1.days)
         .apply(httpApp)
 
@@ -81,7 +89,6 @@ object Server extends IOApp:
           .as(ExitCode.Success)
       yield server
     }
-
 
   /** Acquire and safely release the Mongo client (using Resource). */
   private def mongoResource(uri: String): Resource[IO, MongoClient] =

@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import EarmarkingManager from '@/components/organization/EarmarkingManager';
 import { Earmarking } from '@/types/types';
 import { fetchEarmarkings } from './earmarkings';
+import withAuth from '../api/RequiresAuth';
 
-export default function EarmarkingsPage() {
+
+function EarmarkingsPage() {
   const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);
   const organizationId = '591671920';
 
@@ -23,3 +25,5 @@ export default function EarmarkingsPage() {
     </div>
   );
 }
+
+export default withAuth(EarmarkingsPage)

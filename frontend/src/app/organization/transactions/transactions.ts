@@ -1,6 +1,7 @@
 'use client';
 
 import { Money, Transaction } from '@/types/types';
+import axiosInstance from '../api/axiosInstance';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,19 +11,15 @@ if (!API_URL) {
 
 export async function fetchTransactions(orgId: string): Promise<Transaction[]> {
   try {
-    const response = await fetch(
-      `${API_URL}/organisation/${orgId}/transaction/list`,
+    const response = await axiosInstance.get(
+      `/organisation/${orgId}/transaction/list`,
     );
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch bank accounts');
-    }
-
-    const data = await response.json();
-    return data;
+    // Axios automatically parses JSON, so no need for `response.json()`
+    return response.data;
   } catch (error) {
-    console.error('Failed to fetch bank accounts:', error);
-    return [];
+    console.error('Failed to fetch transactions:', error);
+    return []; // Return an empty array if the request fails
   }
 }
 
@@ -33,26 +30,19 @@ export async function createTransfer(
   amount: {
     amount: string;
   },
-) {
+): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetch(`${API_URL}/transfer/${orgId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        fromAccount,
-        toAccount,
-        amount,
-      }),
+    // Use axiosInstance to make the POST request
+    await axiosInstance.post(`/transfer/${orgId}`, {
+      fromAccount,
+      toAccount,
+      amount,
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to create transfer');
-    }
-
-    return { success: true };
+    return { success: true }; // Return success if no errors occur
   } catch (error) {
+    console.error('Failed to create transfer:', error);
+
     return {
       success: false,
       error:
@@ -67,27 +57,20 @@ export async function createWithdrawal(
   earmarking: string,
   amount: Money,
   description: string,
-) {
+): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetch(`${API_URL}/withdraw/${orgId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        fromAccount,
-        earmarking,
-        amount,
-        description,
-      }),
+    // Use axiosInstance to make the POST request
+    await axiosInstance.post(`/withdraw/${orgId}`, {
+      fromAccount,
+      earmarking,
+      amount,
+      description,
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to create withdrawal');
-    }
-
-    return { success: true };
+    return { success: true }; // Return success if no errors occur
   } catch (error) {
+    console.error('Failed to create withdrawal:', error);
+
     return {
       success: false,
       error:

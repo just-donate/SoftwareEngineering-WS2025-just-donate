@@ -5,8 +5,9 @@ import { fetchEarmarkings } from '../../earmarkings/earmarkings';
 import { fetchBankAccounts } from '../../bank-accounts/bank-accounts';
 import { useEffect, useState } from 'react';
 import { BankAccount, Earmarking } from '@/types/types';
+import withAuth from '../../api/RequiresAuth';
 
-export default function WithdrawalPage() {
+function WithdrawalPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,3 +50,5 @@ export default function WithdrawalPage() {
     </div>
   );
 }
+
+export default withAuth(WithdrawalPage)

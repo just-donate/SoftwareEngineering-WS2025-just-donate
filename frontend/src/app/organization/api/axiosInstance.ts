@@ -10,10 +10,10 @@ if (!API_URL) {
 // Create an axios instance
 const axiosInstance = axios.create({
   baseURL: API_URL, // Adjust your base URL accordingly
-  // You can add default headers here if needed, or add them dynamically
+  withCredentials: true, // Allow cookies to be included in cross-origin requests
 });
 
-// Optional: Add an interceptor to attach the token to each request dynamically
+// Pass in the JWTToken in every request
 // axiosInstance.interceptors.request.use(
 //   (config) => {
 //     const jwtToken = localStorage.getItem('jwtToken');
@@ -23,7 +23,7 @@ const axiosInstance = axios.create({
 //     }
 //     return config;
 //   },
-//   (error) => Promise.reject(error)
+//   (error) => Promise.reject(error),
 // );
 
 export default axiosInstance;

@@ -10,8 +10,9 @@ import {
 } from '../../../components/organization/ui/card';
 import { Theme } from '../../../styles/themes';
 import { useTheme } from '@/contexts/ThemeContext';
+import withAuth from '../api/RequiresAuth';
 
-export default function ManageTrackingPage() {
+function ManageTrackingPage() {
   const { theme, updateTheme } = useTheme();
   const [themeString, setThemeString] = useState('');
   const [error, setError] = useState('');
@@ -101,3 +102,5 @@ export default function ManageTrackingPage() {
     </div>
   );
 }
+
+export default withAuth(ManageTrackingPage)

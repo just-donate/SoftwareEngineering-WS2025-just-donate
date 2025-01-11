@@ -6,8 +6,9 @@ import { fetchBankAccounts } from '../bank-accounts/bank-accounts';
 import { fetchTransactions } from './transactions';
 import { useEffect, useState } from 'react';
 import { Transaction, BankAccount, Earmarking } from '@/types/types';
+import withAuth from '../api/RequiresAuth';
 
-export default function TransactionsPage() {
+function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);
@@ -55,3 +56,5 @@ export default function TransactionsPage() {
     </div>
   );
 }
+
+export default withAuth(TransactionsPage)
