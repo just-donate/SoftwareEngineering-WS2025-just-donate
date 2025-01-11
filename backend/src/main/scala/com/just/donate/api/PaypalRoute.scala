@@ -1,7 +1,8 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import com.just.donate.db.PaypalRepository
+import com.just.donate.db.mongo.MongoPaypalRepository
+import com.just.donate.db.mongo.MongoPaypalRepository
 import com.just.donate.models.PaypalIPN
 import org.http4s.client.Client
 import org.http4s.dsl.io.*
@@ -9,13 +10,15 @@ import org.http4s.{HttpRoutes, Method, Request, Uri}
 
 object PaypalRoute:
 
-  def paypalRoute(repo: PaypalRepository, client: Client[IO]): HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case GET -> Root =>
-      for {
-        allDb <- repo.findAll()
-        _ <- IO.println(s"IPNs in DB: $allDb")
-        resp <- Ok(allDb.mkString("\n"))
-      } yield resp
+  def paypalRoute: PaypalRepository => HttpRoutes[IO] = (repo: PaypalRepository) =>
+    HttpRoutes.of[IO]:
+      case GET -> Root =>
+        // Maybe list everything from DB, or just memory buffer:
+        for
+          allDb <- repo.findAll()
+          _ <- IO.println(s"IPNs in DB: $allDb")
+          resp <- Ok(allDb.mkString("\n"))
+        yield resp
 
     case req@POST -> Root =>
       for {

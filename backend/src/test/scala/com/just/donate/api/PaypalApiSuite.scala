@@ -4,6 +4,7 @@ import cats.effect.{IO, Resource}
 import com.just.donate.*
 import com.just.donate.mocks.client.MockHttpClient
 import com.just.donate.mocks.paypal.PaypalRepositoryMock
+import com.just.donate.mocks.paypal.MongoPaypalRepositoryMock
 import munit.CatsEffectSuite
 import org.http4s.client.Client
 import org.http4s.implicits.uri
@@ -16,7 +17,7 @@ class PaypalApiSuite extends CatsEffectSuite:
 
   sleep(1); // Sleep for 1 second to avoid port conflict with other tests
 
-  private val fakeRepo = new PaypalRepositoryMock(null)
+  private val fakeRepo = new MongoPaypalRepositoryMock(null)
 
   override def beforeEach(context: BeforeEach): Unit = {
     fakeRepo.reset()
