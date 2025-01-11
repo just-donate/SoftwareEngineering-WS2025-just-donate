@@ -10,6 +10,7 @@ import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
 import com.just.donate.config.{AppConfig, AppEnvironment, Config}
 import com.just.donate.db.mongo.{MongoOrganisationRepository, MongoPaypalRepository}
+import com.just.donate.models.Organisation
 import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
 import org.http4s.*
 import org.http4s.ember.server.*
@@ -18,6 +19,7 @@ import org.http4s.server.Router
 import org.mongodb.scala.*
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
+import cats.effect.unsafe.implicits.global
 
 object Server extends IOApp:
 
@@ -34,6 +36,11 @@ object Server extends IOApp:
     val organisationRepository = MongoOrganisationRepository(organisationCollection)
     val paypalRepository = MongoPaypalRepository(paypalCollection)
 
+    val defaultOrg = Organisation("Just-Donate")
+    val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
+    if org.isEmpty then
+      organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
+    
     val emailService: IEmailService = appConfig.environment match
       case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
       case AppEnvironment.PRODUCTION  => new EmailService(appConfig)
