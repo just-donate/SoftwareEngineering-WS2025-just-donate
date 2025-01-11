@@ -51,26 +51,27 @@ const config: Config = {
           '2': 'hsl(var(--chart-2))',
           '3': 'hsl(var(--chart-3))',
           '4': 'hsl(var(--chart-4))',
-          '5': 'hsl(var(--chart-5))'
-        }
+          '5': 'hsl(var(--chart-5))',
+        },
       },
       keyframes: {
-        "fade-in": {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" }
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
         },
-        "pop-up": {
-          "0%": { transform: "scale(0.95)", opacity: "0" },
-          "100%": { transform: "scale(1)", opacity: "1" }
-        }
+        'pop-up': {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
       },
       animation: {
-        "fade-in-slow": "fade-in 0.5s ease-in-out",
-        "pop-up-slow": "pop-up 0.5s ease-in-out"
-      }
-    }
+        'fade-in-slow': 'fade-in 0.5s ease-in-out',
+        'pop-up-slow': 'pop-up 0.5s ease-in-out',
+      },
+    },
   },
-  plugins: [require("tailwindcss-animate")], // Added plugin
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  plugins: [require('tailwindcss-animate')], // Added plugin
 } satisfies Config;
 
 export default config;

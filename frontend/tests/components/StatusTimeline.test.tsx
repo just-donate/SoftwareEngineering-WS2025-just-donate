@@ -7,9 +7,17 @@ import '@testing-library/jest-dom'; // Import jest-dom
 // Mock status data including 'allocated', 'in use', and 'used'
 const mockStatus = [
   { status: 'Donated', date: '2023-07-20', description: 'Donation received' },
-  { status: 'Allocated', date: '2023-07-21', description: 'Funds sent to project' },
+  {
+    status: 'Allocated',
+    date: '2023-07-21',
+    description: 'Funds sent to project',
+  },
   { status: 'In Use', date: '2023-07-22', description: 'Funds are inuse' },
-  { status: 'Processed', date: '2023-07-23', description: 'Donation used by NGO' },
+  {
+    status: 'Processed',
+    date: '2023-07-23',
+    description: 'Donation used by NGO',
+  },
 ];
 
 describe('StatusTimeline Component', () => {
@@ -17,7 +25,7 @@ describe('StatusTimeline Component', () => {
     render(
       <ThemeProvider>
         <StatusTimeline status={mockStatus} />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     // Check if the status items are rendered
@@ -37,4 +45,4 @@ describe('StatusTimeline Component', () => {
     expect(screen.getByText(/2023-07-23/i)).toBeInTheDocument();
     expect(screen.getByText(/Donation used by NGO/i)).toBeInTheDocument();
   });
-}); 
+});

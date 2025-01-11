@@ -7,7 +7,9 @@ import '@testing-library/jest-dom'; // Import jest-dom
 // Mock the StatusTimeline component
 jest.mock('../../src/components/tracking/StatusTimeline', () => {
   return {
-    StatusTimeline: jest.fn(() => <div data-testid="mock-status-timeline">Status Timeline</div>),
+    StatusTimeline: jest.fn(() => (
+      <div data-testid="mock-status-timeline">Status Timeline</div>
+    )),
   };
 });
 
@@ -21,8 +23,16 @@ describe('DonationDetails Component', () => {
     currency: 'USD',
     date: '2023-01-01',
     status: [
-      { status: 'Completed', date: '2023-01-01', description: 'Donation completed successfully' },
-      { status: 'Pending', date: '2023-01-02', description: 'Donation is pending' },
+      {
+        status: 'Completed',
+        date: '2023-01-01',
+        description: 'Donation completed successfully',
+      },
+      {
+        status: 'Pending',
+        date: '2023-01-02',
+        description: 'Donation is pending',
+      },
     ],
   };
 
@@ -33,7 +43,7 @@ describe('DonationDetails Component', () => {
       render(
         <ThemeProvider>
           <DonationDetails donation={mockDonation} onClose={mockOnClose} />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
     });
 

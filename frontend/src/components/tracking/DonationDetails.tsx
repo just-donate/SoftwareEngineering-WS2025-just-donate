@@ -9,7 +9,10 @@ interface DonationDetailsProps {
   onClose: () => void;
 }
 
-export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onClose }) => {
+export const DonationDetails: React.FC<DonationDetailsProps> = ({
+  donation,
+  onClose,
+}) => {
   const position: [number, number] = [-3.315502, 40.016154];
 
   // Placeholder images
@@ -20,12 +23,29 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onCl
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className={`${customStyles.layout.card} ${customStyles.colors.card} max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
+      <div
+        className={`${customStyles.layout.card} ${customStyles.colors.card} max-w-2xl w-full max-h-[90vh] overflow-y-auto`}
+      >
         <div className="flex justify-between items-center mb-4">
           <h2 className={customStyles.text.heading}>Donation Details</h2>
-          <button onClick={onClose} className={`${customStyles.button.base} ${customStyles.button.secondary}`} data-testid="close-button">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <button
+            onClick={onClose}
+            className={`${customStyles.button.base} ${customStyles.button.secondary}`}
+            data-testid="close-button"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -63,7 +83,9 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({ donation, onCl
           </div>
 
           <div>
-            <p className={`${customStyles.text.body} font-semibold mb-2`}>Project Photos</p>
+            <p className={`${customStyles.text.body} font-semibold mb-2`}>
+              Project Photos
+            </p>
             <div className="grid grid-cols-2 gap-2">
               {images.map((url, i) => (
                 <img
