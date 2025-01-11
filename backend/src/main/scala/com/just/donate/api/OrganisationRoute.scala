@@ -1,7 +1,7 @@
 package com.just.donate.api
 
 import cats.effect.*
-import com.just.donate.models.Organisation
+import com.just.donate.models.{Organisation, ThemeConfig}
 import com.just.donate.store.Store
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisation, loadOrganisation}
@@ -12,6 +12,8 @@ import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+
+import java.nio.file.{Files, Paths, StandardOpenOption}
 
 object OrganisationRoute:
 
@@ -65,6 +67,21 @@ object OrganisationRoute:
 
       case GET -> Root / organisationId / "transaction" / "list" =>
         Ok(Seq.empty)
+
+      case req @ POST -> Root / organisationId / "theme" =>
+        for
+          theme <- req.as[ThemeConfig]
+          response <- loadAndSaveOrganisation(organisationId)(store)(_.setTheme(theme))
+        yield response
+
+      case GET -> Root / organisationId / "theme" => for
+        organisation <- store.load(organisationId)
+        response <- organisation match
+          case Some(org) => org.theme match
+            case Some(value) => Ok(value)
+            case None => NotFound()
+          case None => NotFound()
+      yield response
 
   case class RequestOrganisation(name: String)
 

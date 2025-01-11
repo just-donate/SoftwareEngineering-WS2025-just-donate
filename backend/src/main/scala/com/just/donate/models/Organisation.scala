@@ -7,7 +7,7 @@ import com.just.donate.notify.EmailMessage
 import com.just.donate.utils.Money
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.{Optional, UUID}
 import scala.math.Ordered.orderingToOrdered
 
 case class Organisation(
@@ -15,8 +15,11 @@ case class Organisation(
   accounts: Map[String, Account] = Map.empty,
   donations: Map[String, Donation] = Map.empty,
   expenses: Seq[Expense] = Seq.empty,
-  donors: Map[String, Donor] = Map.empty
+  donors: Map[String, Donor] = Map.empty,
+  theme: Option[ThemeConfig] = None
 ):
+  
+  def setTheme(theme: ThemeConfig): Organisation = copy(theme = Some(theme))
 
   private def getEarmarkings: Set[String] = accounts.values.flatMap(_.boundDonations.map(_._1)).toSet
   
