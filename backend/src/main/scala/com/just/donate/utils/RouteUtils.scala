@@ -26,7 +26,7 @@ object RouteUtils:
     organisation <- repository.findById(organisationId)
     response <- organisation match
       case Some(organisation) =>
-        repository.save(mapper(organisation)) >> Ok()
+        repository.update(mapper(organisation)) >> Ok()
       case None => NotFound()
   yield response
 
@@ -37,6 +37,6 @@ object RouteUtils:
     response <- organisation match
       case Some(organisation) =>
         val (newOrganisation, response) = mapper(organisation)
-        repository.save(newOrganisation) >> IO.pure(Some(response))
+        repository.update(newOrganisation) >> IO.pure(Some(response))
       case None => IO.pure(None)
   yield response
