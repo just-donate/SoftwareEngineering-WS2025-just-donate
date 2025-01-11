@@ -33,54 +33,54 @@ object Server extends IOApp:
   def run(args: List[String]): IO[ExitCode] =
     mongoResource(appConfig.mongoUri).use { client =>
       val database = client.getDatabase("just-donate")
-      val paypalRepository = new PaypalRepository(database.getCollection("paypal-ipn"))
-    
+
       val organisationCollection = database.getCollection("organisations")
       val paypalCollection = database.getCollection("paypal_ipn")
-    
+
       val organisationRepository = MongoOrganisationRepository(organisationCollection)
       val paypalRepository = MongoPaypalRepository(paypalCollection)
 
-     val defaultOrg = Organisation("Just-Donate")
-     val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
-     if org.isEmpty then
+      val defaultOrg = Organisation("Just-Donate")
+      val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
+      if org.isEmpty then
         organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
-    
-     val emailService: IEmailService = appConfig.environment match
+
+      val emailService: IEmailService = appConfig.environment match
         case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
-        case AppEnvironment.PRODUCTION  => new EmailService(appConfig)
+        case AppEnvironment.PRODUCTION => new EmailService(appConfig)
 
-     val httpApp: HttpApp[IO] = Router(
+      val httpApp: HttpApp[IO] = Router(
         "organisation" -> organisationApi(organisationRepository),
-       "donate" -> donationRoute(organisationRepository, appConfig, emailService),
+        "donate" -> donationRoute(organisationRepository, appConfig, emailService),
         "transfer" -> transferRoute(organisationRepository, appConfig, emailService),
-       "withdraw" -> withdrawalRoute(organisationRepository, appConfig, emailService),
-       "notify" -> notificationRoute(appConfig),
-       "paypal-ipn" -> paypalRoute(paypalRepository)
-     ).orNotFound
+        "withdraw" -> withdrawalRoute(organisationRepository, appConfig, emailService),
+        "notify" -> notificationRoute(appConfig),
+        "paypal-ipn" -> paypalRoute(paypalRepository)
+      ).orNotFound
 
 
-     val corsService = CORS.policy
+      val corsService = CORS.policy
         .withAllowOriginHost(Set(
-         Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)),
+          Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)),
           Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None)
         ))
-       .withAllowMethodsIn(Set(Method.GET, Method.POST))
-       .withAllowCredentials(false)
+        .withAllowMethodsIn(Set(Method.GET, Method.POST))
+        .withAllowCredentials(false)
         .withMaxAge(1.days)
-       .apply(httpApp)
+        .apply(httpApp)
 
       for
-       service <- corsService
-       server <- EmberServerBuilder
+        service <- corsService
+        server <- EmberServerBuilder
           .default[IO]
-         .withHost(ipv4"0.0.0.0")
-         .withPort(port"8080")
-         .withHttpApp(service)
-         .build
-         .use(_ => IO.never)
-         .as(ExitCode.Success)
+          .withHost(ipv4"0.0.0.0")
+          .withPort(port"8080")
+          .withHttpApp(service)
+          .build
+          .use(_ => IO.never)
+          .as(ExitCode.Success)
       yield server
+    }
 
 
   /** Acquire and safely release the Mongo client (using Resource). */
