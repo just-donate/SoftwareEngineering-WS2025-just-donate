@@ -1,13 +1,13 @@
 package com.just.donate.api
 
 import cats.effect.*
-import cats.implicits.*
 import com.just.donate.config.Config
 import com.just.donate.db.Repository
 import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
 import com.just.donate.models.{Donation, Donor, Organisation}
 import com.just.donate.notify.IEmailService
-import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
+import com.just.donate.utils.Money
+import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisationOps, loadOrganisation}
 import io.circe.*
 import io.circe.generic.auto.*
 import org.http4s.*
@@ -15,8 +15,10 @@ import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 
+import java.time.LocalDateTime
+
 object DonationRoute:
-  
+
   val donationRoute: (Repository[String, Organisation], Config, IEmailService) => HttpRoutes[IO] =
     (repository, config, emailService) =>
       HttpRoutes.of[IO]:
@@ -31,7 +33,7 @@ object DonationRoute:
               case None                      => BadRequest("Organisation not found")
               case Some(Left(donationError)) => BadRequest(donationError.message)
               case Some(Right(trackingId)) =>
-                val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+                val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId"
                 emailService.sendEmail(
                   requestDonation.donorEmail,
                   emailTemplate(trackingLink, trackingId, config.frontendUrl)
@@ -40,13 +42,36 @@ object DonationRoute:
             case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
           }
 
+        case GET -> Root / organisationId / "donor" / donorId =>
+          loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
+            DonationListResponse(
+              organisation.getDonations(donorId).map(toResponseDonation(organisationId))
+            )
+
+        case GET -> Root / organisationId / "donations" =>
+          loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
+            DonationListResponse(
+              organisation.getDonations.map(toResponseDonation(organisationId))
+            )
+
+  private def toResponseDonation(organisationId: String)(donation: Donation): DonationResponse =
+    DonationResponse(
+      donation.id,
+      donation.amountTotal,
+      organisationId,
+      donation.donationDate,
+      donation.earmarking.getOrElse(""),
+      donation.statusUpdates.map: status =>
+        StatusResponse(status.status.toString.toLowerCase, status.date, status.description)
+    )
+
   private val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
     f"""Thank you for your donation, to track your progress visit
-       |${linkWithId}
+       |$linkWithId
        |or enter your tracking id
-       |${id}
+       |$id
        |on our tracking page
-       |${link}""".stripMargin
+       |$link""".stripMargin
 
   private def organisationMapper(requestDonation: RequestDonation, accountName: String)(
     org: Organisation
@@ -66,6 +91,27 @@ object DonationRoute:
   private[api] case class RequestDonation(
     donorName: String,
     donorEmail: String,
-    amount: BigDecimal,
+    amount: Money,
     earmarking: Option[String]
+  )
+
+  // Define the Status case class to represent each status update
+  private[api] case class StatusResponse(
+    status: String,
+    date: LocalDateTime,
+    description: String
+  )
+
+  // Define the Donation case class to represent each donation
+  private[api] case class DonationResponse(
+    donationId: String,
+    amount: Money,
+    organisation: String,
+    date: LocalDateTime,
+    earmarking: String,
+    status: Seq[StatusResponse]
+  )
+
+  private[api] case class DonationListResponse(
+    donations: Seq[DonationResponse]
   )

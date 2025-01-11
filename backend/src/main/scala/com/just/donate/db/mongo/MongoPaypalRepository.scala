@@ -7,16 +7,22 @@ import org.mongodb.scala.*
 import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.model.*
 
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.*
-
 /**
  * Implementation of CrudRepository for PayPal IPN.
  */
 class MongoPaypalRepository(collection: MongoCollection[Document])
     extends MongoRepository[ObjectId, PaypalIPN](collection: MongoCollection[Document]):
 
+  /**
+   * Helper to convert a Document to a PaypalIPN case class
+   */
+  private def docToPaypalIPN(doc: Document): PaypalIPN =
+    PaypalIPN(
+      // doc("_id") can be cast to ObjectId
+      _id = doc.getObjectId("_id"),
+      payload = doc.getString("payload")
+    )
+  
   override def save(ipn: PaypalIPN): IO[PaypalIPN] =
     val doc = Document(
       "_id" -> ipn._id,
@@ -32,6 +38,7 @@ class MongoPaypalRepository(collection: MongoCollection[Document])
       docs.toSeq.map(docToPaypalIPN)
     }
 
+
   /**
    * Find a single IPN document by its _id (as String)
    */
@@ -42,16 +49,7 @@ class MongoPaypalRepository(collection: MongoCollection[Document])
       // If none found, we get an empty sequence => None
       docs.headOption.map(docToPaypalIPN)
     }
-
-  /**
-   * Helper to convert a Document to a PaypalIPN case class
-   */
-  private def docToPaypalIPN(doc: Document): PaypalIPN =
-    PaypalIPN(
-      _id = doc.getObjectId("_id"),
-      payload = doc.getString("payload")
-    )
-
+  
   /**
    * Update an existing IPN document by _id. Return true if something was updated.
    */

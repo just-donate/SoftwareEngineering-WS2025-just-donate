@@ -14,16 +14,20 @@ import com.just.donate.models.Organisation
 import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
 import org.http4s.*
 import org.http4s.ember.server.*
+import org.http4s.headers.Origin
 import org.http4s.implicits.*
 import org.http4s.server.Router
+import org.http4s.server.middleware.CORS
 import org.mongodb.scala.*
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
 import cats.effect.unsafe.implicits.global
+import scala.concurrent.duration.DurationInt
 
 object Server extends IOApp:
 
   private val appConfig: Config = AppConfig()
+
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   def run(args: List[String]): IO[ExitCode] =
@@ -54,14 +58,29 @@ object Server extends IOApp:
       "paypal-ipn" -> paypalRoute(paypalRepository)
     ).orNotFound
 
-    EmberServerBuilder
-      .default[IO]
-      .withHost(ipv4"0.0.0.0")
-      .withPort(port"8080")
-      .withHttpApp(httpApp)
-      .build
-      .use(_ => IO.never)
-      .as(ExitCode.Success)
+
+    val corsService = CORS.policy
+      .withAllowOriginHost(Set(
+        Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)),
+        Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None)
+      ))
+      .withAllowMethodsIn(Set(Method.GET, Method.POST))
+      .withAllowCredentials(false)
+      .withMaxAge(1.days)
+      .apply(httpApp)
+
+    for
+      service <- corsService
+      server <- EmberServerBuilder
+        .default[IO]
+        .withHost(ipv4"0.0.0.0")
+        .withPort(port"8080")
+        .withHttpApp(service)
+        .build
+        .use(_ => IO.never)
+        .as(ExitCode.Success)
+    yield server
+
 
   /** Acquire and safely release the Mongo client (using Resource). */
   private def mongoResource(uri: String): Resource[IO, MongoClient] =

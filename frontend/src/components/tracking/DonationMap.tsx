@@ -1,20 +1,34 @@
-"use client"
+'use client';
 
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
 // Dynamically import MapContainer and related components
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false },
+);
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false },
+);
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false },
+);
+const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 interface DonationMapProps {
   position: [number, number];
   popupText: string;
 }
 
-export const DonationMap: React.FC<DonationMapProps> = ({ position, popupText }) => {
+export const DonationMap: React.FC<DonationMapProps> = ({
+  position,
+  popupText,
+}) => {
   return (
     <div className="w-full h-[400px]">
       <MapContainer
@@ -33,4 +47,4 @@ export const DonationMap: React.FC<DonationMapProps> = ({ position, popupText })
       </MapContainer>
     </div>
   );
-}; 
+};

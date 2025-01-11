@@ -3,6 +3,7 @@ package com.just.donate.helper
 import cats.effect.IO
 import com.just.donate.db.Repository
 import com.just.donate.models.{Account, Donation, Donor, Organisation}
+import com.just.donate.utils.Money
 
 /**
  * A driver object to create and manage organisations.
@@ -26,7 +27,7 @@ object OrganisationDriver:
   )(repo: Repository[String, Organisation]): IO[Organisation] =
     val baseOrg = Organisation(orgName)
     val finalOrg = accountNames.foldLeft(baseOrg) { (org, accName) =>
-      org.addAccount(new Account(accName))
+      org.addAccount(accName, Money("0.0"))
     }
 
     for
@@ -49,7 +50,7 @@ object OrganisationDriver:
     orgName: String,
     donorName: String,
     donorEmail: String,
-    amount: BigDecimal,
+    amount: Money,
     accountName: String
   )(repo: Repository[String, Organisation]): IO[Unit] =
     val orgId = organisationId(orgName)

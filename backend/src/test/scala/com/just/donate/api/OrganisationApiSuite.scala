@@ -118,7 +118,8 @@ class OrganisationApiSuite extends CatsEffectSuite:
   }
 
   test("POST /organisation/{id}/account should return NotFound if org does not exist") {
-    val requestJson = Json.obj("name" -> Json.fromString("AccName"), "balance" -> Json.fromBigDecimal(100.00))
+    val requestJson =
+      Json.obj("name" -> Json.fromString("AccName"), "balance" -> Json.obj("amount" -> Json.fromString("100")))
     val req = Request[IO](Method.POST, uri"/00000/account").withEntity(requestJson)
     for resp <- routes.run(req)
     yield assertEquals(resp.status, Status.NotFound)

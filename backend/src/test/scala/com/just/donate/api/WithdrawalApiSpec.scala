@@ -7,6 +7,7 @@ import com.just.donate.helper.OrganisationHelper.*
 import com.just.donate.helper.TestHelper.*
 import com.just.donate.mocks.config.AppConfigMock
 import com.just.donate.mocks.notify.EmailServiceMock
+import com.just.donate.utils.Money
 import io.circe.generic.auto.*
 import munit.CatsEffectSuite
 import org.http4s.*
@@ -29,8 +30,8 @@ class WithdrawalApiSpec extends CatsEffectSuite:
 
   test("POST /withdraw/organisationId/account/accountName should return OK and update the organisation") {
     val req =
-      Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "account", "Paypal"))
-        .withEntity(RequestWithdrawal(BigDecimal(100), "test-description", None))
+      Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS)))
+        .withEntity(RequestWithdrawal("Paypal", Money("100"), "test-description", None))
     for
       _ <- addPaypalDonation(repo)
       resp <- withdrawRoute.run(req)
@@ -39,8 +40,8 @@ class WithdrawalApiSpec extends CatsEffectSuite:
       assertEquals(status, Status.Ok)
       val updatedOrg = repo.findById(organisationId(NEW_ROOTS)).unsafeRunSync().get
       println(updatedOrg)
-      assert(updatedOrg.totalBalance == BigDecimal(0))
+      assert(updatedOrg.totalBalance == Money.ZERO)
       assert(updatedOrg.expenses.length == 1)
       assertEquals(updatedOrg.expenses.head.description, "test-description")
-      assertEquals(updatedOrg.expenses.head.amount, BigDecimal(100))
+      assertEquals(updatedOrg.expenses.head.amount, Money("100"))
   }

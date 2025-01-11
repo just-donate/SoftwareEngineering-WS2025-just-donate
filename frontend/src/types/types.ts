@@ -4,15 +4,22 @@ export interface DonationStatus {
   description: string;
 }
 
+export interface Money {
+  amount: string;
+}
+
 export interface Donation {
-  id: string;
-  amount: number;
-  currency: string;
-  ngo: string;
-  date: string;
-  project: string;
-  status: DonationStatus[];
+  donationId: string;
   donorEmail: string;
+  amount: Money;
+  organisation: string;
+  date: string;
+  earmarking: string;
+  status: DonationStatus[];
+}
+
+export interface Donations {
+  donations: Donation[];
 }
 
 export interface Organization {
@@ -21,21 +28,10 @@ export interface Organization {
 }
 
 export interface Earmarking {
-  id: string;
   name: string;
-  organizationId: string;
-}
-
-export interface BankAccount {
-  id: string;
-  name: string;
-  balance: number;
-  organizationId: string;
-  parentIds: string[];
 }
 
 export interface Transaction {
-  id: string;
   amount: number;
   fromAccountId: string;
   toAccountId: string | null;
@@ -50,12 +46,7 @@ export interface Photo {
   uploadDate: string;
 }
 
-
-
-
 export interface BankAccount {
-  id: string
-  name: string
-  balance: number
-  parentIds: string[]
-} 
+  name: string;
+  balance: Money;
+}

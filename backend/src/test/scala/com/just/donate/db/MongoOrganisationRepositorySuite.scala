@@ -6,6 +6,7 @@ import com.dimafeng.testcontainers.{DockerComposeContainer, ExposedService}
 import com.just.donate.db.mongo.MongoOrganisationRepository
 import com.just.donate.helper.OrganisationHelper.createNewRoots
 import com.just.donate.models.{Donation, Donor, Organisation}
+import com.just.donate.utils.Money
 import munit.CatsEffectSuite
 import org.mongodb.scala.MongoClient
 import org.testcontainers.containers.wait.strategy.Wait
@@ -74,7 +75,7 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
 
         // update org2
         donor = Donor("1", "Donor", "donor@example.org")
-        (donation, donationPart) = Donation(donor.id, BigDecimal(100))
+        (donation, donationPart) = Donation(donor.id, Money("100"))
         updatedOrg2 = org2
           .addAccount("Bank")
           .addAccount("Paypal")
@@ -84,11 +85,11 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
         updatedOk <- repo.update(updatedOrg2)
         _ = assertEquals(updatedOk.getAccount("Paypal").get.name, "Paypal")
         _ = assertEquals(updatedOk.getAccount("Bank").get.name, "Bank")
-        _ = assertEquals(updatedOk.totalBalance, BigDecimal(100))
+        _ = assertEquals(updatedOk.totalBalance, Money("100"))
         found2 <- repo.findById(org2.id)
         _ = assertEquals(found2.get.getAccount("Paypal").get.name, "Paypal")
         _ = assertEquals(found2.get.getAccount("Bank").get.name, "Bank")
-        _ = assertEquals(found2.get.totalBalance, BigDecimal(100))
+        _ = assertEquals(found2.get.totalBalance, Money("100"))
 
         // delete org1
         _ <- repo.delete(org1.id)

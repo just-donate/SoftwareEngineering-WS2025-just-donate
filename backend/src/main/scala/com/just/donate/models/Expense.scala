@@ -1,8 +1,9 @@
 package com.just.donate.models
 
+import com.just.donate.utils.Money
 case class Expense(
   description: String,
-  amount: BigDecimal,
+  amount: Money,
   earMarking: Option[String] = None,
   paidBy: Seq[DonationPart] = Seq.empty
 ):

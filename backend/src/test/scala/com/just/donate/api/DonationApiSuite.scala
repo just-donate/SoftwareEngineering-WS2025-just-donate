@@ -7,8 +7,9 @@ import com.just.donate.helper.OrganisationHelper.*
 import com.just.donate.helper.TestHelper.*
 import com.just.donate.mocks.config.AppConfigMock
 import com.just.donate.mocks.notify.EmailServiceMock
+import com.just.donate.utils.Money
 import io.circe.generic.auto.*
-import munit.CatsEffectSuite
+import munit.{BeforeEach, CatsEffectSuite}
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 
@@ -33,7 +34,7 @@ class DonationApiSuite extends CatsEffectSuite:
 
   test("POST /donate/organisationId/account/accountName should return OK and update the organisation") {
     val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "account", "Paypal"))
-      .withEntity(RequestDonation("MyDonor", "mydonor@example.org", 100, None))
+      .withEntity(RequestDonation("MyDonor", "mydonor@example.org", Money("100"), None))
     for
       resp <- donationRoute.run(req)
       status = resp.status
@@ -41,5 +42,5 @@ class DonationApiSuite extends CatsEffectSuite:
       assertEquals(status, Status.Ok)
       val updatedOrg = repo.findById(organisationId(NEW_ROOTS)).unsafeRunSync().get
       println(">>>> ORG: " + updatedOrg)
-      assert(updatedOrg.totalBalance == BigDecimal(100))
+      assert(updatedOrg.totalBalance == Money("100"))
   }

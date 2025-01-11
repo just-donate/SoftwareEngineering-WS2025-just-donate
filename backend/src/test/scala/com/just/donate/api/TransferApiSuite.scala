@@ -7,6 +7,7 @@ import com.just.donate.helper.OrganisationHelper.*
 import com.just.donate.helper.TestHelper.*
 import com.just.donate.mocks.config.AppConfigMock
 import com.just.donate.mocks.notify.EmailServiceMock
+import com.just.donate.utils.Money
 import io.circe.generic.auto.*
 import munit.CatsEffectSuite
 import org.http4s.*
@@ -28,7 +29,8 @@ class TransferApiSuite extends CatsEffectSuite:
 
   test("POST /transfer/organisationId should return OK and update the organisation") {
     val req =
-      Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS))).withEntity(RequestTransfer("Paypal", "Bank", 100))
+      Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS)))
+        .withEntity(RequestTransfer("Paypal", "Bank", Money("100")))
     for
       _ <- addPaypalDonation(repo)
       resp <- transferRoute.run(req)
@@ -37,7 +39,7 @@ class TransferApiSuite extends CatsEffectSuite:
       assertEquals(status, Status.Ok)
       val updatedOrg = repo.findById(organisationId(NEW_ROOTS)).unsafeRunSync().get
       println(updatedOrg)
-      assert(updatedOrg.totalBalance == BigDecimal(100))
-      assert(updatedOrg.getAccount("Paypal").get.totalBalance == BigDecimal(0))
-      assert(updatedOrg.getAccount("Bank").get.totalBalance == BigDecimal(100))
+      assert(updatedOrg.totalBalance == Money("100"))
+      assert(updatedOrg.getAccount("Paypal").get.totalBalance == Money.ZERO)
+      assert(updatedOrg.getAccount("Bank").get.totalBalance == Money("100"))
   }
