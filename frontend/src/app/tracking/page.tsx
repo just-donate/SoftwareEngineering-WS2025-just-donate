@@ -1,34 +1,27 @@
 'use client';
 
-import { themes } from '@/styles/themes';
-import { getTheme } from '@/contexts/ThemeContext';
-import { getDonations } from './donations';
-import { TrackingPageClient } from '@/components/tracking/TrackingPage';
 import { useEffect, useState } from 'react';
-import { Donations } from '@/types/types';
+import { getDonations } from './donations';
 import { useSearchParams } from 'next/navigation';
+import { Donation } from '@/types/types';
+import { useTheme } from '../../contexts/ThemeContext';
+import { Navigation } from '@/components/tracking/Navigation';
+import { DonationList } from '@/components/tracking/DonationList';
+import '../../styles/animations.css';
 
-const organizationId = '591671920';
-
-// @ts-nocheck
-export default function Tracking() {
+export default function TrackingPage() {
   const searchParams = useSearchParams();
-  const id = searchParams.get('id') || '';
+  const trackingId = searchParams.get('id') || '';
 
-  const [donations, setDonations] = useState<Donations | null>(null);
-  const [theme, setTheme] = useState(themes.default);
   const [isLoading, setIsLoading] = useState(true);
+  const [donationList, setDonationList] = useState<Donation[] | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [donationsData, themeData] = await Promise.all([
-          getDonations(id),
-          getTheme(organizationId),
-        ]);
-
-        setDonations(donationsData);
-        setTheme(themeData || themes.default);
+        const donationsData = await getDonations(trackingId);
+        setDonationList(donationsData?.donations || null);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -37,15 +30,27 @@ export default function Tracking() {
     };
 
     fetchData();
-  }, [id]);
+  }, [trackingId]);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!donations) {
-    return <div>No donations found</div>;
-  }
-
-  return <TrackingPageClient donations={donations.donations} theme={theme} />;
+  return (
+    <div className={`min-h-screen ${theme.background}`}>
+      <Navigation links={[]} />
+      <main className={`${theme.text}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {donationList ? (
+            <DonationList donations={donationList} />
+          ) : (
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-semibold">No donations found</h2>
+              <p className="mt-2">The tracking ID you provided could not be found.</p>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
 }
