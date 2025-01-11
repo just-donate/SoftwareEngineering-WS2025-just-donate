@@ -12,8 +12,7 @@ import {
 } from './ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount } from '@/types/types';
-import { createTransfer } from '@/app/actions/transaction';
-
+import { createTransfer } from '@/app/organization/transactions/transactions';
 interface TransferManagerProps {
   accounts: BankAccount[];
   organizationId: string;

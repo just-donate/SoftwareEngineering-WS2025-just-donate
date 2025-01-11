@@ -1,7 +1,7 @@
-import { getTransactions } from '@/app/actions/transaction';
-import { getBankAccounts } from '@/app/actions/bank-account';
-import { getEarmarkings } from '@/app/actions/earmarking';
 import TransactionManager from '@/components/organization/TransactionManager';
+import { fetchEarmarkings } from '../earmarkings/earmarkings';
+import { fetchBankAccounts } from '../bank-accounts/bank-accounts';
+import { fetchTransactions } from './transactions';
 
 export default async function TransactionsPage() {
   // TODO: Get the organization ID from the session/context
@@ -9,9 +9,9 @@ export default async function TransactionsPage() {
 
   // Fetch all required data in parallel
   const [transactions, accounts, earmarkings] = await Promise.all([
-    getTransactions(organizationId),
-    getBankAccounts(organizationId),
-    getEarmarkings(organizationId),
+    fetchTransactions(organizationId),
+    fetchBankAccounts(organizationId),
+    fetchEarmarkings(organizationId),
   ]);
 
   return (

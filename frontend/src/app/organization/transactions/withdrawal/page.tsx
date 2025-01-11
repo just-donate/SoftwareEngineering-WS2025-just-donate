@@ -1,14 +1,14 @@
-import { getBankAccounts } from '@/app/actions/bank-account';
-import { getEarmarkings } from '@/app/actions/earmarking';
 import WithdrawalManager from '@/components/organization/WithdrawalManager';
+import { fetchEarmarkings } from '../../earmarkings/earmarkings';
+import { fetchBankAccounts } from '../../bank-accounts/bank-accounts';
 
 export default async function WithdrawalPage() {
   // TODO: Get the organization ID from the session/context
   const organizationId = '591671920';
 
   const [accounts, earmarkings] = await Promise.all([
-    getBankAccounts(organizationId),
-    getEarmarkings(organizationId),
+    fetchBankAccounts(organizationId),
+    fetchEarmarkings(organizationId),
   ]);
 
   return (

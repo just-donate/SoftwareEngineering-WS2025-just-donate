@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import {
@@ -12,7 +12,8 @@ import {
 } from './ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Transaction, BankAccount, Earmarking } from '@/types/types';
-import { createTransfer, createWithdrawal } from '@/app/actions/transaction';
+import { createWithdrawal } from '@/app/organization/transactions/transactions';
+import { createTransfer } from '@/app/organization/transactions/transactions';
 
 interface TransactionManagerProps {
   initialTransactions: Transaction[];
@@ -39,6 +40,10 @@ export default function TransactionManager({
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  useEffect(() => {
+    setTransactions(initialTransactions);
+  }, [initialTransactions]);
+
   const createTransaction = async () => {
     if (
       !amount ||
@@ -53,38 +58,41 @@ export default function TransactionManager({
       const result =
         transactionType === 'transfer'
           ? await createTransfer(organizationId, fromAccount, toAccount, {
-              amount: amount,
+              amount,
             })
           : await createWithdrawal(
               organizationId,
               fromAccount,
               earmarking,
-              { amount: amount },
+              { amount },
               Date.now().toString(),
             );
 
-      if (result.success) {
-        // Optimistically update the UI
-        const newTransaction: Transaction = {
-          amount: parseFloat(amount),
-          fromAccountId: fromAccount,
-          toAccountId: transactionType === 'transfer' ? toAccount : null,
-          earmarkingId: transactionType === 'withdrawal' ? earmarking : null,
-          type: transactionType,
-        };
-        setTransactions([...transactions, newTransaction]);
-        setAmount('');
-        setFromAccount('');
-        setToAccount('');
-        setEarmarking('');
-        setSuccessMessage('Transaction created successfully!');
-        setError('');
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        setError(result.error || 'Failed to create transaction');
+      if (!result.success) {
+        throw new Error(result.error || `Failed to create ${transactionType}`);
       }
-    } catch {
-      setError('An error occurred while creating the transaction');
+
+      // Optimistically update the UI
+      const newTransaction: Transaction = {
+        amount: parseFloat(amount),
+        fromAccountId: fromAccount,
+        toAccountId: transactionType === 'transfer' ? toAccount : null,
+        earmarkingId: transactionType === 'withdrawal' ? earmarking : null,
+        type: transactionType,
+      };
+      setTransactions([...transactions, newTransaction]);
+      setAmount('');
+      setFromAccount('');
+      setToAccount('');
+      setEarmarking('');
+      setSuccessMessage('Transaction created successfully!');
+      setError('');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : 'Failed to create transaction',
+      );
+      setSuccessMessage('');
     }
   };
 
@@ -92,7 +100,7 @@ export default function TransactionManager({
     const fromAcc = accounts.find((a) => a.name === from);
     const toAcc = accounts.find((a) => a.name === to);
     if (!fromAcc || !toAcc) return false;
-    return true; // Add your transfer validation logic here
+    return true;
   };
 
   return (

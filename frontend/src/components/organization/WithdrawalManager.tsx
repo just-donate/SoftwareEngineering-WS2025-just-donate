@@ -13,7 +13,7 @@ import {
 } from './ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount, Earmarking } from '@/types/types';
-import { createWithdrawal } from '@/app/actions/transaction';
+import { createWithdrawal } from '@/app/organization/transactions/transactions';
 
 interface WithdrawalManagerProps {
   accounts: BankAccount[];

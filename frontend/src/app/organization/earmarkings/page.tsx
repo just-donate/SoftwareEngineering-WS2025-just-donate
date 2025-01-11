@@ -3,23 +3,7 @@
 import { useState, useEffect } from 'react';
 import EarmarkingManager from '@/components/organization/EarmarkingManager';
 import { Earmarking } from '@/types/types';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-async function fetchEarmarkings(orgId: string): Promise<Earmarking[]> {
-  try {
-    const response = await fetch(`${API_URL}/organisation/${orgId}/earmarking/list`);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch earmarkings');
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error('Failed to fetch earmarkings:', error);
-    return [];
-  }
-}
+import { fetchEarmarkings } from './earmarkings';
 
 export default function EarmarkingsPage() {
   const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);

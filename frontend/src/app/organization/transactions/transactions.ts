@@ -1,7 +1,4 @@
-'use server';
-
-import { revalidatePath } from 'next/cache';
-import { Transaction, Money } from '@/types/types';
+import { Money, Transaction } from '@/types/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -9,22 +6,20 @@ if (!API_URL) {
   throw new Error('NEXT_PUBLIC_API_URL is not set');
 }
 
-export async function getTransactions(orgId: string): Promise<Transaction[]> {
+export async function fetchTransactions(orgId: string): Promise<Transaction[]> {
   try {
     const response = await fetch(
       `${API_URL}/organisation/${orgId}/transaction/list`,
-      {
-        cache: 'no-store',
-      },
     );
 
     if (!response.ok) {
-      throw new Error('Failed to fetch transactions');
+      throw new Error('Failed to fetch bank accounts');
     }
 
-    return response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error('Failed to fetch transactions:', error);
+    console.error('Failed to fetch bank accounts:', error);
     return [];
   }
 }
@@ -54,7 +49,6 @@ export async function createTransfer(
       throw new Error('Failed to create transfer');
     }
 
-    revalidatePath('/organization/transactions/transfer');
     return { success: true };
   } catch (error) {
     return {
@@ -90,7 +84,6 @@ export async function createWithdrawal(
       throw new Error('Failed to create withdrawal');
     }
 
-    revalidatePath('/organization/transactions/withdrawal');
     return { success: true };
   } catch (error) {
     return {

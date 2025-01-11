@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from './ui/select';
 import DonationDetails from './DonationDetails';
-import { Donation } from '@/app/actions/donation';
+import { Donation } from '@/types/types';
 
 interface DonationsListProps {
   initialDonations: Donation[];

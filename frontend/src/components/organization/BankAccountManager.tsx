@@ -36,18 +36,21 @@ export default function BankAccountManager({
     if (!newAccountName || !newAccountAmount) return;
 
     try {
-      const response = await fetch(`${API_URL}/organisation/${organizationId}/account`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: newAccountName,
-          balance: {
-            amount: newAccountAmount,
+      const response = await fetch(
+        `${API_URL}/organisation/${organizationId}/account`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        }),
-      });
+          body: JSON.stringify({
+            name: newAccountName,
+            balance: {
+              amount: newAccountAmount,
+            },
+          }),
+        },
+      );
 
       if (!response.ok) {
         throw new Error('Failed to create bank account');
@@ -67,7 +70,11 @@ export default function BankAccountManager({
       setError('');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to create bank account');
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to create bank account',
+      );
       setSuccessMessage('');
     }
   };

@@ -1,22 +1,38 @@
-'use server';
+'use client';
 
+import { useState, useEffect } from 'react';
 import { themes } from '@/styles/themes';
-import { getTheme } from '../actions/theme';
+import { getTheme } from '@/contexts/ThemeContext';
 import { getDonations } from './donations';
 import { TrackingPageClient } from '@/components/tracking/TrackingPage';
+import { Donations } from '@/types/types';
 
-export default async function Tracking({
+const organizationId = '591671920';
+
+export default function Tracking({
   searchParams,
 }: {
-  searchParams: Promise<{ id: string }>;
+  searchParams: { id: string };
 }) {
-  const { id } = await searchParams;
-  const donations = await getDonations(id);
-  const theme = (await getTheme()) || themes.default;
+  const [donations, setDonations] = useState<Donations | null>(null);
+  const [theme, setTheme] = useState(themes.default);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const [donationsData, themeData] = await Promise.all([
+        getDonations(searchParams.id),
+        getTheme(organizationId),
+      ]);
+      setDonations(donationsData);
+      setTheme(themeData || themes.default);
+    };
+
+    fetchData();
+  }, [searchParams.id]);
 
   if (!donations) {
     return <div>No donations found</div>;
   }
 
-  return <TrackingPageClient donations={donations.donations} theme={theme} />;
+  return <TrackingPageClient donations={donations} theme={theme} />;
 }

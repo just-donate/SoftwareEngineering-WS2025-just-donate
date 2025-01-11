@@ -1,7 +1,7 @@
 'use client';
 
+import { Donation } from '@/types/types';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
-import { Donation } from '@/app/actions/donation';
 
 interface DonationDetailsProps {
   donation: Donation;

@@ -17,7 +17,8 @@ export default function EarmarkingManager({
   initialEarmarkings,
   organizationId,
 }: EarmarkingManagerProps) {
-  const [earmarkings, setEarmarkings] = useState<Earmarking[]>(initialEarmarkings);
+  const [earmarkings, setEarmarkings] =
+    useState<Earmarking[]>(initialEarmarkings);
   const [newEarmarkingName, setNewEarmarkingName] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -30,13 +31,16 @@ export default function EarmarkingManager({
     if (!newEarmarkingName) return;
 
     try {
-      const response = await fetch(`${API_URL}/organisation/${organizationId}/earmarking`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${API_URL}/organisation/${organizationId}/earmarking`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: newEarmarkingName }),
         },
-        body: JSON.stringify({ name: newEarmarkingName }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error('Failed to create earmarking');
@@ -52,7 +56,9 @@ export default function EarmarkingManager({
       setError('');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to create earmarking');
+      setError(
+        error instanceof Error ? error.message : 'Failed to create earmarking',
+      );
       setSuccessMessage('');
     }
   };
