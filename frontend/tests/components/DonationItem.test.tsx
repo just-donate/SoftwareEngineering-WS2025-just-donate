@@ -2,26 +2,29 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { DonationItem } from '../../src/components/tracking/DonationItem';
 import { ThemeProvider } from '../../src/contexts/ThemeContext';
+import { Donation } from '../../src/types/types';
 import Cookies from 'js-cookie'; // Import js-cookie
 import '@testing-library/jest-dom'; // Import jest-dom
 
 // Mock donation data
+// Mock donation data
 const mockDonation = {
-  id: '1',
-  donorEmail: 'donor@example.com',
-  ngo: 'Test NGO',
-  project: 'Test Project',
-  amount: 100,
-  currency: 'USD',
-  date: '2023-01-01',
-  status: [
-    {
-      status: 'Completed',
-      date: '2023-01-02',
-      description: 'Donation completed successfully',
-    },
-  ],
-};
+    donationId: '1', // Add this line
+    organisation: 'Test Organisation', // Add this line
+    earmarking: 'General Purpose', // Add this line
+    donorEmail: 'donor@example.com',
+    ngo: 'Test NGO',
+    project: 'Test Project',
+    amount: { amount: '100.0' },
+    date: '2023-01-01',
+    status: [
+      {
+        status: 'Completed',
+        date: '2023-01-02',
+        description: 'Donation completed successfully',
+      },
+    ],
+  } as Donation;
 
 const mockOnClick = jest.fn();
 
@@ -39,16 +42,16 @@ describe('DonationItem Component', () => {
     );
 
     // Check if the NGO name is rendered
-    expect(screen.getByText(/Test NGO/i)).toBeInTheDocument();
+    expect(screen.getByText(/Test Organisation/i)).toBeInTheDocument();
 
     // Check if the project name is rendered
-    expect(screen.getByText(/Test Project/i)).toBeInTheDocument();
+    expect(screen.getByText(/General Purpose/i)).toBeInTheDocument();
 
     // Check if the amount and currency are rendered
-    expect(screen.getByText(/100 USD/i)).toBeInTheDocument();
+    expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
 
     // Check if the donation date is rendered
-    expect(screen.getByText(/2023-01-01/i)).toBeInTheDocument();
+    expect(screen.getByText(/January 1, 2023/i)).toBeInTheDocument();
 
     // Check if the status is rendered
     expect(screen.getByText(/Completed/i)).toBeInTheDocument();
@@ -85,7 +88,7 @@ describe('DonationItem Component', () => {
     );
 
     // Simulate a click on the donation item
-    screen.getByText(/Test NGO/i).click();
+    screen.getByText(/Test Organisation/i).click();
 
     // Check if the onClick function was called
     expect(mockOnClick).toHaveBeenCalledTimes(1);
