@@ -1,5 +1,8 @@
 name: SonarQube CI
 
+env:
+  NEXT_PUBLIC_API_URL: http://localhost:8080
+
 on:
   push:
     branches: [ "main" ]
@@ -27,7 +30,7 @@ jobs:
       - name: Install & test frontend
         run: |
           cd frontend
-          npm ci
+          npm ci --force
           npm run test
 
       - name: SonarQube Scan

@@ -7,6 +7,7 @@ import com.just.donate.models.Organisation
 import com.just.donate.models.errors.WithdrawError
 import com.just.donate.notify.IEmailService
 import com.just.donate.store.Store
+import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
 import io.circe.*
 import io.circe.generic.auto.*
@@ -42,5 +43,5 @@ object TransferRoute:
   private[api] case class RequestTransfer(
     fromAccount: String,
     toAccount: String,
-    amount: BigDecimal
+    amount: Money
   )

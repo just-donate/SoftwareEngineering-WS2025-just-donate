@@ -1,58 +1,25 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from "../../../components/organization/ui/button"
-import { Input } from "../../../components/organization/ui/input"
-import { Card, CardHeader, CardTitle, CardContent } from "../../../components/organization/ui/card"
-import { Earmarking } from '../../../types/types'
+import { useState, useEffect } from 'react';
+import EarmarkingManager from '@/components/organization/EarmarkingManager';
+import { Earmarking } from '@/types/types';
+import { fetchEarmarkings } from './earmarkings';
 
 export default function EarmarkingsPage() {
-  const [earmarkings, setEarmarkings] = useState<Earmarking[]>([])
-  const [newEarmarkingName, setNewEarmarkingName] = useState('')
+  const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);
+  const organizationId = '591671920';
 
-  const addEarmarking = () => {
-    if (newEarmarkingName) {
-      const newEarmarking: Earmarking = {
-        id: Date.now().toString(),
-        name: newEarmarkingName,
-        organizationId: '1', // This should be the actual organization ID
-      }
-      setEarmarkings([...earmarkings, newEarmarking])
-      setNewEarmarkingName('')
-    }
-  }
+  useEffect(() => {
+    fetchEarmarkings(organizationId).then(setEarmarkings);
+  }, [organizationId]);
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Manage Earmarkings</h1>
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Add New Earmarking</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex space-x-2">
-            <Input
-              value={newEarmarkingName}
-              onChange={(e) => setNewEarmarkingName(e.target.value)}
-              placeholder="Earmarking name"
-            />
-            <Button onClick={addEarmarking}>Add</Button>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Existing Earmarkings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul>
-            {earmarkings.map((earmarking) => (
-              <li key={earmarking.id}>{earmarking.name}</li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      <EarmarkingManager
+        initialEarmarkings={earmarkings}
+        organizationId={organizationId}
+      />
     </div>
-  )
+  );
 }
-

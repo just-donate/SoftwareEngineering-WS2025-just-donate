@@ -1,5 +1,7 @@
 package com.just.donate.models
 
+import com.just.donate.utils.Money
+
 import java.time.LocalDateTime
 import java.util
 import java.util.UUID
@@ -11,29 +13,33 @@ import java.util.UUID
 case class Donation(
   donorId: String,
   donationDate: LocalDateTime,
-  amountRemaining: BigDecimal,
-  amountTotal: BigDecimal,
+  amountRemaining: Money,
+  amountTotal: Money,
   earmarking: Option[String] = None,
-  id: String = UUID.randomUUID().toString
+  id: String = UUID.randomUUID().toString,
+  var statusUpdates: Seq[StatusUpdate] = Seq.empty
 ):
 
   override def toString: String = String.format("Donation from %s on %s", donorId, donationDate)
 
+  def addStatusUpdate(status: StatusUpdate): Unit =
+    statusUpdates = statusUpdates.appended(status)
+
 object Donation:
 
-  def apply(donorId: String, amount: BigDecimal): (Donation, DonationPart) =
+  def apply(donorId: String, amount: Money): (Donation, DonationPart) =
     apply(donorId, amount, LocalDateTime.now)
 
-  def apply(donorId: String, amount: BigDecimal, donationDate: LocalDateTime): (Donation, DonationPart) =
+  def apply(donorId: String, amount: Money, donationDate: LocalDateTime): (Donation, DonationPart) =
     val donation = Donation(donorId, donationDate, amount, amount)
     (donation, DonationPart(amount, donation.id, donationDate))
 
-  def apply(donorId: String, amount: BigDecimal, earmarking: String): (Donation, DonationPart) =
+  def apply(donorId: String, amount: Money, earmarking: String): (Donation, DonationPart) =
     apply(donorId, amount, earmarking, LocalDateTime.now)
 
   def apply(
     donorId: String,
-    amount: BigDecimal,
+    amount: Money,
     earmarking: String,
     donationDate: LocalDateTime
   ): (Donation, DonationPart) =

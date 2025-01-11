@@ -16,15 +16,47 @@ import org.http4s.*
 import org.http4s.client.Client
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.*
+import org.http4s.headers.Origin
 import org.http4s.implicits.*
 import org.http4s.server.Router
+import org.http4s.server.middleware.CORS
 import org.mongodb.scala.*
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
 
+import scala.concurrent.duration.DurationInt
+
 object Server extends IOApp:
 
+  /*
+  var org = Organisation("Just-Donate")
+  org = org.addAccount("Paypal")
+  org = org.addAccount("Stripe")
+  org = org.addAccount("Bank")
+
+  org = org.addEarmarking("Education")
+  org = org.addEarmarking("Health")
+
+
+  val donor1 = Donor("1", "John", "john@example.org")
+  val donor2 = Donor("2", "Jane", "jane@example.org")
+
+  var donation = Donation(donor1.id, Money("100.00"))
+  org = org.donate(donor1, donation._2, donation._1, "Paypal").toOption.get
+
+  donation = Donation(donor2.id, Money("150.00"))
+  org = org.donate(donor2, donation._2, donation._1, "Bank").toOption.get
+
+  donation = Donation(donor1.id, Money("200.00"), "Education")
+  org = org.donate(donor1, donation._2, donation._1, "Stripe").toOption.get
+
+  donation = Donation(donor2.id, Money("250.00"), "Health")
+  org = org.donate(donor2, donation._2, donation._1, "Paypal").toOption.get
+
+  FileStore.save(org.name.hashCode.toString, org).unsafeRunSync()
+   */
   private val appConfig: Config = AppConfig()
+
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   def run(args: List[String]): IO[ExitCode] =
@@ -51,16 +83,28 @@ object Server extends IOApp:
         "paypal-ipn" -> paypalRoute(paypalRepository, client._2)
       ).orNotFound
 
-      val httpClient = Client
+      val corsService = CORS.policy
+        .withAllowOriginHost(Set(
+          Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)),
+          Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None)
+        ))
+        .withAllowMethodsIn(Set(Method.GET, Method.POST))
+        .withAllowCredentials(false)
+        .withMaxAge(1.days)
+        .apply(httpApp)
 
-      EmberServerBuilder
-        .default[IO]
-        .withHost(ipv4"0.0.0.0")
-        .withPort(port"8080")
-        .withHttpApp(httpApp)
-        .build
-        .use(_ => IO.never)
-        .as(ExitCode.Success)
+      for
+        service <- corsService
+        server <- EmberServerBuilder
+          .default[IO]
+          .withHost(ipv4"0.0.0.0")
+          .withPort(port"8080")
+          .withHttpApp(service)
+          .build
+          .use(_ => IO.never)
+          .as(ExitCode.Success)
+      yield server
+
     }
 
   /** Acquire and safely release the Mongo client (using Resource). */

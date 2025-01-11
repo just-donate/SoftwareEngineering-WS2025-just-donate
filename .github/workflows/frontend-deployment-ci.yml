@@ -1,6 +1,9 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
+env:
+  NEXT_PUBLIC_API_URL: http://localhost:8080
+
 on:
   # Runs on pushes targeting the default branch
   push:
@@ -39,8 +42,7 @@ jobs:
       - name: Install dependencies
         working-directory: ./frontend
         run: | 
-          npm install
-          npm install --os=linux --cpu=x64 sharp
+          npm install --force
       - name: Build
         working-directory: ./frontend
         run: npm run build

@@ -19,6 +19,8 @@ object FileStore extends Store:
       Files.writeString(storePathForId(id), json.spaces4)
     }
 
+  private def storePathForId(id: String) = storePath.resolve(s"$id.json")
+
   override def load(id: String): IO[Option[Organisation]] =
     if Files.exists(storePathForId(id)) then
       val json = Files.readString(storePathForId(id))
@@ -31,8 +33,6 @@ object FileStore extends Store:
           println(f"encountered error while decoding: ${e}")
           throw e
     else IO.pure(None)
-
-  private def storePathForId(id: String) = storePath.resolve(s"$id.json")
 
   override def list(): IO[List[String]] =
     if Files.exists(storePath) then
