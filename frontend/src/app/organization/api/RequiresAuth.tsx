@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, ComponentType, useState } from 'react';
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from './axiosInstance';
 
 const withAuth = <P extends object>(
   WrappedComponent: React.ComponentType<P>,
@@ -13,12 +13,11 @@ const withAuth = <P extends object>(
     useEffect(() => {
       const checkAuth = async () => {
         try {
-          const response = await fetch('/api/check-auth');
-          if (response.ok) {
-            setIsAuthenticated(true);
-          } else {
-            router.push('/organization/login');
-          }
+          // Axios automatically throws an error for non-2xx responses.
+          await axiosInstance.get('/check-auth');
+
+          // If the request is successful, mark the user as authenticated.
+          setIsAuthenticated(true);
         } catch (error) {
           console.error('Error during authentication check:', error);
           router.push('/organization/login');
@@ -35,7 +34,7 @@ const withAuth = <P extends object>(
     }
 
     if (isAuthenticated) {
-      return <WrappedComponent {...props}/>
+      return <WrappedComponent {...props} />;
     }
   };
 

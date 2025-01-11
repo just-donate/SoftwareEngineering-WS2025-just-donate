@@ -8,7 +8,8 @@ import org.http4s.dsl.io.*
 import org.typelevel.vault.Key
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
 
-import scala.util.{Failure, Success, Try}
+import java.time.Instant
+import scala.util.{Failure, Success}
 
 object AuthMiddleware:
 
@@ -18,8 +19,7 @@ object AuthMiddleware:
   def apply(protectedRoutes: HttpRoutes[IO]): HttpRoutes[IO] = Kleisli { req =>
     OptionT {
       // Enable themes to be loaded without authentication
-      if req.uri.toString.endsWith("theme") && req.method.eq(GET) then
-        protectedRoutes(req).value 
+      if req.uri.toString.endsWith("theme") && req.method.eq(GET) then protectedRoutes(req).value
       else
         req.cookies.find(_.name == "jwtToken") match
           case Some(cookie) =>
@@ -30,10 +30,10 @@ object AuthMiddleware:
                 protectedRoutes(updatedReq).value
               case Left(error) =>
                 // Invalid token
-                BadRequest(s"Invalid token: $error").map(Some(_))
+                Forbidden(s"Invalid token: $error").map(Some(_))
           case None =>
             // Missing cookie
-            BadRequest("Missing authentication cookie").map(Some(_))
+            Forbidden("Missing authentication cookie").map(Some(_))
     }
   }
 
@@ -46,7 +46,9 @@ object AuthMiddleware:
 
   private def isExpired(claim: JwtClaim): Boolean =
     claim.expiration match
-      case Some(exp) => exp < System.currentTimeMillis() / 1000
+      case Some(exp) => {
+        exp < Instant.now().getEpochSecond
+      }
       case None      => true
 
 private object AuthAttributes:

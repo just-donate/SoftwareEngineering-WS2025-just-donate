@@ -4,14 +4,14 @@ import cats.effect.*
 import cats.effect.unsafe.implicits.global
 import com.comcast.ip4s.*
 import com.just.donate.api.DonationRoute.donationRoute
-import com.just.donate.api.{LoginRoute, LogoutRoute}
 import com.just.donate.api.NotificationRoute.notificationRoute
 import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
+import com.just.donate.api.{CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute}
 import com.just.donate.config.{AppConfig, AppEnvironment, Config}
-import com.just.donate.db.mongo.{MongoOrganisationRepository, MongoPaypalRepository}
+import com.just.donate.db.mongo.{MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository}
 import com.just.donate.models.Organisation
 import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
 import com.just.donate.security.AuthMiddleware
@@ -39,9 +39,11 @@ object Server extends IOApp:
 
       val organisationCollection = database.getCollection("organisations")
       val paypalCollection = database.getCollection("paypal_ipn")
+      val userCollection = database.getCollection("users")
 
       val organisationRepository = MongoOrganisationRepository(organisationCollection)
       val paypalRepository = MongoPaypalRepository(paypalCollection)
+      val userRepository = MongoUserRepository(userCollection)
 
       val defaultOrg = Organisation("Just-Donate")
       val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
@@ -53,15 +55,27 @@ object Server extends IOApp:
 
       val securedOrganisationApi: HttpRoutes[IO] = AuthMiddleware.apply(organisationApi(organisationRepository))
       val securedLogoutRoute: HttpRoutes[IO] = AuthMiddleware.apply(LogoutRoute.logoutRoute(appConfig))
+      val securedCheckAuthRoute: HttpRoutes[IO] = AuthMiddleware.apply(CheckAuthRoute.checkAuthRoute)
+      val securedRegisterRoute: HttpRoutes[IO] =
+        AuthMiddleware.apply(UserRoute.userApi(userRepository, organisationRepository))
+      val securedDonationRoute: HttpRoutes[IO] =
+        AuthMiddleware.apply(donationRoute(organisationRepository, appConfig, emailService))
+      val securedTransferRoute: HttpRoutes[IO] =
+        AuthMiddleware.apply(transferRoute(organisationRepository, appConfig, emailService))
+      val securedWithdrawalRoute: HttpRoutes[IO] =
+        AuthMiddleware.apply(withdrawalRoute(organisationRepository, appConfig, emailService))
+      val securedNotificationRoute: HttpRoutes[IO] = AuthMiddleware.apply(notificationRoute(appConfig))
 
       val httpApp: HttpApp[IO] = Router(
-        "login" -> LoginRoute.loginRoute(appConfig),
+        "login" -> LoginRoute.loginRoute(appConfig, userRepository),
+        "user" -> securedRegisterRoute,
+        "check-auth" -> securedCheckAuthRoute,
         "logout" -> securedLogoutRoute,
         "organisation" -> securedOrganisationApi,
-        "donate" -> donationRoute(organisationRepository, appConfig, emailService),
-        "transfer" -> transferRoute(organisationRepository, appConfig, emailService),
-        "withdraw" -> withdrawalRoute(organisationRepository, appConfig, emailService),
-        "notify" -> notificationRoute(appConfig),
+        "donate" -> securedDonationRoute,
+        "transfer" -> securedTransferRoute,
+        "withdraw" -> securedWithdrawalRoute,
+        "notify" -> securedNotificationRoute,
         "paypal-ipn" -> paypalRoute(paypalRepository)
       ).orNotFound
 

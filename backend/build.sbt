@@ -52,8 +52,11 @@ libraryDependencies ++= Seq(
   // MongoDB
   "org.mongodb.scala"            % "mongo-scala-driver_2.13"      % "5.2.1",
 
-  // JWT
+  // Encryption
   "com.github.jwt-scala" %% "jwt-core" % "10.0.1",
+  "de.mkammerer" % "argon2-jvm" % "2.1",
+
+
 
 
 // Testcontainers for Mongo
