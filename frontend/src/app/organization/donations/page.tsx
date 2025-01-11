@@ -3,26 +3,25 @@
 import { useState, useEffect } from 'react';
 import DonationsList from '@/components/organization/DonationsList';
 import { Donation } from '@/types/types';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import axiosInstance from '../api/axiosInstance';
+import axios from 'axios';
 
 async function fetchDonations(orgId: string): Promise<Donation[]> {
   try {
-    const response = await fetch(`${API_URL}/donate/${orgId}/donations`);
-
-    if (!response.ok) {
+    const response = await axiosInstance.get(`/donate/${orgId}/donations`);
+    return response.data.donations;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // Axios-specific error handling
       console.error(
         'Failed to fetch donations:',
-        response.status,
-        response.statusText,
+        error.response?.status,
+        error.response?.statusText
       );
-      throw new Error('Failed to fetch donations');
+    } else {
+      // Non-Axios error handling
+      console.error('Failed to fetch donations:', error);
     }
-
-    const data = await response.json();
-    return data.donations;
-  } catch (error) {
-    console.error('Failed to fetch donations:', error);
     return [];
   }
 }

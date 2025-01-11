@@ -8,6 +8,8 @@ import React, {
   useEffect,
 } from 'react';
 import { Theme, themes } from '@/styles/themes';
+import axios from 'axios';
+import axiosInstance from '@/app/organization/api/axiosInstance';
 
 interface ThemeContextType {
   theme: Theme;
@@ -70,31 +72,17 @@ export const useTheme = () => {
   return context;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not set');
-}
-
 export async function getTheme(organizationId: string): Promise<Theme | null> {
   try {
-    const response = await fetch(
-      `${API_URL}/organisation/${organizationId}/theme`,
-      {
-        method: 'GET',
-      },
-    );
-
-    if (!response.ok) {
-      if (response.status === 404) {
+    const response = await axiosInstance.get<string>(`/organisation/${organizationId}/theme`);
+    return JSON.parse(response.data);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
         return null;
       }
-      throw new Error(`Failed to fetch theme: ${response.statusText}`);
+      throw new Error(`Failed to fetch theme: ${error.response?.statusText}`);
     }
-
-    const themeData = await response.text();
-    return JSON.parse(themeData);
-  } catch (error) {
     console.error('Failed to fetch theme:', error);
     return null;
   }
@@ -106,22 +94,18 @@ export async function saveTheme(organizationId: string, theme: Theme) {
     if (!isValidTheme(theme)) {
       throw new Error('Invalid theme structure');
     }
-
-    const response = await fetch(
-      `${API_URL}/organisation/${organizationId}/theme`,
+  
+    const response = await axiosInstance.post(
+      `/organisation/${organizationId}/theme`,
+      theme,
       {
-        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(theme),
-      },
+      }
     );
-
-    if (!response.ok) {
-      throw new Error(`Failed to update theme: ${response.statusText}`);
-    }
-
+  
+    // No need to check response.ok; Axios throws an error for non-2xx statuses.
     return { success: true };
   } catch (error) {
     return {

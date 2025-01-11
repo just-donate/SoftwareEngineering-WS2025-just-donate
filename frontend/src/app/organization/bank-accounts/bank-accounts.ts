@@ -1,6 +1,7 @@
 'use client';
 
 import { BankAccount } from '@/types/types';
+import axiosInstance from '../api/axiosInstance';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,16 +11,8 @@ if (!API_URL) {
 
 export async function fetchBankAccounts(orgId: string): Promise<BankAccount[]> {
   try {
-    const response = await fetch(
-      `${API_URL}/organisation/${orgId}/account/list`,
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch bank accounts');
-    }
-
-    const data = await response.json();
-    return data;
+    const response = await axiosInstance.get(`/organisation/${orgId}/account/list`)
+    return response.data;
   } catch (error) {
     console.error('Failed to fetch bank accounts:', error);
     return [];
