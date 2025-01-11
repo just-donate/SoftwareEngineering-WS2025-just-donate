@@ -5,8 +5,7 @@ import com.just.donate.db.PaypalRepository
 import com.just.donate.models.PaypalIPN
 import org.http4s.client.Client
 import org.http4s.dsl.io.*
-import org.http4s.implicits.uri
-import org.http4s.{HttpRoutes, Method, Request, Uri, UrlForm}
+import org.http4s.{HttpRoutes, Method, Request, Uri}
 
 object PaypalRoute:
 

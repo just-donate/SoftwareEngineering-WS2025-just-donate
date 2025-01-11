@@ -86,7 +86,8 @@ object Server extends IOApp:
       val corsService = CORS.policy
         .withAllowOriginHost(Set(
           Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)),
-          Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None)
+          Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None),
+          Origin.Host(Uri.Scheme.https, Uri.RegName("ipnpb.sandbox.paypal.com"), None)
         ))
         .withAllowMethodsIn(Set(Method.GET, Method.POST))
         .withAllowCredentials(false)
@@ -111,5 +112,6 @@ object Server extends IOApp:
   private def mongoResource(uri: String): Resource[IO, MongoClient] =
     Resource.make(IO(MongoClient(uri)))(client => IO(client.close()))
 
-  def httpClientResource: Resource[IO, Client[IO]] =
+  /** Acquire and safely release the HTTP client (using Resource). */
+  private def httpClientResource: Resource[IO, Client[IO]] =
     EmberClientBuilder.default[IO].build
