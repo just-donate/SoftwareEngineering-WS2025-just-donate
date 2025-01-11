@@ -1,6 +1,7 @@
-package com.just.donate.db
+package com.just.donate.db.mongo
 
 import cats.effect.IO
+import com.just.donate.db.mongo.MongoRepository.ObservableOps
 import com.just.donate.models.PaypalIPN
 import org.mongodb.scala.*
 import org.mongodb.scala.bson.ObjectId
@@ -13,9 +14,8 @@ import scala.concurrent.duration.*
 /**
  * Implementation of CrudRepository for PayPal IPN.
  */
-class PaypalRepository(collection: MongoCollection[Document]) extends MongoRepository[PaypalIPN, ObjectId](collection: MongoCollection[Document]):
-
-  import MongoOps.*
+class MongoPaypalRepository(collection: MongoCollection[Document])
+    extends MongoRepository[ObjectId, PaypalIPN](collection: MongoCollection[Document]):
 
   override def save(ipn: PaypalIPN): IO[PaypalIPN] =
     val doc = Document(
@@ -33,15 +33,6 @@ class PaypalRepository(collection: MongoCollection[Document]) extends MongoRepos
     }
 
   /**
-   * Helper to convert a Document to a PaypalIPN case class
-   */
-  private def docToPaypalIPN(doc: Document): PaypalIPN =
-    PaypalIPN(
-      _id = doc.getObjectId("_id"),
-      payload = doc.getString("payload")
-    )
-
-  /**
    * Find a single IPN document by its _id (as String)
    */
   override def findById(id: ObjectId): IO[Option[PaypalIPN]] =
@@ -51,6 +42,15 @@ class PaypalRepository(collection: MongoCollection[Document]) extends MongoRepos
       // If none found, we get an empty sequence => None
       docs.headOption.map(docToPaypalIPN)
     }
+
+  /**
+   * Helper to convert a Document to a PaypalIPN case class
+   */
+  private def docToPaypalIPN(doc: Document): PaypalIPN =
+    PaypalIPN(
+      _id = doc.getObjectId("_id"),
+      payload = doc.getString("payload")
+    )
 
   /**
    * Update an existing IPN document by _id. Return true if something was updated.

@@ -3,10 +3,10 @@ package com.just.donate.api
 import cats.effect.*
 import cats.implicits.*
 import com.just.donate.config.Config
-import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
-import com.just.donate.models.{ Donation, Donor, Organisation }
+import com.just.donate.db.Repository
+import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
+import com.just.donate.models.{Donation, Donor, Organisation}
 import com.just.donate.notify.IEmailService
-import com.just.donate.store.Store
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
 import io.circe.*
 import io.circe.generic.auto.*
@@ -16,27 +16,29 @@ import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 
 object DonationRoute:
-  val donationRoute: (Store, Config, IEmailService) => HttpRoutes[IO] = (store, config, emailService) =>
-    HttpRoutes.of[IO]:
+  
+  val donationRoute: (Repository[String, Organisation], Config, IEmailService) => HttpRoutes[IO] =
+    (repository, config, emailService) =>
+      HttpRoutes.of[IO]:
 
-      case req @ POST -> Root / organisationId / "account" / accountName =>
-        (for
-          requestDonation <- req.as[RequestDonation]
-          trackingId <- loadAndSaveOrganisationOps(organisationId)(store)(
-            organisationMapper(requestDonation, accountName)
-          )
-          response <- trackingId match
-            case None                      => BadRequest("Organisation not found")
-            case Some(Left(donationError)) => BadRequest(donationError.message)
-            case Some(Right(trackingId)) =>
-              val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
-              emailService.sendEmail(
-                requestDonation.donorEmail,
-                emailTemplate(trackingLink, trackingId, config.frontendUrl)
-              ) >> Ok()
-        yield response).handleErrorWith {
-          case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
-        }
+        case req @ POST -> Root / organisationId / "account" / accountName =>
+          (for
+            requestDonation <- req.as[RequestDonation]
+            trackingId <- loadAndSaveOrganisationOps(organisationId)(repository)(
+              organisationMapper(requestDonation, accountName)
+            )
+            response <- trackingId match
+              case None                      => BadRequest("Organisation not found")
+              case Some(Left(donationError)) => BadRequest(donationError.message)
+              case Some(Right(trackingId)) =>
+                val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+                emailService.sendEmail(
+                  requestDonation.donorEmail,
+                  emailTemplate(trackingLink, trackingId, config.frontendUrl)
+                ) >> Ok()
+          yield response).handleErrorWith {
+            case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
+          }
 
   private val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
     f"""Thank you for your donation, to track your progress visit

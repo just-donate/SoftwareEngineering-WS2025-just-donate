@@ -2,7 +2,7 @@ package com.just.donate.models
 
 import com.just.donate.config.Config
 import com.just.donate.models.Types.DonationGetter
-import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
+import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
 import com.just.donate.notify.EmailMessage
 
 import java.util.UUID
@@ -14,6 +14,11 @@ case class Organisation(
   expenses: Seq[Expense] = Seq.empty,
   donors: Map[String, Donor] = Map.empty
 ):
+
+  def id: String = math.abs(name.hashCode).toString
+
+  def getEarmarkings: Set[String] = accounts.values.flatMap(_.boundDonations.map(_._1)).toSet
+
   def addAccount(name: String): Organisation =
     addAccount(new Account(name))
 

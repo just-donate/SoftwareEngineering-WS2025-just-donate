@@ -1,18 +1,18 @@
 package com.just.donate.helper
 
 import cats.effect.IO
-import com.just.donate.models.{Organisation, Account, Donor, Donation}
-import com.just.donate.store.MemoryStore
+import com.just.donate.db.Repository
+import com.just.donate.models.{Account, Donation, Donor, Organisation}
 
 /**
  * A driver object to create and manage organisations.
  */
-object OrganisationDriver {
+object OrganisationDriver:
 
   /**
    * Derives a stable ID from the organisation name.
    */
-  private def organisationId(name: String): String = name.hashCode.toString
+  private def organisationId(name: String): String = Organisation(name).id
 
   /**
    * Creates a new organisation with the given name and accounts.
@@ -20,18 +20,19 @@ object OrganisationDriver {
    * @param accountNames The names of the accounts to create within the organisation.
    * @return The newly created organisation.
    */
-  def createOrganisation(orgName: String, accountNames: String*): IO[Organisation] = {
-    val orgId      = organisationId(orgName)
-    val baseOrg    = Organisation(orgName)
-    val finalOrg   = accountNames.foldLeft(baseOrg) { (org, accName) =>
+  def createOrganisation(
+    orgName: String,
+    accountNames: String*
+  )(repo: Repository[String, Organisation]): IO[Organisation] =
+    val baseOrg = Organisation(orgName)
+    val finalOrg = accountNames.foldLeft(baseOrg) { (org, accName) =>
       org.addAccount(new Account(accName))
     }
 
-    for {
+    for
       // Save the newly created organisation in MemoryStore
-      _ <- MemoryStore.save(orgId, finalOrg)
-    } yield finalOrg
-  }
+      _ <- repo.save(finalOrg)
+    yield finalOrg
 
   /**
    * Adds a donation to an existing organisation. If the organisation
@@ -45,24 +46,22 @@ object OrganisationDriver {
    * @return A no-result IO, signifying the side effect of saving the updated org.
    */
   def addDonation(
-                   orgName: String,
-                   donorName: String,
-                   donorEmail: String,
-                   amount: BigDecimal,
-                   accountName: String
-                 ): IO[Unit] = {
+    orgName: String,
+    donorName: String,
+    donorEmail: String,
+    amount: BigDecimal,
+    accountName: String
+  )(repo: Repository[String, Organisation]): IO[Unit] =
     val orgId = organisationId(orgName)
-    for {
-      maybeOrg <- MemoryStore.load(orgId)
-      org       = maybeOrg.getOrElse(sys.error(s"Organisation '$orgName' not found"))
-      donor     = Donor(org.getNewDonorId, donorName, donorEmail)
+    for
+      maybeOrg <- repo.findById(orgId)
+      org = maybeOrg.getOrElse(sys.error(s"Organisation '$orgName' not found"))
+      donor = Donor(org.getNewDonorId, donorName, donorEmail)
       // Donation can return donation and donation part
       (donation, donationPart) = Donation(donor.id, amount)
       updatedOrg = org
         .donate(donor, donationPart, donation, accountName)
         .toOption
         .getOrElse(sys.error("Donation failed"))
-      _ <- MemoryStore.save(orgId, updatedOrg)
-    } yield ()
-  }
-}
+      _ <- repo.save(updatedOrg)
+    yield ()
