@@ -15,5 +15,9 @@ class MongoPaypalRepositoryMock(collection: MongoCollection[Document]) extends M
     ipn
   }
 
+  override def findById(id: String): IO[Option[PayPalIPN]] = IO {
+    stored.find(_.ipnTrackId == id)
+  }
+
   def reset(): Unit = stored = Nil
 }

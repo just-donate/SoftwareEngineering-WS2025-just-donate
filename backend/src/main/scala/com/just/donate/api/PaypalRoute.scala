@@ -43,12 +43,12 @@ object PaypalRoute:
               }
 
               // Verify recipient email
-              _ <- if (newIpn.receiverEmail == "expected-business-email@example.com") {
-                IO.unit
-              } else {
-                IO.println(s"Invalid recipient email: ${newIpn.receiverEmail}. Expected: expected-business-email@example.com") *>
-                  IO.raiseError(new IllegalArgumentException("Invalid recipient email"))
-              }
+//              _ <- if (newIpn.receiverEmail == "expected-business-email@example.com") {
+//                IO.unit
+//              } else {
+//                IO.println(s"Invalid recipient email: ${newIpn.receiverEmail}. Expected: expected-business-email@example.com") *>
+//                  IO.raiseError(new IllegalArgumentException("Invalid recipient email"))
+//              }
 
               // Check for duplicates
               existingIpn <- repo.findById(newIpn.ipnTrackId)
