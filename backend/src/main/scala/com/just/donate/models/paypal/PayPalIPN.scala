@@ -1,15 +1,15 @@
-package com.just.donate.models
+package com.just.donate.models.paypal
 
 import com.just.donate.utils.Money
 
-case class PaypalIPN(
+case class PayPalIPN(
                       // Transaction fields
                       txnId: String,
                       txnType: String,
                       paymentStatus: String,
                       paymentDate: String,     // Consider using a date/time type if parsing the value
-                      mcGross: Money,
-                      mcFee: Money,
+                      mcGross: Money, // Money
+                      mcFee: Money, // Money
                       invoice: Option[String], // Some values may be empty, so using Option
 
                       // Payer fields
@@ -41,6 +41,6 @@ case class PaypalIPN(
 
                       // Currency, quantity and other details
                       mcCurrency: String,
-                      quantity: Int,
+                      quantity: Int, // Int
                       itemName: String
                     )

@@ -2,9 +2,8 @@ package com.just.donate.api
 
 import cats.effect.IO
 import com.just.donate.db.mongo.MongoPaypalRepository
-import com.just.donate.models.PaypalIPN
+import com.just.donate.models.paypal.PayPalIPNMapper
 import io.circe.*
-import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
@@ -15,27 +14,24 @@ import org.http4s.dsl.io.*
 object PaypalRoute:
 
   def paypalRoute(repo: MongoPaypalRepository, client: Client[IO]): HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case GET -> Root =>
-      for
-        allDb <- repo.findAll()
-        _ <- IO.println(s"IPNs in DB: $allDb")
-        resp <- Ok(allDb.mkString("\n"))
-      yield resp
-
     case req @ POST -> Root =>
       for
         // Read the raw request body
-        rawBody <- req.bodyText.compile.string
-        newIpn <- req.as[PaypalIPN]
+        rawBody <- req.as[UrlForm].map(_.values)
         _ <- IO.println(s"Received raw IPN payload: $rawBody")
 
         // Immediately respond to PayPal with 200 OK
         response <- Ok("")
 
+        newIpn <- PayPalIPNMapper.mapToPayPalIPN(rawBody)
+
+        _ <- IO.println(s"Received IPN: $newIpn")
+
         // Perform asynchronous validation
-        _ <- validateWithPaypal(client, rawBody).flatMap {
+        _ <- validateWithPaypal(client, "1234").flatMap {
           case "VERIFIED" =>
-            for _ <- IO.println("IPN verified by PayPal")
+            for
+              _ <- IO.println("IPN verified by PayPal")
 
               // TODO: Verify that you are the intended recipient of the IPN message. To do this, check the email address in the message. This check prevents another merchant from accidentally or intentionally using your listener.
 
@@ -64,9 +60,13 @@ object PaypalRoute:
     )
 
     // Send the HTTPS POST to PayPal
-    client.expect[String](
-      Request[IO](
-        method = Method.POST,
-        uri = paypalValidationUrl
-      ).withEntity(validationPayload)
-    )
+//    client.expect[String](
+//      Request[IO](
+//        method = Method.POST,
+//        uri = paypalValidationUrl
+//      ).withEntity(validationPayload)
+//    )
+
+    IO {
+        "VERIFIED"
+    } // Placeholder for now

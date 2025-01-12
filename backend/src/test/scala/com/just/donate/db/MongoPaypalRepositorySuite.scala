@@ -4,7 +4,7 @@ import cats.effect.IO
 import com.dimafeng.testcontainers.munit.TestContainerForAll
 import com.dimafeng.testcontainers.{DockerComposeContainer, ExposedService}
 import com.just.donate.db.mongo.MongoPaypalRepository
-import com.just.donate.models.PaypalIPN
+import com.just.donate.models.paypal.PayPalIPN
 import munit.CatsEffectSuite
 import org.bson.types.ObjectId
 import org.mongodb.scala.MongoClient
@@ -67,8 +67,8 @@ class MongoPaypalRepositorySuite extends CatsEffectSuite with TestContainerForAl
       val collection = database.getCollection("paypal_ipn")
       collection.drop()
 
-      val ipn1 = PaypalIPN(_id = ObjectId.get(), payload = "payload-1")
-      val ipn2 = PaypalIPN(_id = ObjectId.get(), payload = "payload-2")
+      val ipn1 = PayPalIPN(_id = ObjectId.get(), payload = "payload-1")
+      val ipn2 = PayPalIPN(_id = ObjectId.get(), payload = "payload-2")
 
       val test = for
         // save ipn1 and ipn2

@@ -2,7 +2,7 @@ package com.just.donate.db.mongo
 
 import cats.effect.IO
 import com.just.donate.db.mongo.MongoRepository.ObservableOps
-import com.just.donate.models.PaypalIPN
+import com.just.donate.models.paypal.PayPalIPN
 import io.circe.*
 import io.circe.generic.auto.*
 import io.circe.parser.*
@@ -14,9 +14,9 @@ import org.mongodb.scala.model.*
  * Implementation of CrudRepository for PayPal IPN.
  */
 class MongoPaypalRepository(collection: org.mongodb.scala.MongoCollection[Document])
-    extends MongoRepository[String, PaypalIPN](collection):
+    extends MongoRepository[String, PayPalIPN](collection):
 
-  override def save(ipn: PaypalIPN): IO[PaypalIPN] =
+  override def save(ipn: PayPalIPN): IO[PayPalIPN] =
     val doc = Document(
       "_id" -> ipn.ipnTrackId,
       "data" -> ipn.asJson.noSpaces
@@ -33,26 +33,26 @@ class MongoPaypalRepository(collection: org.mongodb.scala.MongoCollection[Docume
   /**
    * Find all IPN documents
    */
-  override def findAll(): IO[Seq[PaypalIPN]] =
+  override def findAll(): IO[Seq[PayPalIPN]] =
     collection
       .find()
       .toIO
-      .map(docs => docs.flatMap(doc => parse(doc.getString("data")).flatMap(_.as[PaypalIPN]).toOption))
+      .map(docs => docs.flatMap(doc => parse(doc.getString("data")).flatMap(_.as[PayPalIPN]).toOption))
 
   /**
    * Find a single IPN document by its _id (as ObjectId)
    */
-  override def findById(id: String): IO[Option[PaypalIPN]] =
+  override def findById(id: String): IO[Option[PayPalIPN]] =
     collection
       .find(Filters.eq("_id", id))
       .first()
       .toIO
-      .map(_.headOption.flatMap(doc => parse(doc.getString("data")).flatMap(_.as[PaypalIPN]).toOption))
+      .map(_.headOption.flatMap(doc => parse(doc.getString("data")).flatMap(_.as[PayPalIPN]).toOption))
 
   /**
    * Update an existing IPN document by _id.
    */
-  override def update(ipn: PaypalIPN): IO[PaypalIPN] =
+  override def update(ipn: PayPalIPN): IO[PayPalIPN] =
     val doc = Document(
       "_id" -> ipn.ipnTrackId,
       "data" -> ipn.asJson.noSpaces

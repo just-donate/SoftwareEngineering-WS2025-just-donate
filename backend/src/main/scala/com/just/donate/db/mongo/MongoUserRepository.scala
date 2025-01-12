@@ -2,7 +2,7 @@ package com.just.donate.db.mongo
 
 import cats.effect.IO
 import com.just.donate.db.mongo.MongoRepository.ObservableOps
-import com.just.donate.models.PaypalIPN
+import com.just.donate.models.paypal.PayPalIPN
 import com.just.donate.models.user.{Roles, User}
 import org.mongodb.scala.*
 import org.mongodb.scala.bson.ObjectId
