@@ -6,8 +6,11 @@ import { fetchDonations, createDonation } from '@/app/organization/donations/don
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/organization/ui/card';
 import { Input } from '@/components/organization/ui/input';
 import { Button } from '@/components/organization/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/organization/ui/select';
 import DonationsList from '@/components/organization/DonationsList';
-
+import { BankAccount, Earmarking } from '@/types/types';
+import { fetchBankAccounts } from '@/app/organization/bank-accounts/bank-accounts';
+import { fetchEarmarkings } from '@/app/organization/earmarkings/earmarkings';
 
 interface DonationManagerProps {
   initialDonations: Donation[];
@@ -19,6 +22,8 @@ export default function DonationManager({
     organizationId,
 }: DonationManagerProps) {
     const [donations, setDonations] = useState<Donation[]>(initialDonations);
+    const [aviableAccounts, setAviableAccounts] = useState<BankAccount[]>([]); 
+    const [aviableEarmarkings, setAviableEarmarkings] = useState<Earmarking[]>([]);
     const [donorName, setDonorName] = useState('');
     const [donorEmail, setDonorEmail] = useState('');
     const [amount, setAmount] = useState('');
@@ -29,6 +34,8 @@ export default function DonationManager({
 
     useEffect(() => {
         fetchDonations(organizationId).then(setDonations);
+        fetchBankAccounts(organizationId).then(setAviableAccounts);
+        fetchEarmarkings(organizationId).then(setAviableEarmarkings);
     }, [organizationId]);
 
     const addDonation = async () => {
@@ -80,16 +87,30 @@ export default function DonationManager({
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount"
               />
-              <Input
-                value={earmarking}
-                onChange={(e) => setEarmarking(e.target.value)}
-                placeholder="Earmarking"
-              />
-              <Input
-                value={accountName}
-                onChange={(e) => setAccountName(e.target.value)}
-                placeholder="Account Name"
-              />
+              <Select value={earmarking} onValueChange={setEarmarking}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Earmarking" />
+                </SelectTrigger>
+                <SelectContent>
+                  {aviableEarmarkings.map((earmarking) => (
+                    <SelectItem key={earmarking.name} value={earmarking.name}>
+                      {earmarking.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={accountName} onValueChange={setAccountName}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Account" />
+                </SelectTrigger>
+                <SelectContent>
+                  {aviableAccounts.map((account) => (
+                    <SelectItem key={account.name} value={account.name}>
+                      {account.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button onClick={addDonation}>Create Donation</Button>
               {successMessage && <p className="text-green-500">{successMessage}</p>}
               {errorMessage && <p className="text-red-500">{errorMessage}</p>}
