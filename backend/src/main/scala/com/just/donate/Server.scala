@@ -41,7 +41,7 @@ object Server extends IOApp:
         (mongoClient, httpClient)
       }
     }.use { client =>
-      val database = client.getDatabase("just-donate")
+      val database = client._1.getDatabase("just-donate")
 
       val organisationCollection = database.getCollection("organisations")
       val paypalCollection = database.getCollection("paypal_ipn")
