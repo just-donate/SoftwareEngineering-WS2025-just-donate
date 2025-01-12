@@ -4,7 +4,7 @@
 //import com.dimafeng.testcontainers.munit.TestContainerForAll
 //import com.dimafeng.testcontainers.{DockerComposeContainer, ExposedService}
 //import com.just.donate.db.mongo.MongoPaypalRepository
-//import com.just.donate.models.paypal.PayPalIPN
+//import com.just.donate.models.PaypalIPN
 //import munit.CatsEffectSuite
 //import org.bson.types.ObjectId
 //import org.mongodb.scala.MongoClient
@@ -13,6 +13,8 @@
 //import java.io.File
 //
 //class MongoPaypalRepositorySuite extends CatsEffectSuite with TestContainerForAll:
+//
+//  val updated2 = "updated=2"
 //
 //  /**
 //   * Define the Docker Compose container for the Mongo database.
@@ -67,8 +69,8 @@
 //      val collection = database.getCollection("paypal_ipn")
 //      collection.drop()
 //
-//      val ipn1 = PayPalIPN(_id = ObjectId.get(), payload = "payload-1")
-//      val ipn2 = PayPalIPN(_id = ObjectId.get(), payload = "payload-2")
+//      val ipn1 = PaypalIPN(_id = ObjectId.get(), payload = "payload-1")
+//      val ipn2 = PaypalIPN(_id = ObjectId.get(), payload = "payload-2")
 //
 //      val test = for
 //        // save ipn1 and ipn2
@@ -86,11 +88,11 @@
 //        _ = assertEquals(found1.get.payload, "payload-1")
 //
 //        // update ipn2
-//        updatedIpn2 = ipn2.copy(payload = "updated-2")
+//        updatedIpn2 = ipn2.copy(payload = updated2)
 //        updatedOk <- repo.update(updatedIpn2)
-//        _ = assertEquals(updatedOk.payload, "updated-2")
+//        _ = assertEquals(updatedOk.payload, updated2)
 //        found2 <- repo.findById(ipn2._id)
-//        _ = assertEquals(found2.get.payload, "updated-2")
+//        _ = assertEquals(found2.get.payload, updated2)
 //
 //        // delete ipn1
 //        _ <- repo.delete(ipn1._id)

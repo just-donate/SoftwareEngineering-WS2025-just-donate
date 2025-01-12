@@ -15,6 +15,8 @@ import java.io.File
 
 class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContainerForAll:
 
+  val testDb = "test-db"
+
   override val containerDef: DockerComposeContainer.Def =
     DockerComposeContainer.Def(
       new File("src/test/resources/db/docker-compose.yml"),
@@ -35,7 +37,7 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
       val connectionString = s"mongodb://$host:$port"
       val client = org.mongodb.scala.MongoClient(connectionString)
 
-      val db = client.getDatabase("test-db")
+      val db = client.getDatabase(testDb)
       val collection = db.getCollection("dummy")
 
       assert(port != 0, s"Port must be mapped properly, found: $port")
@@ -48,7 +50,7 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
       val port = mongo.getServicePort("mongo_1", 27017)
       val connectionString = s"mongodb://$host:$port"
       val client = MongoClient(connectionString)
-      val database = client.getDatabase("test-db")
+      val database = client.getDatabase(testDb)
 
       val repo = new MongoOrganisationRepository(database.getCollection("organisations"))
 
@@ -107,7 +109,7 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
       val port = mongo.getServicePort("mongo_1", 27017)
       val connectionString = s"mongodb://$host:$port"
       val client = MongoClient(connectionString)
-      val database = client.getDatabase("test-db")
+      val database = client.getDatabase(testDb)
 
       val repo = new MongoOrganisationRepository(database.getCollection("organisations"))
 
