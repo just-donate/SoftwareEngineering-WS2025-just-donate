@@ -13,7 +13,7 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 import org.http4s.headers.`WWW-Authenticate`
-import org.http4s.*
+import org.http4s.{SameSite, *}
 import pdi.jwt.{Jwt, JwtAlgorithm}
 
 import java.time.Instant
@@ -66,7 +66,7 @@ object LoginRoute {
             httpOnly = true,
             secure = appConfig.environment == PRODUCTION,
             path = Some("/"),
-            sameSite = Some(Strict),
+            sameSite = Some(if (appConfig.environment == PRODUCTION) SameSite.None else Strict),
             maxAge = Some(expirationTimeInSeconds),
             expires = Some(httpDate)
           )
