@@ -57,4 +57,4 @@ function TransactionsPage() {
   );
 }
 
-export default withAuth(TransactionsPage)
+export default withAuth(TransactionsPage);

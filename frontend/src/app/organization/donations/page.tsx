@@ -43,4 +43,4 @@ function DonationsPage() {
   );
 }
 
-export default withAuth(DonationsPage)
+export default withAuth(DonationsPage);

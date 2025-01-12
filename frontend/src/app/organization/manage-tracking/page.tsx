@@ -103,4 +103,4 @@ function ManageTrackingPage() {
   );
 }
 
-export default withAuth(ManageTrackingPage)
+export default withAuth(ManageTrackingPage);

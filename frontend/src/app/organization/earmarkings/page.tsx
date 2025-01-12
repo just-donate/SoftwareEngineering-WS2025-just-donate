@@ -6,7 +6,6 @@ import { Earmarking } from '@/types/types';
 import { fetchEarmarkings } from './earmarkings';
 import withAuth from '../api/RequiresAuth';
 
-
 function EarmarkingsPage() {
   const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);
   const organizationId = '591671920';
@@ -26,4 +25,4 @@ function EarmarkingsPage() {
   );
 }
 
-export default withAuth(EarmarkingsPage)
+export default withAuth(EarmarkingsPage);

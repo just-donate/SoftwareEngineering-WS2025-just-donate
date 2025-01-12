@@ -80,4 +80,4 @@ function DashboardPage() {
   );
 }
 
-export default withAuth(DashboardPage)
+export default withAuth(DashboardPage);

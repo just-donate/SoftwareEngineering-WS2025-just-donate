@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-  
+
     try {
       // Perform the login request
       const response = await axios.post(
@@ -36,24 +36,25 @@ export default function LoginPage() {
           headers: {
             'Content-Type': 'application/json', // Specify JSON content type
           },
-        }
+        },
       );
-  
+
       // On success, display a success notification (optional) and redirect to dashboard
       toast.success('Login successful!', {
-        position: "top-center"
+        position: 'top-center',
       });
       router.push('/organization/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
-      let message = 'An unexpected error occurred. Please check your connection.';
+      let message =
+        'An unexpected error occurred. Please check your connection.';
       if (err.response?.status === 403) {
         message = 'Invalid credentials. Please try again.';
       } else if (err.response?.status === 500) {
         message = 'Server error. Please try again later.';
       }
       toast.error(message, {
-        position: "top-center"
+        position: 'top-center',
       });
     }
   };

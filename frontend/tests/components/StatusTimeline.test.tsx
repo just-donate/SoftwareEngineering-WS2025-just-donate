@@ -20,8 +20,6 @@ const mockStatus = [
   },
 ];
 
-
-
 describe('StatusTimeline Component', () => {
   it('renders status items correctly', () => {
     render(

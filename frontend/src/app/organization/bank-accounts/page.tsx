@@ -26,4 +26,4 @@ function BankAccountsPage() {
   );
 }
 
-export default withAuth(BankAccountsPage)
+export default withAuth(BankAccountsPage);

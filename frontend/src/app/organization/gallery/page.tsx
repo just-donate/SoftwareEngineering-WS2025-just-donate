@@ -132,4 +132,4 @@ function GalleryPage() {
   );
 }
 
-export default withAuth(GalleryPage)
+export default withAuth(GalleryPage);

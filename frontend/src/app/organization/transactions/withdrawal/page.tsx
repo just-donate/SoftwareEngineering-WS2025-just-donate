@@ -51,4 +51,4 @@ function WithdrawalPage() {
   );
 }
 
-export default withAuth(WithdrawalPage)
+export default withAuth(WithdrawalPage);

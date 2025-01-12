@@ -63,7 +63,12 @@ export const NavBar: React.FC = () => {
                   {item.label}
                 </Link>
               ))}
-              <button onClick={logout} className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-opacity-20 hover:text-${theme.text}`}>Logout</button>
+              <button
+                onClick={logout}
+                className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-opacity-20 hover:text-${theme.text}`}
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>

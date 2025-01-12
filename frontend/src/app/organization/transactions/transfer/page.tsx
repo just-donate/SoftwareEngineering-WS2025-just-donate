@@ -40,4 +40,4 @@ function TransferPage() {
   );
 }
 
-export default withAuth(TransferPage)
+export default withAuth(TransferPage);
