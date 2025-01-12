@@ -27,7 +27,6 @@ import org.mongodb.scala.*
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
 
-import javax.net.ssl.SSLContext
 import scala.concurrent.duration.DurationInt
 
 object Server extends IOApp:
@@ -83,7 +82,7 @@ object Server extends IOApp:
         "transfer" -> securedTransferRoute,
         "withdraw" -> securedWithdrawalRoute,
         "notify" -> securedNotificationRoute,
-        "paypal-ipn" -> paypalRoute(paypalRepository, client._2)
+        "paypal-ipn" -> paypalRoute(paypalRepository)
       ).orNotFound
 
       val corsService = CORS.policy

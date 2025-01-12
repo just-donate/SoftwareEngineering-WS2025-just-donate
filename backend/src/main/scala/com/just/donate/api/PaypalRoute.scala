@@ -7,7 +7,6 @@ import io.circe.*
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
-import org.http4s.client.Client
 import org.http4s.dsl.io.*
 
 import java.io.{BufferedReader, DataOutputStream, InputStreamReader}
@@ -16,7 +15,7 @@ import scala.concurrent.duration.*
 
 object PaypalRoute:
 
-  def paypalRoute(repo: MongoPaypalRepository, client: Client[IO]): HttpRoutes[IO] = HttpRoutes.of[IO] {
+  def paypalRoute(repo: MongoPaypalRepository): HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root =>
       for
         // Parse the request body
@@ -37,12 +36,32 @@ object PaypalRoute:
           case "VERIFIED" =>
             for
               _ <- IO.println("IPN verified by PayPal")
+
+              // Map the incoming IPN data to a domain model
               newIpn <- PayPalIPNMapper.mapToPayPalIPN(urlForm).handleErrorWith { error =>
                 IO.println(s"Failed to map IPN: $error") *> IO.raiseError(error)
               }
-              // TODO: Additional verification checks (recipient email, amount, duplicate, etc.)
+
+              // Verify recipient email
+              _ <- if (newIpn.receiverEmail == "expected-business-email@example.com") {
+                IO.unit
+              } else {
+                IO.println(s"Invalid recipient email: ${newIpn.receiverEmail}. Expected: expected-business-email@example.com") *>
+                  IO.raiseError(new IllegalArgumentException("Invalid recipient email"))
+              }
+
+              // Check for duplicates
+              existingIpn <- repo.findById(newIpn.ipnTrackId)
+              _ <- existingIpn match {
+                case Some(_) =>
+                  IO.println(s"Duplicate IPN detected for IPN track ID: ${newIpn.ipnTrackId}") *>
+                    IO.raiseError(new IllegalStateException("Duplicate IPN detected"))
+                case None => IO.unit // No duplicate found, continue processing
+              }
+
+              // Save the IPN if all checks pass
               _ <- repo.save(newIpn).handleErrorWith { error =>
-                IO.println(s"Failed to save IPN: $error")
+                IO.println(s"Failed to save IPN: $error") *> IO.raiseError(error)
               }
             yield ()
           case "INVALID" =>
@@ -56,10 +75,15 @@ object PaypalRoute:
   // Function to validate IPN with PayPal, adding retry logic
   private def validateWithRetry(rawBody: String, maxRetries: Int, delay: FiniteDuration): IO[String] =
     val validationPayload = s"cmd=_notify-validate&$rawBody"
-    val paypalValidationUrl = sys.env.getOrElse(
-      "PAYPAL_VALIDATION_URL",
-      "https://ipnpb.sandbox.paypal.com/cgi-bin/webscr"
-    )
+
+    var paypalValidationUrl = System.getProperty("PAYPAL_VALIDATION_URL")
+
+    if (paypalValidationUrl == null) {
+      paypalValidationUrl = sys.env.getOrElse(
+        "PAYPAL_VALIDATION_URL",
+        "https://ipnpb.sandbox.paypal.com/cgi-bin/webscr"
+      )
+    }
 
     def doRequest: IO[String] = IO.blocking {
       // Create URL and open connection
