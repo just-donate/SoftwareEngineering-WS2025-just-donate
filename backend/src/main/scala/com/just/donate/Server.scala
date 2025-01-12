@@ -89,6 +89,10 @@ object Server extends IOApp:
         .withAllowOriginHost(
           Set(
             Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)),
+            Origin.Host(Uri.Scheme.https, Uri.RegName("paypal.com"), None),
+            Origin.Host(Uri.Scheme.https, Uri.RegName("sandbox.paypal.com"), None),
+            Origin.Host(Uri.Scheme.https, Uri.RegName("ipnpb.sandbox.paypal.com"), None),
+            Origin.Host(Uri.Scheme.https, Uri.RegName("ipnpb.paypal.com"), None),
             Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None)
           )
         )
