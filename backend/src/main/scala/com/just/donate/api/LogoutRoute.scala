@@ -5,7 +5,7 @@ import com.just.donate.config.AppEnvironment.PRODUCTION
 import com.just.donate.config.Config
 import org.http4s.{HttpRoutes, *}
 import org.http4s.Method.POST
-import org.http4s.SameSite.Strict
+import org.http4s.SameSite.{None, Strict}
 import org.http4s.dsl.io.*
 
 object LogoutRoute:
@@ -22,4 +22,5 @@ object LogoutRoute:
           sameSite = Some(if (appConfig.environment == PRODUCTION) SameSite.None else Strict),
           maxAge = Some(0) // Expire the cookie immediately
         )
-        Ok("Logout successful").map(_.removeCookie(expiredCookie.name))
+
+        Ok("Logout successful").map(_.addCookie(expiredCookie))
