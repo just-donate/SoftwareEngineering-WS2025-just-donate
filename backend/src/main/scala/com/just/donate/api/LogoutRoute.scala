@@ -19,7 +19,7 @@ object LogoutRoute:
           httpOnly = true,
           secure = appConfig.environment == PRODUCTION, // Use secure = false in development
           path = Some("/"),
-          sameSite = Some(Strict),
+          sameSite = Some(if (appConfig.environment == PRODUCTION) SameSite.None else Strict),
           maxAge = Some(0) // Expire the cookie immediately
         )
         Ok("Logout successful").map(_.removeCookie(expiredCookie.name))
