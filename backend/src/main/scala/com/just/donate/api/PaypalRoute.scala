@@ -8,7 +8,6 @@ import com.just.donate.models.Organisation
 import com.just.donate.models.paypal.{PayPalIPN, PayPalIPNMapper}
 import com.just.donate.notify.IEmailService
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
-import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
@@ -55,6 +54,14 @@ object PaypalRoute:
 //                  IO.raiseError(new IllegalArgumentException("Invalid recipient email"))
 //              }
 
+              // Check whether the payment status is completed
+              _ <- if (newIpn.paymentStatus.equals("Completed")) {
+                IO.unit
+              } else {
+                IO.println(s"Invalid payment status: ${newIpn.receiverEmail}. Expected: Completed") *>
+                                  IO.raiseError(new IllegalArgumentException("Invalid recipient email"))
+              }
+
               // Check for duplicates
               existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
               _ <- existingIpn match {
@@ -70,8 +77,8 @@ object PaypalRoute:
               }
 
               // Call the donation endpoint
-              // TODO pass in the earmarking!
-              requestDonation <- IO.pure(RequestDonation(newIpn.firstName, newIpn.payerEmail, newIpn.mcGross, None ))
+              // Item name is set by the donation-paypal.html as earmarking
+              requestDonation <- IO.pure(RequestDonation(newIpn.firstName, newIpn.payerEmail, newIpn.mcGross, if newIpn.itemName.isEmpty then None else Option[String](newIpn.itemName)))
               trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
                 organisationMapper(requestDonation, "Paypal")
               )
