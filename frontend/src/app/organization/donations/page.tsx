@@ -5,6 +5,7 @@ import DonationsList from '@/components/organization/DonationsList';
 import { Donation } from '@/types/types';
 import axiosInstance from '../api/axiosInstance';
 import axios from 'axios';
+import withAuth from '../api/RequiresAuth';
 
 async function fetchDonations(orgId: string): Promise<Donation[]> {
   try {
@@ -26,7 +27,7 @@ async function fetchDonations(orgId: string): Promise<Donation[]> {
   }
 }
 
-export default function DonationsPage() {
+function DonationsPage() {
   const [donations, setDonations] = useState<Donation[]>([]);
   const organizationId = '591671920';
 
@@ -41,3 +42,5 @@ export default function DonationsPage() {
     </div>
   );
 }
+
+export default withAuth(DonationsPage);

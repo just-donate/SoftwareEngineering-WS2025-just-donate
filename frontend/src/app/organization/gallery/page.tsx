@@ -18,6 +18,7 @@ import {
 } from '../../../components/organization/ui/select';
 import { Input } from '../../../components/organization/ui/input';
 import Image from 'next/image';
+import withAuth from '../api/RequiresAuth';
 
 // Mock data for demonstration
 const mockEarmarkings: Earmarking[] = [
@@ -46,7 +47,7 @@ const mockPhotos: Photo[] = [
   },
 ];
 
-export default function GalleryPage() {
+function GalleryPage() {
   const [earmarkings] = useState<Earmarking[]>(mockEarmarkings);
   const [photos, setPhotos] = useState<Photo[]>(mockPhotos);
   const [selectedEarmarking, setSelectedEarmarking] = useState<string>('');
@@ -130,3 +131,5 @@ export default function GalleryPage() {
     </div>
   );
 }
+
+export default withAuth(GalleryPage);

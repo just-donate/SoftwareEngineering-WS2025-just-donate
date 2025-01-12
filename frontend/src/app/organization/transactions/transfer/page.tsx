@@ -4,8 +4,9 @@ import TransferManager from '@/components/organization/TransferManager';
 import { fetchBankAccounts } from '../../bank-accounts/bank-accounts';
 import { useEffect, useState } from 'react';
 import { BankAccount } from '@/types/types';
+import withAuth from '../../api/RequiresAuth';
 
-export default function TransferPage() {
+function TransferPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,3 +39,5 @@ export default function TransferPage() {
     </div>
   );
 }
+
+export default withAuth(TransferPage);
