@@ -1,8 +1,8 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import com.just.donate.config.{AppConfig, Config}
 import com.just.donate.config.AppEnvironment.PRODUCTION
+import com.just.donate.config.Config
 import com.just.donate.db.Repository
 import com.just.donate.models.user.User
 import de.mkammerer.argon2.Argon2Factory
@@ -13,12 +13,10 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 import org.http4s.headers.`WWW-Authenticate`
-import org.http4s.{Challenge, HttpDate, HttpRoutes, Response, ResponseCookie}
+import org.http4s.*
 import pdi.jwt.{Jwt, JwtAlgorithm}
 
-import java.time.{Instant, ZoneId}
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import java.time.Instant
 
 object LoginRoute {
 
@@ -44,13 +42,15 @@ object LoginRoute {
         // Verify that the user is active and the password matches
         if (user.active && argon2.verify(user.password, login.password)) {
           // Authentication successful
-          val expirationTimeInSeconds = 3600 // 1 hour in seconds
+          val expirationTimeInSeconds = 7200 // 1 hour in seconds
           val currentTime = Instant.now().getEpochSecond
           val expirationTime = currentTime + expirationTimeInSeconds
 
           val httpDate = HttpDate.fromEpochSecond(expirationTime).getOrElse(
             throw new RuntimeException("Invalid expiration time")
           )
+
+          println(s"Converted HttpDate: $httpDate")
 
           val claim =
             s"""{
