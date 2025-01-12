@@ -65,7 +65,7 @@ object DonationRoute:
         StatusResponse(status.status.toString.toLowerCase, status.date, status.description)
     )
 
-  private val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
+  val emailTemplate: (String, String, String) => String = (linkWithId, id, link) =>
     f"""Thank you for your donation, to track your progress visit
        |$linkWithId
        |or enter your tracking id
@@ -73,7 +73,7 @@ object DonationRoute:
        |on our tracking page
        |$link""".stripMargin
 
-  private def organisationMapper(requestDonation: RequestDonation, accountName: String)(
+  def organisationMapper(requestDonation: RequestDonation, accountName: String)(
     org: Organisation
   ): (Organisation, Either[DonationError, String]) =
     val existingDonor = org.getExistingDonor(requestDonation.donorEmail)

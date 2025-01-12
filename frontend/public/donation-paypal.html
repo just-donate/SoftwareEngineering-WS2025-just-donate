@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -39,8 +39,8 @@
         color: #333;
       }
 
-      input[type="text"],
-      input[type="email"],
+      input[type='text'],
+      input[type='email'],
       select {
         width: 100%;
         padding: 8px;
@@ -142,6 +142,7 @@
         <!-- Donation Purpose -->
         <label for="purpose">Donation Purpose</label>
         <select id="purpose" name="purpose">
+          <option value="" disabled selected hidden>Choose a purpose</option>
           <option value="Wherever my help is needed most">
             Wherever my help is needed most
           </option>
@@ -186,6 +187,8 @@
       <input type="hidden" name="cmd" value="_xclick" />
 
       <!-- Sandbox Business Email -->
+      <!-- Use the value below when testing with the test-server -->
+      <!-- value="sb-8rsvi36693121@business.example.com" -->
       <input
         type="hidden"
         name="business"
@@ -208,14 +211,20 @@
       <input
         type="hidden"
         name="return"
-        value="http://localhost:3001/SoftwareEngineering-WS2025-just-donate/paypal"
+        value="https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/"
       />
       <input
         type="hidden"
         name="cancel_return"
-        value="http://localhost:3001/SoftwareEngineering-WS2025-just-donate/paypal"
+        value="https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/"
       />
       <input type="hidden" id="invoice_paypal" name="invoice" value="124" />
+
+      <input
+        type="hidden"
+        name="org_name"
+        value="New Roots"
+      />
 
       <!-- Optional invoice/order ID -->
     </form>
@@ -226,14 +235,14 @@
        * and limits decimals to 2 places for a currency format.
        */
       function formatAmount() {
-        const amountInput = document.getElementById("amount");
-        let value = amountInput.value.replace(/[^0-9.]/g, "");
+        const amountInput = document.getElementById('amount');
+        let value = amountInput.value.replace(/[^0-9.]/g, '');
 
         // Only allow two decimal places
-        if (value.includes(".")) {
-          const parts = value.split(".");
+        if (value.includes('.')) {
+          const parts = value.split('.');
           parts[1] = parts[1].slice(0, 2);
-          value = parts.join(".");
+          value = parts.join('.');
         }
 
         amountInput.value = value;
@@ -248,28 +257,29 @@
         event.preventDefault();
 
         // Get references
-        const amountInput = document.getElementById("amount");
+        const amountInput = document.getElementById('amount');
         const amountValue = parseFloat(amountInput.value);
 
         // Basic validation: amount must be > 0
         if (isNaN(amountValue) || amountValue <= 0) {
-          alert("Please enter a valid donation amount greater than 0.");
+          alert('Please enter a valid donation amount greater than 0.');
           return; // Exit without proceeding further
         }
 
-        document.getElementById('item_name_purpose').value = document.getElementById('purpose').value;
+        document.getElementById('item_name_purpose').value =
+          document.getElementById('purpose').value;
 
         // If valid, set PayPal form amount
-        document.getElementById("paypalAmount").value = amountValue.toFixed(2);
+        document.getElementById('paypalAmount').value = amountValue.toFixed(2);
 
         // Generate a random invoice number
         const crypto = window.crypto || window.msCrypto;
         const array = new Uint32Array(1);
-        document.getElementById("invoice_paypal").value =
+        document.getElementById('invoice_paypal').value =
           crypto.getRandomValues(array)[0];
 
         // Submit PayPal form
-        document.getElementById("paypalForm").submit();
+        document.getElementById('paypalForm').submit();
       }
     </script>
   </body>

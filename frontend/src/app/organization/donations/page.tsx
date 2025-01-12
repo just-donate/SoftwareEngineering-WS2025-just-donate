@@ -9,8 +9,9 @@ import axiosInstance from '../api/axiosInstance';
 import { fetchDonations } from './donations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/organization/ui/card';
 import DonationManager from '@/components/organization/DonationManager';
+import withAuth from '../api/RequiresAuth';
 
-export default function DonationsPage() {
+function DonationsPage() {
   const [donations, setDonations] = useState<Donation[]>([]);
 
   // TODO: Get the organization ID from the session/context
@@ -31,3 +32,5 @@ export default function DonationsPage() {
   );
 
 }
+
+export default withAuth(DonationsPage);

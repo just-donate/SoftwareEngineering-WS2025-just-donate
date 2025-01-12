@@ -13,8 +13,6 @@ jest.mock('../../src/components/tracking/StatusTimeline', () => {
   };
 });
 
-
-
 describe('DonationDetails Component', () => {
   const mockDonation = {
     donationId: '1',

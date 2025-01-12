@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
+import axiosInstance from '@/app/organization/api/axiosInstance';
+import axios from 'axios';
 
 const navItems = [
   { href: '/organization/dashboard', label: 'Dashboard' },
@@ -18,6 +20,29 @@ const navItems = [
 export const NavBar: React.FC = () => {
   const { theme } = useTheme();
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function logout() {
+    try {
+      // Call the logout endpoint
+      await axiosInstance.post('/logout');
+
+      // Redirect to the login page or home
+      router.push('/organization/login');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error during logout:',
+          error.response?.data || error.message,
+        );
+      } else if (error instanceof Error) {
+        // Fallback for standard JS errors
+        console.error('Error during logout:', error.message);
+      } else {
+        console.error('Error during logout:', error);
+      }
+    }
+  }
 
   return (
     <nav className={`${theme.primary} shadow-lg`}>
@@ -46,6 +71,12 @@ export const NavBar: React.FC = () => {
                   {item.label}
                 </Link>
               ))}
+              <button
+                onClick={logout}
+                className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-opacity-20 hover:text-${theme.text}`}
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>

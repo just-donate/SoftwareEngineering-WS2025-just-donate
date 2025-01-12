@@ -9,22 +9,22 @@ import '@testing-library/jest-dom'; // Import jest-dom
 // Mock donation data
 // Mock donation data
 const mockDonation = {
-    donationId: '1', // Add this line
-    organisation: 'Test Organisation', // Add this line
-    earmarking: 'General Purpose', // Add this line
-    donorEmail: 'donor@example.com',
-    ngo: 'Test NGO',
-    project: 'Test Project',
-    amount: { amount: '100.0' },
-    date: '2023-01-01',
-    status: [
-      {
-        status: 'Completed',
-        date: '2023-01-02',
-        description: 'Donation completed successfully',
-      },
-    ],
-  } as Donation;
+  donationId: '1', // Add this line
+  organisation: 'Test Organisation', // Add this line
+  earmarking: 'General Purpose', // Add this line
+  donorEmail: 'donor@example.com',
+  ngo: 'Test NGO',
+  project: 'Test Project',
+  amount: { amount: '100.0' },
+  date: '2023-01-01',
+  status: [
+    {
+      status: 'Completed',
+      date: '2023-01-02',
+      description: 'Donation completed successfully',
+    },
+  ],
+} as Donation;
 
 const mockOnClick = jest.fn();
 
