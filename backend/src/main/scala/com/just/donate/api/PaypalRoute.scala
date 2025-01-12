@@ -1,9 +1,14 @@
 package com.just.donate.api
 
 import cats.effect.*
-import com.just.donate.db.mongo.MongoPaypalRepository
-import com.just.donate.models.paypal.PayPalIPNMapper
-import io.circe.*
+import com.just.donate.api.DonationRoute.{RequestDonation, emailTemplate, organisationMapper}
+import com.just.donate.config.Config
+import com.just.donate.db.Repository
+import com.just.donate.models.Organisation
+import com.just.donate.models.paypal.{PayPalIPN, PayPalIPNMapper}
+import com.just.donate.notify.IEmailService
+import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
+import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
@@ -15,7 +20,7 @@ import scala.concurrent.duration.*
 
 object PaypalRoute:
 
-  def paypalRoute(repo: MongoPaypalRepository): HttpRoutes[IO] = HttpRoutes.of[IO] {
+  def paypalRoute(paypalRepo: Repository[String, PayPalIPN], orgRepo: Repository[String, Organisation], conf: Config, emailService: IEmailService): HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root =>
       for
         // Parse the request body
@@ -51,7 +56,7 @@ object PaypalRoute:
 //              }
 
               // Check for duplicates
-              existingIpn <- repo.findById(newIpn.ipnTrackId)
+              existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
               _ <- existingIpn match {
                 case Some(_) =>
                   IO.println(s"Duplicate IPN detected for IPN track ID: ${newIpn.ipnTrackId}") *>
@@ -60,9 +65,25 @@ object PaypalRoute:
               }
 
               // Save the IPN if all checks pass
-              _ <- repo.save(newIpn).handleErrorWith { error =>
+              _ <- paypalRepo.save(newIpn).handleErrorWith { error =>
                 IO.println(s"Failed to save IPN: $error") *> IO.raiseError(error)
               }
+
+              // Call the donation endpoint
+              // TODO pass in the earmarking!
+              requestDonation <- IO.pure(RequestDonation(newIpn.firstName, newIpn.payerEmail, newIpn.mcGross, None ))
+              trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
+                organisationMapper(requestDonation, "Paypal")
+              )
+              _ <- trackingId match
+                case None                      => BadRequest("Organisation not found")
+                case Some(Left(donationError)) => BadRequest(donationError.message)
+                case Some(Right(trackingId)) =>
+                  val trackingLink = f"${conf.frontendUrl}/tracking?id=$trackingId"
+                  emailService.sendEmail(
+                    requestDonation.donorEmail,
+                    emailTemplate(trackingLink, trackingId, conf.frontendUrl))
+
             yield ()
           case "INVALID" =>
             IO.println("IPN invalid")

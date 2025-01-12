@@ -23,6 +23,7 @@ case class PayPalIPN(
                       receiverId: String,
                       receiverEmail: String,
                       business: String,
+                      organisationName: String,
 
                       // Address / Shipping fields
                       addressName: String,

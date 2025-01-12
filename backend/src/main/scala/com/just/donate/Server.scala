@@ -82,7 +82,7 @@ object Server extends IOApp:
         "transfer" -> securedTransferRoute,
         "withdraw" -> securedWithdrawalRoute,
         "notify" -> securedNotificationRoute,
-        "paypal-ipn" -> paypalRoute(paypalRepository)
+        "paypal-ipn" -> paypalRoute(paypalRepository, organisationRepository, appConfig, emailService)
       ).orNotFound
 
       val corsService = CORS.policy
