@@ -8,6 +8,10 @@ import scala.math.Ordered.orderingToOrdered
 
 class MoneySuite extends FunSuite:
 
+  val amount1 = "123.45"
+  val amount2 = "-0.001"
+  val amount3 = "100.0"
+
   // Helper method to assert Money equality
   def assertMoneyEquals(expected: String, actual: Money): Unit =
     assertEquals(actual.getAmount, expected)
@@ -15,13 +19,13 @@ class MoneySuite extends FunSuite:
   // Test the apply method with various inputs
   test("Money.apply should trim spaces and leading zeros") {
     val m1 = Money("  0123.45 ")
-    assertMoneyEquals("123.45", m1)
+    assertMoneyEquals(amount1, m1)
 
     val m2 = Money("0000")
     assertMoneyEquals("0.0", m2)
 
     val m3 = Money(" 000123.4500 ")
-    assertMoneyEquals("123.45", m3)
+    assertMoneyEquals(amount1, m3)
 
     val m4 = Money(" .5")
     assertMoneyEquals("0.5", m4)
@@ -57,13 +61,13 @@ class MoneySuite extends FunSuite:
     assertMoneyEquals("-0.0", m14)
 
     val m15 = Money("-000.00100")
-    assertMoneyEquals("-0.001", m15)
+    assertMoneyEquals(amount2, m15)
 
     val m16 = Money("-0.00100")
-    assertMoneyEquals("-0.001", m16)
+    assertMoneyEquals(amount2, m16)
 
     val m17 = Money("-.001")
-    assertMoneyEquals("-0.001", m17)
+    assertMoneyEquals(amount2, m17)
 
     val m18 = Money("-10000.00001")
     assertMoneyEquals("-10000.00001", m18)
@@ -160,7 +164,7 @@ class MoneySuite extends FunSuite:
 
   // Test division
   test("Money./ should divide two Money instances correctly") {
-    val m1 = Money("100.00")
+    val m1 = Money(amount3)
     val m2 = Money("20.00")
     val quotient = m1 / m2
     assertMoneyEquals("5.0", quotient)
@@ -181,9 +185,9 @@ class MoneySuite extends FunSuite:
 
   // Test comparison
   test("Money comparisons should work correctly") {
-    val m1 = Money("100.00")
+    val m1 = Money(amount3)
     val m2 = Money("200.00")
-    val m3 = Money("100.00")
+    val m3 = Money(amount3)
     val m4 = Money("-50.00")
 
     assert(m1 < m2)
@@ -242,10 +246,10 @@ class MoneySuite extends FunSuite:
 
   // Test pattern matching with unapply
   test("Money.unapply should allow pattern matching") {
-    val m = Money("123.45")
+    val m = Money(amount1)
 
     m match
-      case Money(amount) => assertEquals(amount, "123.45")
+      case Money(amount) => assertEquals(amount, amount1)
       case _             => fail("Pattern matching failed")
 
     val mZero = Money("0")
@@ -263,7 +267,7 @@ class MoneySuite extends FunSuite:
 
   // Test immutability
   test("Money instances should be immutable") {
-    val m1 = Money("100.00")
+    val m1 = Money(amount3)
     val m2 = m1 + Money("50.00")
     val m3 = m1 - Money("30.00")
 
@@ -319,7 +323,7 @@ class MoneySuite extends FunSuite:
   // Test zero operations
   test("Money operations involving ZERO should behave correctly") {
     val m1 = Money("0")
-    val m2 = Money("100.00")
+    val m2 = Money(amount3)
 
     // Addition
     val sum = m1 + m2
@@ -344,8 +348,8 @@ class MoneySuite extends FunSuite:
 
   // Test toString method
   test("Money.toString should return the amount as String") {
-    val m1 = Money("123.45")
-    assertEquals(m1.toString, "123.45")
+    val m1 = Money(amount1)
+    assertEquals(m1.toString, amount1)
 
     val m2 = Money("0")
     assertEquals(m2.toString, "0.0")
@@ -356,8 +360,8 @@ class MoneySuite extends FunSuite:
 
   // Test equality and hashCode
   test("Money equality and hashCode should work correctly") {
-    val m1 = Money("100.00")
-    val m2 = Money("100.00")
+    val m1 = Money(amount3)
+    val m2 = Money(amount3)
     val m3 = Money("100.000")
     val m4 = Money("99.99")
 
@@ -365,7 +369,7 @@ class MoneySuite extends FunSuite:
     assertEquals(m1.hashCode(), m2.hashCode())
 
     // Depending on the trimming logic, m1 and m3 might be equal or not
-    // Based on the apply method in the earlier implementation, "100.00" vs "100.000" are different
+    // Based on the apply method in the earlier implementation, amount3 vs "100.000" are different
     assertEquals(m1, m3)
 
     assertNotEquals(m1, m4)

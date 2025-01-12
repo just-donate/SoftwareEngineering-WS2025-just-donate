@@ -17,6 +17,12 @@ RUN sbt clean assembly
 # Stage 2: Run the application
 # ---------------------------------------------------------------
 FROM eclipse-temurin:11-jre
+
+RUN addgroup -S nonroot \
+    && adduser -S nonroot -G nonroot
+
+USER nonroot
+
 WORKDIR /app
 
 # Copy the fat JAR from the builder stage into the runtime image

@@ -14,6 +14,8 @@ import java.io.File
 
 class MongoPaypalRepositorySuite extends CatsEffectSuite with TestContainerForAll:
 
+  val updated2 = "updated=2"
+
   /**
    * Define the Docker Compose container for the Mongo database.
    * @see <a href="https://github.com/testcontainers/testcontainers-scala/blob/master/docs/src/main/tut/usage.md">TestContainers Scala</a>
@@ -86,11 +88,11 @@ class MongoPaypalRepositorySuite extends CatsEffectSuite with TestContainerForAl
         _ = assertEquals(found1.get.payload, "payload-1")
 
         // update ipn2
-        updatedIpn2 = ipn2.copy(payload = "updated-2")
+        updatedIpn2 = ipn2.copy(payload = updated2)
         updatedOk <- repo.update(updatedIpn2)
-        _ = assertEquals(updatedOk.payload, "updated-2")
+        _ = assertEquals(updatedOk.payload, updated2)
         found2 <- repo.findById(ipn2._id)
-        _ = assertEquals(found2.get.payload, "updated-2")
+        _ = assertEquals(found2.get.payload, updated2)
 
         // delete ipn1
         _ <- repo.delete(ipn1._id)
