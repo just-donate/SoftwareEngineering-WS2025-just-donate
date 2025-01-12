@@ -43,7 +43,6 @@ libraryDependencies ++= Seq(
   "org.http4s"                   % "http4s-ember-server_3"        % "1.0.0-M43",
   "org.http4s"                   % "http4s-ember-client_3"        % "1.0.0-M43",
   "org.http4s"                   % "http4s-circe_3"               % "1.0.0-M43",
-  "org.scalaj" %% "scalaj-http" % "2.4.2",
 
   // Logging
   "org.typelevel"                % "log4cats-slf4j_3"             % "2.7.0",
