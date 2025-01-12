@@ -9,7 +9,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const orgId = '591671920';
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -44,14 +43,19 @@ export default function LoginPage() {
         position: 'top-center',
       });
       router.push('/organization/dashboard');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Login error:', err);
+
       let message =
         'An unexpected error occurred. Please check your connection.';
-      if (err.response?.status === 403) {
-        message = 'Invalid credentials. Please try again.';
-      } else if (err.response?.status === 500) {
-        message = 'Server error. Please try again later.';
+
+      if (axios.isAxiosError(err)) {
+        // Now err is narrowed to AxiosError
+        if (err.response?.status === 403) {
+          message = 'Invalid credentials. Please try again.';
+        } else if (err.response?.status === 500) {
+          message = 'Server error. Please try again later.';
+        }
       }
       toast.error(message, {
         position: 'top-center',

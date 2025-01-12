@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
 import axiosInstance from '@/app/organization/api/axiosInstance';
+import axios from 'axios';
 
 const navItems = [
   { href: '/organization/dashboard', label: 'Dashboard' },
@@ -29,10 +30,17 @@ export const NavBar: React.FC = () => {
       // Redirect to the login page or home
       router.push('/organization/login');
     } catch (error) {
-      console.error(
-        'Error during logout:',
-        error.response?.data || error.message,
-      );
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error during logout:',
+          error.response?.data || error.message,
+        );
+      } else if (error instanceof Error) {
+        // Fallback for standard JS errors
+        console.error('Error during logout:', error.message);
+      } else {
+        console.error('Error during logout:', error);
+      }
     }
   }
 

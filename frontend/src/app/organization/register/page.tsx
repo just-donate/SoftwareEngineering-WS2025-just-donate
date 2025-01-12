@@ -2,10 +2,10 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-axiosInstance;
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../api/axiosInstance';
+import axios from 'axios';
 
 interface RegisterUser {
   email: string;
@@ -37,9 +37,18 @@ function RegisterPage() {
       setTimeout(() => {
         router.push('/organization/login');
       }, 2000);
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.error || error.message || 'Registration failed';
+    } catch (error) {
+      let errorMessage = 'Registration failed';
+
+      if (axios.isAxiosError(error)) {
+        // Narrowed type: AxiosError
+        errorMessage =
+          error.response?.data?.error || error.message || errorMessage;
+      } else if (error instanceof Error) {
+        // Standard JS Error
+        errorMessage = error.message;
+      }
+
       toast.error(errorMessage, {
         position: 'top-center',
       });
