@@ -13,10 +13,12 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 import org.http4s.headers.`WWW-Authenticate`
-import org.http4s.{Challenge, HttpRoutes, Response, ResponseCookie}
+import org.http4s.{Challenge, HttpDate, HttpRoutes, Response, ResponseCookie}
 import pdi.jwt.{Jwt, JwtAlgorithm}
 
-import java.time.Instant
+import java.time.{Instant, ZoneId}
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 object LoginRoute {
 
@@ -46,6 +48,10 @@ object LoginRoute {
           val currentTime = Instant.now().getEpochSecond
           val expirationTime = currentTime + expirationTimeInSeconds
 
+          val httpDate = HttpDate.fromEpochSecond(expirationTime).getOrElse(
+            throw new RuntimeException("Invalid expiration time")
+          )
+
           val claim =
             s"""{
                 "username": "${login.username}",
@@ -61,7 +67,8 @@ object LoginRoute {
             secure = appConfig.environment == PRODUCTION,
             path = Some("/"),
             sameSite = Some(Strict),
-            maxAge = Some(expirationTimeInSeconds)
+            maxAge = Some(expirationTimeInSeconds),
+            expires = Some(httpDate)
           )
           Ok(LoginResponse("Login successful")).map(_.addCookie(jwtCookie))
         } else {
