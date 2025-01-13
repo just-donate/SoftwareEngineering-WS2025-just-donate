@@ -47,11 +47,7 @@ object OrganisationRoute:
 
       case GET -> Root / organisationId / "earmarking" / "list" =>
         loadOrganisation(organisationId)(repository)(
-          _.accounts.headOption
-            .map(
-              _._2.boundDonations.map(_._1).map(e => ResponseEarmarking(e.name))
-            )
-            .getOrElse(Seq())
+          _.getEarmarkings.map(e => ResponseEarmarking(e.name, e.description)).toSeq
         )
 
       case GET -> Root / organisationId / "account" / "list" =>
@@ -94,7 +90,7 @@ object OrganisationRoute:
 
   private[api] case class RequestEarmarking(name: String, description: String)
 
-  private[api] case class ResponseEarmarking(name: String)
+  private[api] case class ResponseEarmarking(name: String, description: String)
 
   private[api] case class RequestAccount(name: String, balance: Money)
 

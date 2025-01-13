@@ -51,9 +51,9 @@ object Server extends IOApp:
       val paypalRepository = MongoPaypalRepository(paypalCollection)
       val userRepository = MongoUserRepository(userCollection)
 
-      val defaultOrg = Organisation("Just-Donate")
-      val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
-      if org.isEmpty then organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
+      // val defaultOrg = Organisation("Just-Donate")
+      // val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
+      // if org.isEmpty then organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
 
       val emailService: IEmailService = appConfig.environment match
         case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
