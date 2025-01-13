@@ -97,15 +97,11 @@ export async function saveTheme(organizationId: string, theme: Theme) {
       throw new Error('Invalid theme structure');
     }
 
-    const response = await axiosInstance.post(
-      `/organisation/${organizationId}/theme`,
-      theme,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    await axiosInstance.post(`/organisation/${organizationId}/theme`, theme, {
+      headers: {
+        'Content-Type': 'application/json',
       },
-    );
+    });
 
     // No need to check response.ok; Axios throws an error for non-2xx statuses.
     return { success: true };

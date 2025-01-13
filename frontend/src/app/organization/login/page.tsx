@@ -19,10 +19,11 @@ export default function LoginPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setLoading(true);
 
     try {
       // Perform the login request
-      const response = await axios.post(
+      await axios.post(
         `${API_URL}/login`, // Replace with your login endpoint
         {
           username: email,
@@ -60,6 +61,8 @@ export default function LoginPage() {
       toast.error(message, {
         position: 'top-center',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
