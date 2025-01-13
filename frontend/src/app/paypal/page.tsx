@@ -163,7 +163,7 @@ const DonationPage: React.FC = () => {
               Donation Amount <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+              <span className="absolute left-3 top-2.5 text-gray-500">€</span>
               <input
                 type="text"
                 id="amount"
