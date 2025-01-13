@@ -13,7 +13,7 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 import org.http4s.headers.`WWW-Authenticate`
-import org.http4s.*
+import org.http4s.{SameSite, *}
 import pdi.jwt.{Jwt, JwtAlgorithm}
 
 import java.time.Instant
@@ -45,7 +45,7 @@ object LoginRoute:
         // Verify that the user is active and the password matches
         if user.active && CryptoUtils.verifyPassword(login.password, user.password) then
           // Authentication successful
-          val expirationTimeInSeconds = 3600 // 1 hour in seconds
+          val expirationTimeInSeconds = 7200 // 1 hour in seconds
           val currentTime = Instant.now().getEpochSecond
           val expirationTime = currentTime + expirationTimeInSeconds
 
@@ -54,6 +54,8 @@ object LoginRoute:
             .getOrElse(
               throw new RuntimeException("Invalid expiration time")
             )
+
+          println(s"Converted HttpDate: $httpDate")
 
           val claim =
             s"""{
@@ -69,7 +71,7 @@ object LoginRoute:
             httpOnly = true,
             secure = appConfig.environment == PRODUCTION,
             path = Some("/"),
-            sameSite = Some(Strict),
+            sameSite = Some(if (appConfig.environment == PRODUCTION) SameSite.None else Strict),
             maxAge = Some(expirationTimeInSeconds),
             expires = Some(httpDate)
           )
