@@ -162,30 +162,28 @@ class OrganisationTransferSuite extends FunSuite:
     )
   }
 
-  // FIX: this test
-  // TODO: readd it afterwards
-  // test("transfer multiple donation parts") {
-  //   var newRoots = createNewRoots()
-  //   newRoots = newRoots.addEarmarking("Education")
-  //   newRoots = newRoots.addEarmarking("Health")
-  //
-  //   val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
-  //   val (donation, donationPart) = Donation(donor.id, Money(amountHundred), "Education")
-  //   val (donation2, donationPart2) = Donation(donor.id, Money(amountOneFifty), "Education")
-  //   newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
-  //   newRoots = newRoots.donate(donor, donationPart2, donation2, "Paypal").toOption.get
-  //
-  //   newRoots = newRoots.transfer(Money("120.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
-  //
-  //   assertEquals(newRoots.getAccount("Paypal").get.totalBalance, Money("130.00"))
-  //   assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money("120.00"))
-  //
-  //   assertEquals(
-  //     newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Education"),
-  //     Money("130.00")
-  //   )
-  //   assertEquals(
-  //     newRoots.getAccount("Bank").get.totalEarmarkedBalance("Education"),
-  //     Money("120.00")
-  //   )
-  // }
+   test("transfer multiple donation parts") {
+     var newRoots = createNewRoots()
+     newRoots = newRoots.addEarmarking("Education")
+     newRoots = newRoots.addEarmarking("Health")
+
+     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
+     val (donation, donationPart) = Donation(donor.id, Money(amountHundred), "Education")
+     val (donation2, donationPart2) = Donation(donor.id, Money(amountOneFifty), "Education")
+     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
+     newRoots = newRoots.donate(donor, donationPart2, donation2, "Paypal").toOption.get
+
+     newRoots = newRoots.transfer(Money("120.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
+
+     assertEquals(newRoots.getAccount("Paypal").get.totalBalance, Money("130.00"))
+     assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money("120.00"))
+
+     assertEquals(
+       newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Education"),
+       Money("130.00")
+     )
+     assertEquals(
+       newRoots.getAccount("Bank").get.totalEarmarkedBalance("Education"),
+       Money("120.00")
+     )
+   }
