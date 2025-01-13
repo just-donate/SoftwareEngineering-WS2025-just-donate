@@ -61,6 +61,8 @@ object PaypalRoute:
                   IO.raiseError(new IllegalArgumentException("Invalid payment status"))
               }
 
+              _ <- IO.println(s"IPN: $newIpn")
+
               // Check for duplicates
               existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
               _ <- existingIpn match {
@@ -72,6 +74,8 @@ object PaypalRoute:
                 case None => IO.unit
               }
 
+              _ <- IO.println("No duplicate IPN detected")
+
               // Save the IPN if all checks pass
               _ <- paypalRepo.save(newIpn).handleErrorWith { error =>
                 val errMsg = s"Failed to save IPN: $error"
@@ -79,6 +83,8 @@ object PaypalRoute:
                   errorLogger.logError("IPN", errMsg, rawBody) *>
                   IO.raiseError(error)
               }
+
+                _ <- IO.println("IPN saved")
 
               // Call the donation endpoint
               // Item name is set by the donation-paypal.html as earmarking
@@ -91,9 +97,13 @@ object PaypalRoute:
                 )
               )
 
+              _ <- IO.println(s"Request donation: $requestDonation")
+
               trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
                 organisationMapper(requestDonation, paypalAccountName)
               )
+
+              _ <- IO.println(s"Tracking ID: $trackingId")
 
               _ <- trackingId match {
                 case None =>
@@ -115,7 +125,7 @@ object PaypalRoute:
             IO.println("IPN invalid")
           case other =>
             IO.println(s"Unexpected validation response: $other")
-        }
+        }.start
       yield response
   }
 
