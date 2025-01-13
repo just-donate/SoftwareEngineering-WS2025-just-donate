@@ -13,7 +13,7 @@ export default function DonationDetails({ donation }: DonationDetailsProps) {
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>Donation {donation.donationId}</span>
-          <span className="text-lg font-normal">{donation.amount.amount}</span>
+          <span className="text-lg font-normal">{donation.amount.amount}€</span>
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -6,6 +6,9 @@ import com.just.donate.utils.Money
 
 object PayPalIPNMapper:
   def mapToPayPalIPN(urlForm: Map[String, Chain[String]]): IO[PayPalIPN] = IO {
+
+    val customInfo = urlForm.get("custom").flatMap(_.headOption).getOrElse("").split("/")
+
     PayPalIPN(
       // Transaction fields
       txnId = urlForm
@@ -25,7 +28,8 @@ object PayPalIPNMapper:
       payerStatus = urlForm.get("payer_status").flatMap(_.headOption).getOrElse(""),
       firstName = urlForm.get("first_name").flatMap(_.headOption).getOrElse(""),
       lastName = urlForm.get("last_name").flatMap(_.headOption).getOrElse(""),
-      organisationName = urlForm.get("custom").flatMap(_.headOption).getOrElse(""),
+      organisationName = customInfo.lift(0).getOrElse(""),
+      notificationEmail = customInfo.lift(1).getOrElse(""),
 
       // Business / Receiver info
       receiverId = urlForm.get("receiver_id").flatMap(_.headOption).getOrElse(""),

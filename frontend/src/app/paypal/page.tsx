@@ -88,16 +88,17 @@ const DonationPage: React.FC = () => {
     paypalForm.method = 'POST';
     paypalForm.action = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 
+    // sb-swv8l35388930@business.example.com
     paypalForm.innerHTML = `
       <input type="hidden" name="cmd" value="_xclick" />
-      <input type="hidden" name="business" value="sb-swv8l35388930@business.example.com" />
+      <input type="hidden" name="business" value="sb-8rsvi36693121@business.example.com" />
       <input type="hidden" name="item_name" value="${purpose}" />
       <input type="hidden" name="currency_code" value="EUR" />
       <input type="hidden" name="amount" value="${parsedAmount.toFixed(2)}" />
       <input type="hidden" name="return" value="https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/" />
       <input type="hidden" name="cancel_return" value="https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/" />
       <input type="hidden" name="invoice" value="${invoice}" />
-      <input type="hidden" name="custom" value="${orgName}" />
+      <input type="hidden" name="custom" value="${orgName}/${email}" />
     `;
 
     document.body.appendChild(paypalForm);
@@ -120,23 +121,6 @@ const DonationPage: React.FC = () => {
         )}
 
         <form onSubmit={validateAndSubmit}>
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="block text-gray-700 font-medium mb-1"
-            >
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Max Mustermann"
-              className="w-full border border-gray-300 rounded-md p-2"
-            />
-          </div>
-
           <div className="mb-4">
             <label
               htmlFor="email"
