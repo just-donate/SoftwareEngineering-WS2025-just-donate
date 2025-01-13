@@ -54,7 +54,6 @@ libraryDependencies ++= Seq(
 
   // Encryption
   "com.github.jwt-scala" %% "jwt-core" % "10.0.1",
-  "de.mkammerer" % "argon2-jvm" % "2.1",
 
 
 

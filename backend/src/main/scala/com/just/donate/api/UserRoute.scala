@@ -4,7 +4,7 @@ import cats.effect.IO
 import com.just.donate.db.Repository
 import com.just.donate.models.Organisation
 import com.just.donate.models.user.User
-import de.mkammerer.argon2.Argon2Factory
+import com.just.donate.utils.CryptoUtils
 import io.circe.generic.auto.*
 import io.circe.syntax.*
 import org.http4s.*
@@ -14,9 +14,7 @@ import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 
 object UserRoute:
-
-  private val argon2 = Argon2Factory.create()
-
+  
   // Define the user API, given a repository instance for User.
   def userApi(userRepo: Repository[String, User], orgRepo: Repository[String, Organisation]): HttpRoutes[IO] =
     HttpRoutes.of[IO] {
@@ -34,7 +32,7 @@ object UserRoute:
               Conflict(s"User with email ${registerReq.email} already exists.")
             case None =>
               // No duplicate found—proceed to hash the password and create the user.
-              val hashedPassword = hashPassword(registerReq.password)
+              val hashedPassword = CryptoUtils.hashPassword(registerReq.password)
 
               existingOrg.getOrElse(None) match
                 case com.just.donate.models.Organisation(_, _, _, _, _, _) =>
@@ -60,7 +58,7 @@ object UserRoute:
           maybeUser <- userRepo.findById(changeReq.email)
           resp <- maybeUser match
             case Some(user) =>
-              val updatedUser = user.copy(password = hashPassword(changeReq.newPassword))
+              val updatedUser = user.copy(password = CryptoUtils.hashPassword(changeReq.newPassword))
               for
                 _ <- userRepo.update(updatedUser)
 
@@ -76,9 +74,6 @@ object UserRoute:
               NotFound(s"User with email ${changeReq.email} not found.")
         yield resp
     }
-
-  private def hashPassword(password: String): String =
-    argon2.hash(3, 1 << 12, 1, password)
 
   // For user registration (e.g., POST /user/register)
   private final case class RegisterUser(email: String, password: String, orgId: String)
