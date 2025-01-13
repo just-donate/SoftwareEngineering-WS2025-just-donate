@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import axiosInstance from '@/app/organization/api/axiosInstance';
-import axios from 'axios';
 
 const navItems = [
   { href: '/organization/dashboard', label: 'Dashboard' },
@@ -33,7 +32,7 @@ export const NavBar: React.FC = () => {
       try {
         await axiosInstance.get('/check-auth');
         setIsAuthenticated(true);
-      } catch (err) {
+      } catch {
         setIsAuthenticated(false);
       }
     }

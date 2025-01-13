@@ -12,7 +12,6 @@ interface Purpose {
 }
 
 const DonationPage: React.FC = () => {
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [amount, setAmount] = useState('');
   const [purpose, setPurpose] = useState('None');
@@ -39,7 +38,7 @@ const DonationPage: React.FC = () => {
         // Extract purpose names from the response data
         const options = response.data.map((item) => item.name);
         setPurposeOptions(options);
-      } catch (error: any) {
+      } catch (error) {
         if (axios.isAxiosError(error)) {
           console.error(
             'Axios error fetching purposes:',

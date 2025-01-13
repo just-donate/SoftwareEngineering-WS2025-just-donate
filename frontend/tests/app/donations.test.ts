@@ -2,7 +2,6 @@ import {
   fetchDonations,
   createDonation,
 } from '../../src/app/organization/donations/donations';
-import axios from 'axios';
 import axiosInstance from '../../src/app/organization/api/axiosInstance';
 
 // Mock the axiosInstance

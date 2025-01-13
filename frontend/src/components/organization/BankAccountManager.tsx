@@ -37,15 +37,12 @@ export default function BankAccountManager({
     if (!newAccountName || !newAccountAmount) return;
 
     try {
-      const response = await axiosInstance.post(
-        `/organisation/${organizationId}/account`,
-        {
-          name: newAccountName,
-          balance: {
-            amount: newAccountAmount,
-          },
+      await axiosInstance.post(`/organisation/${organizationId}/account`, {
+        name: newAccountName,
+        balance: {
+          amount: newAccountAmount,
         },
-      );
+      });
 
       // Optimistically update the UI
       const newAccount: BankAccount = {
