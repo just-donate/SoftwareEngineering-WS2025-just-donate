@@ -116,7 +116,7 @@ object PaypalRoute:
           case other =>
             IO.println(s"Unexpected validation response: $other")
         }
-      yield responsF
+      yield response
   }
 
   // Function to validate IPN with PayPal, adding retry logic
