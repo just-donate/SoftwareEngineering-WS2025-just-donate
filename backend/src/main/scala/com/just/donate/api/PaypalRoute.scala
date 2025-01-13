@@ -38,7 +38,6 @@ object PaypalRoute:
           )
         }
 
-        // Validate IPN asynchronously with retries
         _ <- validateWithRetry(rawBody, maxRetries = 3, delay = 5.seconds).flatMap {
           case "VERIFIED" =>
             for
@@ -116,8 +115,8 @@ object PaypalRoute:
             IO.println("IPN invalid")
           case other =>
             IO.println(s"Unexpected validation response: $other")
-        }.start // Run validation asynchronously
-      yield response
+        }
+      yield responsF
   }
 
   // Function to validate IPN with PayPal, adding retry logic
