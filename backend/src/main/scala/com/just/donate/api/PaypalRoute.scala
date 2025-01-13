@@ -88,7 +88,7 @@ object PaypalRoute:
                   newIpn.firstName + " " + newIpn.lastName,
                   newIpn.notificationEmail,
                   newIpn.mcGross,
-                  if newIpn.itemName.isEmpty then None else Some(newIpn.itemName)
+                  if newIpn.itemName.isEmpty || newIpn.itemName == "empty" then None else Some(newIpn.itemName)
                 )
               )
 

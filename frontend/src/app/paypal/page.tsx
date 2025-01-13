@@ -14,7 +14,7 @@ interface Purpose {
 const DonationPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [amount, setAmount] = useState('');
-  const [purpose, setPurpose] = useState('None');
+  const [purpose, setPurpose] = useState('empty');
   const [errorMessage, setErrorMessage] = useState('');
   const [purposeOptions, setPurposeOptions] = useState<string[]>([]);
 
@@ -179,7 +179,7 @@ const DonationPage: React.FC = () => {
               className="w-full border border-gray-300 rounded-md p-2"
             >
               {/* Default option that can be selected */}
-              <option value="None">
+              <option value="empty">
                 Choose a purpose (or clear selection)
               </option>
               {purposeOptions.length > 0 ? (
