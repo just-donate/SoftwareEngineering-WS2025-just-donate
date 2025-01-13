@@ -2,11 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { Donation } from '@/types/types';
-import { fetchDonations, createDonation } from '@/app/organization/donations/donations';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/organization/ui/card';
+import {
+  fetchDonations,
+  createDonation,
+} from '@/app/organization/donations/donations';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from '@/components/organization/ui/card';
 import { Input } from '@/components/organization/ui/input';
 import { Button } from '@/components/organization/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/organization/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/organization/ui/select';
 import DonationsList from '@/components/organization/DonationsList';
 import { BankAccount, Earmarking } from '@/types/types';
 import { fetchBankAccounts } from '@/app/organization/bank-accounts/bank-accounts';
@@ -18,52 +32,66 @@ interface DonationManagerProps {
 }
 
 export default function DonationManager({
-    initialDonations,
-    organizationId,
+  initialDonations,
+  organizationId,
 }: DonationManagerProps) {
-    const [donations, setDonations] = useState<Donation[]>(initialDonations);
-    const [aviableAccounts, setAviableAccounts] = useState<BankAccount[]>([]); 
-    const [aviableEarmarkings, setAviableEarmarkings] = useState<Earmarking[]>([]);
-    const [donorName, setDonorName] = useState('');
-    const [donorEmail, setDonorEmail] = useState('');
-    const [amount, setAmount] = useState('');
-    const [earmarking, setEarmarking] = useState('');
-    const [accountName, setAccountName] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+  const [donations, setDonations] = useState<Donation[]>(initialDonations);
+  const [aviableAccounts, setAviableAccounts] = useState<BankAccount[]>([]);
+  const [aviableEarmarkings, setAviableEarmarkings] = useState<Earmarking[]>(
+    [],
+  );
+  const [donorName, setDonorName] = useState('');
+  const [donorEmail, setDonorEmail] = useState('');
+  const [amount, setAmount] = useState('');
+  const [earmarking, setEarmarking] = useState('');
+  const [accountName, setAccountName] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-    useEffect(() => {
-        fetchDonations(organizationId).then(setDonations);
-        fetchBankAccounts(organizationId).then(setAviableAccounts);
-        fetchEarmarkings(organizationId).then(setAviableEarmarkings);
-    }, [organizationId]);
+  useEffect(() => {
+    fetchDonations(organizationId).then(setDonations);
+    fetchBankAccounts(organizationId).then(setAviableAccounts);
+    fetchEarmarkings(organizationId).then(setAviableEarmarkings);
+  }, [organizationId]);
 
-    const addDonation = async () => {
-        const newDonation = {
-            donorName,
-            donorEmail,
-            amount: { amount: amount },
-            earmarking,
-            accountName,
-        }
+  const addDonation = async () => {
+    const newDonation = {
+      donorName,
+      donorEmail,
+      amount: { amount: amount },
+      earmarking,
+      accountName,
+    };
 
-        if (!newDonation.donorName || !newDonation.donorEmail || !newDonation.amount.amount || !newDonation.accountName) {
-            setErrorMessage('Please fill in all fields');
-            return;
-        }
-
-        const result = await createDonation(organizationId, newDonation.donorName, newDonation.donorEmail, newDonation.amount, newDonation.earmarking, newDonation.accountName);
-        if (result.success) {
-            setSuccessMessage('Donation created successfully');
-            setErrorMessage('');
-            fetchDonations(organizationId).then(setDonations);
-        } else {
-            setErrorMessage(result.error || 'Failed to create donation');
-            setSuccessMessage('');
-        }
+    if (
+      !newDonation.donorName ||
+      !newDonation.donorEmail ||
+      !newDonation.amount.amount ||
+      !newDonation.accountName
+    ) {
+      setErrorMessage('Please fill in all fields');
+      return;
     }
 
-    return (
+    const result = await createDonation(
+      organizationId,
+      newDonation.donorName,
+      newDonation.donorEmail,
+      newDonation.amount,
+      newDonation.earmarking,
+      newDonation.accountName,
+    );
+    if (result.success) {
+      setSuccessMessage('Donation created successfully');
+      setErrorMessage('');
+      fetchDonations(organizationId).then(setDonations);
+    } else {
+      setErrorMessage(result.error || 'Failed to create donation');
+      setSuccessMessage('');
+    }
+  };
+
+  return (
     <div>
       <Card className="mb-4">
         <CardHeader className="mb-4">
@@ -112,7 +140,9 @@ export default function DonationManager({
                 </SelectContent>
               </Select>
               <Button onClick={addDonation}>Create Donation</Button>
-              {successMessage && <p className="text-green-500">{successMessage}</p>}
+              {successMessage && (
+                <p className="text-green-500">{successMessage}</p>
+              )}
               {errorMessage && <p className="text-red-500">{errorMessage}</p>}
             </div>
           </div>
@@ -121,6 +151,5 @@ export default function DonationManager({
 
       <DonationsList initialDonations={donations} />
     </div>
-    )
+  );
 }
-

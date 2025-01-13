@@ -1,13 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DonationsList from '@/components/organization/DonationsList';
 import { Donation } from '@/types/types';
-import { Input } from '@/components/organization/ui/input';
-import { Button } from '@/components/organization/ui/button';
-import axiosInstance from '../api/axiosInstance';
 import { fetchDonations } from './donations';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/organization/ui/card';
 import DonationManager from '@/components/organization/DonationManager';
 import withAuth from '../api/RequiresAuth';
 
@@ -21,7 +16,6 @@ function DonationsPage() {
     fetchDonations(organizationId).then(setDonations);
   }, [organizationId]);
 
-
   return (
     <div>
       <DonationManager
@@ -30,7 +24,6 @@ function DonationsPage() {
       />
     </div>
   );
-
 }
 
 export default withAuth(DonationsPage);
