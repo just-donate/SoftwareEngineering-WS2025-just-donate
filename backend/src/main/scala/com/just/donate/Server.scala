@@ -11,10 +11,11 @@ import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
 import com.just.donate.api.{CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute}
 import com.just.donate.config.{AppConfig, AppEnvironment, Config}
-import com.just.donate.db.mongo.{MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository}
+import com.just.donate.db.mongo.{MongoErrorLogRepository, MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository}
 import com.just.donate.models.Organisation
 import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
 import com.just.donate.security.AuthMiddleware
+import com.just.donate.utils.ErrorLogger
 import org.http4s.*
 import org.http4s.client.Client
 import org.http4s.ember.client.EmberClientBuilder
@@ -46,10 +47,18 @@ object Server extends IOApp:
       val organisationCollection = database.getCollection("organisations")
       val paypalCollection = database.getCollection("paypal_ipn")
       val userCollection = database.getCollection("users")
+      val errorLogCollection = database.getCollection("error_logs")
 
       val organisationRepository = MongoOrganisationRepository(organisationCollection)
       val paypalRepository = MongoPaypalRepository(paypalCollection)
       val userRepository = MongoUserRepository(userCollection)
+      val errorLogRepository = MongoErrorLogRepository(errorLogCollection)
+
+      /**
+       * Error logger to log errors to the database.
+       * Can be passed in to other services that need to log errors and can showcase them in the UI.
+       */
+      val errorLogger = new ErrorLogger(errorLogRepository)
 
       val defaultOrg = Organisation("Just-Donate")
       val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
@@ -82,7 +91,7 @@ object Server extends IOApp:
         "transfer" -> securedTransferRoute,
         "withdraw" -> securedWithdrawalRoute,
         "notify" -> securedNotificationRoute,
-        "paypal-ipn" -> paypalRoute(paypalRepository, organisationRepository, appConfig, emailService)
+        "paypal-ipn" -> paypalRoute(paypalRepository, organisationRepository, appConfig, emailService, errorLogger)
       ).orNotFound
 
       val corsService = CORS.policy

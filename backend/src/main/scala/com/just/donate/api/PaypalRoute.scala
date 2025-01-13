@@ -7,6 +7,7 @@ import com.just.donate.db.Repository
 import com.just.donate.models.Organisation
 import com.just.donate.models.paypal.{PayPalIPN, PayPalIPNMapper}
 import com.just.donate.notify.IEmailService
+import com.just.donate.utils.ErrorLogger
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
 import org.http4s.*
 import org.http4s.circe.*
@@ -19,7 +20,9 @@ import scala.concurrent.duration.*
 
 object PaypalRoute:
 
-  def paypalRoute(paypalRepo: Repository[String, PayPalIPN], orgRepo: Repository[String, Organisation], conf: Config, emailService: IEmailService): HttpRoutes[IO] = HttpRoutes.of[IO] {
+  val paypalAccountName = "PayPal"
+
+  def paypalRoute(paypalRepo: Repository[String, PayPalIPN], orgRepo: Repository[String, Organisation], conf: Config, emailService: IEmailService, errorLogger: ErrorLogger): HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root =>
       for
         // Parse the request body
@@ -43,53 +46,70 @@ object PaypalRoute:
 
               // Map the incoming IPN data to a domain model
               newIpn <- PayPalIPNMapper.mapToPayPalIPN(urlForm).handleErrorWith { error =>
-                IO.println(s"Failed to map IPN: $error") *> IO.raiseError(error)
+                val errMsg = s"Failed to map IPN: $error"
+                IO.println(errMsg) *>
+                  errorLogger.logError("IPN", errMsg, rawBody) *>
+                  IO.raiseError(error)
               }
-
-              // Verify recipient email
-//              _ <- if (newIpn.receiverEmail == "expected-business-email@example.com") {
-//                IO.unit
-//              } else {
-//                IO.println(s"Invalid recipient email: ${newIpn.receiverEmail}. Expected: expected-business-email@example.com") *>
-//                  IO.raiseError(new IllegalArgumentException("Invalid recipient email"))
-//              }
 
               // Check whether the payment status is completed
               _ <- if (newIpn.paymentStatus.equals("Completed")) {
                 IO.unit
               } else {
-                IO.println(s"Invalid payment status: ${newIpn.receiverEmail}. Expected: Completed") *>
-                                  IO.raiseError(new IllegalArgumentException("Invalid recipient email"))
+                val errMsg = s"Invalid payment status: ${newIpn.paymentStatus}. Expected: Completed"
+                IO.println(errMsg) *>
+                  errorLogger.logError("IPN", errMsg, rawBody) *>
+                  IO.raiseError(new IllegalArgumentException("Invalid payment status"))
               }
 
               // Check for duplicates
               existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
               _ <- existingIpn match {
                 case Some(_) =>
-                  IO.println(s"Duplicate IPN detected for IPN track ID: ${newIpn.ipnTrackId}") *>
+                  val errMsg = s"Duplicate IPN detected for IPN track ID: ${newIpn.ipnTrackId}"
+                  IO.println(errMsg) *>
+                    errorLogger.logError("IPN", errMsg, rawBody) *>
                     IO.raiseError(new IllegalStateException("Duplicate IPN detected"))
-                case None => IO.unit // No duplicate found, continue processing
+                case None => IO.unit
               }
 
               // Save the IPN if all checks pass
               _ <- paypalRepo.save(newIpn).handleErrorWith { error =>
-                IO.println(s"Failed to save IPN: $error") *> IO.raiseError(error)
+                val errMsg = s"Failed to save IPN: $error"
+                IO.println(errMsg) *>
+                  errorLogger.logError("IPN", errMsg, rawBody) *>
+                  IO.raiseError(error)
               }
 
               // Call the donation endpoint
               // Item name is set by the donation-paypal.html as earmarking
-              requestDonation <- IO.pure(RequestDonation(newIpn.firstName, newIpn.payerEmail, newIpn.mcGross, if newIpn.itemName.isEmpty then None else Option[String](newIpn.itemName)))
-              trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
-                organisationMapper(requestDonation, "Paypal")
+              requestDonation <- IO.pure(
+                RequestDonation(
+                  newIpn.firstName,
+                  newIpn.payerEmail,
+                  newIpn.mcGross,
+                  if newIpn.itemName.isEmpty then None else Some(newIpn.itemName)
+                )
               )
-              _ <- trackingId match
-                case None                      => IO.println("No Tracking ID generated")
-                case Some(Left(donationError)) => IO.println(donationError.message)
+              
+              trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
+                organisationMapper(requestDonation, paypalAccountName)
+              )
+
+              _ <- trackingId match {
+                case None =>
+                  errorLogger.logError("IPN", "No Tracking ID generated", rawBody) *>
+                  IO.println("No Tracking ID generated")
+                case Some(Left(donationError)) =>
+                  errorLogger.logError("IPN", donationError.message, rawBody) *>
+                  IO.println(donationError.message)
                 case Some(Right(trackingId)) =>
-                  val trackingLink = f"${conf.frontendUrl}/tracking?id=$trackingId"
+                  val trackingLink = s"${conf.frontendUrl}/tracking?id=$trackingId"
                   emailService.sendEmail(
                     requestDonation.donorEmail,
-                    emailTemplate(trackingLink, trackingId, conf.frontendUrl))
+                    emailTemplate(trackingLink, trackingId, conf.frontendUrl)
+                  )
+              }
 
             yield ()
           case "INVALID" =>

@@ -44,7 +44,7 @@ const DonationPage: React.FC = () => {
 
     paypalForm.innerHTML = `
       <input type="hidden" name="cmd" value="_xclick" />
-      <input type="hidden" name="business" value="value="sb-8rsvi36693121@business.example.com" />
+      <input type="hidden" name="business" value="sb-8rsvi36693121@business.example.com" />
       <input type="hidden" name="item_name" value="${purpose || 'JustDonate - User Donation'}" />
       <input type="hidden" name="currency_code" value="EUR" />
       <input type="hidden" name="amount" value="${parsedAmount.toFixed(2)}" />
