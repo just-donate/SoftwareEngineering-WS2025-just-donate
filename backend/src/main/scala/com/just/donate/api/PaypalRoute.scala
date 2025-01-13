@@ -85,10 +85,10 @@ object PaypalRoute:
               // Item name is set by the donation-paypal.html as earmarking
               requestDonation <- IO.pure(
                 RequestDonation(
-                  newIpn.firstName,
-                  newIpn.payerEmail,
+                  newIpn.firstName + " " + newIpn.lastName,
+                  newIpn.notificationEmail,
                   newIpn.mcGross,
-                  Some(newIpn.itemName)
+                  if newIpn.itemName.isEmpty then None else Some(newIpn.itemName)
                 )
               )
 
