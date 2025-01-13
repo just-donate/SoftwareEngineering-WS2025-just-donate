@@ -3,7 +3,7 @@ package com.just.donate.utils
 import com.just.donate.utils.CryptoUtils
 import munit.FunSuite
 
-class CryptoUtilsSuite extends FunSuite {
+class CryptoUtilsSuite extends FunSuite:
 
   test("hashPassword should generate a non-empty hash") {
     val password = "admin"
