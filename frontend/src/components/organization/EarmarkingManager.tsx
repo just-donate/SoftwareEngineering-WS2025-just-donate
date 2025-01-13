@@ -6,15 +6,12 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Earmarking } from '@/types/types';
-import axios from 'axios';
 import axiosInstance from '@/app/organization/api/axiosInstance';
 
 interface EarmarkingManagerProps {
   initialEarmarkings: Earmarking[];
   organizationId: string;
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function EarmarkingManager({
   initialEarmarkings,
@@ -35,17 +32,17 @@ export default function EarmarkingManager({
     if (!newEarmarkingName) return;
 
     try {
-      const response = await axiosInstance.post(
+      await axiosInstance.post(
         `/organisation/${organizationId}/earmarking`,
-        { 
+        {
           name: newEarmarkingName,
-          description: newEarmarkingDescription 
+          description: newEarmarkingDescription,
         },
         {
           headers: {
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       // Optimistically update the UI
@@ -61,7 +58,7 @@ export default function EarmarkingManager({
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : 'Failed to create earmarking'
+        error instanceof Error ? error.message : 'Failed to create earmarking',
       );
       setSuccessMessage('');
     }
@@ -109,7 +106,9 @@ export default function EarmarkingManager({
               <li key={earmarking.name} className="p-2 bg-secondary rounded-lg">
                 <div className="font-medium">{earmarking.name}</div>
                 {earmarking.description && (
-                  <div className="text-sm text-muted-foreground">{earmarking.description}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {earmarking.description}
+                  </div>
                 )}
               </li>
             ))}
