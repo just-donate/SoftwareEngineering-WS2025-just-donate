@@ -94,7 +94,7 @@ case class Account private (
 
     val (donated, newBoundDonations) = donateRec(boundDonations)
     if donated then Right(copy(boundDonations = newBoundDonations))
-    else Right(this)
+    else Left(DonationError.INVALID_EARMARKING)
 
   private[models] def pull(amount: Money)(using
     donationGetter: DonationGetter

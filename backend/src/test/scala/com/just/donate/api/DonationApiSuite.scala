@@ -33,7 +33,7 @@ class DonationApiSuite extends CatsEffectSuite:
     initRepo.unsafeRunSync()
 
   test("POST /donate/organisationId/account/accountName should return OK and update the organisation") {
-    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "account", "Paypal"))
+    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "account", "PayPal"))
       .withEntity(RequestDonation("MyDonor", "mydonor@example.org", Money("100"), None))
     for
       resp <- donationRoute.run(req)
@@ -41,6 +41,35 @@ class DonationApiSuite extends CatsEffectSuite:
     yield
       assertEquals(status, Status.Ok)
       val updatedOrg = repo.findById(organisationId(NEW_ROOTS)).unsafeRunSync().get
-      println(">>>> ORG: " + updatedOrg)
       assert(updatedOrg.totalBalance == Money("100"))
+  }
+
+  test("POST /donate/organisationId/account/accountName should return BadRequest if organisation not found") {
+    val req = Request[IO](Method.POST, testUri("unknown", "account", "Paypal"))
+      .withEntity(RequestDonation("MyDonor", "mydonor@example.org", Money("100"), None))
+    for
+      resp <- donationRoute.run(req)
+      status = resp.status
+    yield
+      assertEquals(status, Status.BadRequest)
+  }
+
+  test("POST /donate/organisationId/account/accountName should return BadRequest if account not found") {
+    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "unknown", "Paypal"))
+      .withEntity(RequestDonation("MyDonor", "mydonor@example.org", Money("100"), None))
+    for
+      resp <- donationRoute.run(req)
+      status = resp.status
+    yield
+      assertEquals(status, Status.NotFound)
+  }
+
+  test("POST /donate/organisationId/account/accountName should return BadRequest if earmarking does not exist") {
+    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "account", "Paypal"))
+      .withEntity(RequestDonation("MyDonor", "mydonor@example.org", Money("100"), Some("unknown")))
+    for
+      resp <- donationRoute.run(req)
+      status = resp.status
+    yield
+      assertEquals(status, Status.BadRequest)
   }
