@@ -1,7 +1,6 @@
 package com.just.donate
 
 import cats.effect.*
-import cats.effect.unsafe.implicits.global
 import com.comcast.ip4s.*
 import com.just.donate.api.DonationRoute.donationRoute
 import com.just.donate.api.NotificationRoute.notificationRoute
@@ -12,7 +11,6 @@ import com.just.donate.api.WithdrawalRoute.withdrawalRoute
 import com.just.donate.api.{CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute}
 import com.just.donate.config.{AppConfig, AppEnvironment, Config}
 import com.just.donate.db.mongo.{MongoErrorLogRepository, MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository}
-import com.just.donate.models.Organisation
 import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
 import com.just.donate.security.AuthMiddleware
 import com.just.donate.utils.ErrorLogger
@@ -60,9 +58,9 @@ object Server extends IOApp:
        */
       val errorLogger = new ErrorLogger(errorLogRepository)
 
-      val defaultOrg = Organisation("Just-Donate")
-      val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
-      if org.isEmpty then organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
+      //      val defaultOrg = Organisation("Just-Donate")
+      //      val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
+      //      if org.isEmpty then organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
 
       val emailService: IEmailService = appConfig.environment match
         case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
