@@ -2,12 +2,13 @@ package com.just.donate.models
 
 import com.just.donate.config.Config
 import com.just.donate.models.Types.DonationGetter
-import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
+import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
 import com.just.donate.notify.EmailMessage
+import com.just.donate.notify.messages.{ TransferMessage, WithdrawalMessage }
 import com.just.donate.utils.Money
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.{ Optional, UUID }
 import scala.math.Ordered.orderingToOrdered
 
 case class Organisation(
@@ -240,6 +241,45 @@ case class Organisation(
       accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
     )
 
+    // TODO: why was this removed?
+    // val fromQueue = earmarked match
+    //   case None             => updatedFrom.unboundDonations
+    //   case Some(earmarking) => updatedFrom.boundDonations.find { (key, _) => key == earmarking }.get._2
+    // val fromQueueHasRemainingPart =
+    //   fromQueue.donationQueue.queue.exists(reservable =>
+    //     reservable.value.donation.get.id == donationPart.donation.get.id
+    //   )
+    //
+    // val emailMessage: Option[EmailMessage] =
+    //   if !fromQueueHasRemainingPart then
+    //     donors.get(donationPart.donation.get.donorId) match
+    //       case None => return Left(TransferError.INVALID_DONOR)
+    //       case Some(donor) =>
+    //         val trackingId = donor.id
+    //         val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+    //         Some(
+    //           EmailMessage(
+    //             donor.email,
+    //             EmailMessage.prepareString(
+    //               theme.map(_.transferEmailTemplate),
+    //               TransferMessage(
+    //                 donor,
+    //                 config,
+    //                 this,
+    //                 fromAccount
+    //               )
+    //             ),
+    //             "Just Donate: News about your donation"
+    //           )
+    //         )
+    //   else None
+    //
+    // if remaining == Money.ZERO then Right(updatedOrg, emailMessage.toSeq)
+    // else
+    //   updatedOrg.transfer(remaining, fromAccount, toAccount, config).map {
+    //     case (org, emailMessages) => (org, emailMessages.prependedAll(emailMessage))
+    //   }
+
     Right((updatedOrg, Seq.empty[EmailMessage]))
 
   def totalBalance: Money =
@@ -286,13 +326,14 @@ case class Organisation(
         emailMessages = emailMessages.appended(
           EmailMessage(
             donor.email,
-            f"""Your recent donation to ${name} has been fully utilized.
-               |To see more details about the status of your donation, visit the following link
-               |${trackingLink}
-               |or enter your tracking id
-               |${trackingId}
-               |on our tracking page
-               |${config.frontendUrl}""".stripMargin,
+            EmailMessage.prepareString(
+              theme.map(_.withdrawalEmailTemplate),
+              WithdrawalMessage(
+                donor,
+                config,
+                this
+              )
+            ),
             "Just Donate: Your donation has been utilized"
           )
         )

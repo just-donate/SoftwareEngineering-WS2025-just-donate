@@ -1,13 +1,15 @@
 package com.just.donate.api
 
 import cats.effect.*
-import com.just.donate.api.DonationRoute.{RequestDonation, emailTemplate, organisationMapper}
+import com.just.donate.api.DonationRoute.{RequestDonation, organisationMapper}
 import com.just.donate.config.Config
 import com.just.donate.db.Repository
 import com.just.donate.models.Organisation
 import com.just.donate.models.paypal.{PayPalIPN, PayPalIPNMapper}
-import com.just.donate.notify.IEmailService
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
+import com.just.donate.notify.IEmailService
+import com.just.donate.notify.EmailMessage
+import com.just.donate.notify.messages.DonationMessage
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
@@ -79,17 +81,23 @@ object PaypalRoute:
               // Call the donation endpoint
               // Item name is set by the donation-paypal.html as earmarking
               requestDonation <- IO.pure(RequestDonation(newIpn.firstName, newIpn.payerEmail, newIpn.mcGross, if newIpn.itemName.isEmpty then None else Option[String](newIpn.itemName)))
-              trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
+              donationResult <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
                 organisationMapper(requestDonation, "Paypal")
               )
-              _ <- trackingId match
+              _ <- donationResult match
                 case None                      => BadRequest("Organisation not found")
                 case Some(Left(donationError)) => BadRequest(donationError.message)
-                case Some(Right(trackingId)) =>
-                  val trackingLink = f"${conf.frontendUrl}/tracking?id=$trackingId"
+                case Some(Right((org, donor))) =>
                   emailService.sendEmail(
                     requestDonation.donorEmail,
-                    emailTemplate(trackingLink, trackingId, conf.frontendUrl))
+                    EmailMessage.prepareString(
+                      org.theme.map(_.donationEmailTemplate),
+                      DonationMessage(
+                        donor,
+                        conf,
+                      )
+                    )
+                  )
 
             yield ()
           case "INVALID" =>
