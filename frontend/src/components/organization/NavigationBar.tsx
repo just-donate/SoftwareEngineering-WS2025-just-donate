@@ -103,7 +103,12 @@ export const NavBar: React.FC = () => {
               className="text-white focus:outline-none"
             >
               {mobileMenuOpen ? (
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  className="h-6 w-6"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -112,7 +117,12 @@ export const NavBar: React.FC = () => {
                   />
                 </svg>
               ) : (
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  className="h-6 w-6"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -136,7 +146,9 @@ export const NavBar: React.FC = () => {
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`block px-4 py-2 rounded-md text-base font-medium transition-colors ${
-                  pathname === item.href ? 'bg-gray-900 text-white' : 'text-gray-300 hover:text-white'
+                  pathname === item.href
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-300 hover:text-white'
                 }`}
               >
                 {item.label}

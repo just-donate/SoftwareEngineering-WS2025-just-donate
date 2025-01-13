@@ -180,7 +180,9 @@ const DonationPage: React.FC = () => {
               className="w-full border border-gray-300 rounded-md p-2"
             >
               {/* Default option that can be selected */}
-              <option value="None">Choose a purpose (or clear selection)</option>
+              <option value="None">
+                Choose a purpose (or clear selection)
+              </option>
               {purposeOptions.length > 0 ? (
                 purposeOptions.map((option) => (
                   <option key={option} value={option}>

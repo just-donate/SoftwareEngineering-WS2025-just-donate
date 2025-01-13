@@ -38,7 +38,8 @@ function UsersPage() {
 
   // Modal state for changing password:
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [selectedUserForPassword, setSelectedUserForPassword] = useState<User | null>(null);
+  const [selectedUserForPassword, setSelectedUserForPassword] =
+    useState<User | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -102,7 +103,10 @@ function UsersPage() {
     try {
       if (action === 'toggleActive') {
         const updatedPayload = { active: !user.active };
-        const response = await axiosInstance.put(`/user/${user.email}`, updatedPayload);
+        const response = await axiosInstance.put(
+          `/user/${user.email}`,
+          updatedPayload,
+        );
         setUsers((prev) =>
           prev.map((u) =>
             u.email === user.email ? { ...u, active: response.data.active } : u,
@@ -128,14 +132,20 @@ function UsersPage() {
     e.preventDefault();
     if (!selectedUserForPassword) return;
     try {
-      await axiosInstance.put(`/user/${selectedUserForPassword.email}`, { newPassword });
-      alert(`Password change request sent for ${selectedUserForPassword.email}.`);
+      await axiosInstance.put(`/user/${selectedUserForPassword.email}`, {
+        newPassword,
+      });
+      alert(
+        `Password change request sent for ${selectedUserForPassword.email}.`,
+      );
       setIsPasswordModalOpen(false);
       setSelectedUserForPassword(null);
       setNewPassword('');
     } catch (err) {
       console.error('Error changing password:', err);
-      setPasswordError(`Failed to change password for ${selectedUserForPassword.email}.`);
+      setPasswordError(
+        `Failed to change password for ${selectedUserForPassword.email}.`,
+      );
     }
   };
 
@@ -240,7 +250,9 @@ function UsersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                     <button
-                      onClick={() => openConfirmationModal('toggleActive', user)}
+                      onClick={() =>
+                        openConfirmationModal('toggleActive', user)
+                      }
                       className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
                     >
                       {user.active ? 'Deactivate' : 'Activate'}
@@ -276,7 +288,8 @@ function UsersPage() {
         <div>
           <span className="text-sm text-gray-700">
             Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
-            {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} users
+            {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}{' '}
+            users
           </span>
         </div>
         <div className="flex space-x-2">
@@ -291,19 +304,21 @@ function UsersPage() {
           >
             Prev
           </button>
-          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => goToPage(page)}
-              className={`px-3 py-1 rounded border text-sm ${
-                currentPage === page
-                  ? 'bg-blue-500 text-white border-blue-500'
-                  : 'text-gray-700 border-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              {page}
-            </button>
-          ))}
+          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
+            (page) => (
+              <button
+                key={page}
+                onClick={() => goToPage(page)}
+                className={`px-3 py-1 rounded border text-sm ${
+                  currentPage === page
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'text-gray-700 border-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {page}
+              </button>
+            ),
+          )}
           <button
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -323,7 +338,9 @@ function UsersPage() {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Register New User</h2>
-            {registerError && <div className="text-red-600 mb-2">{registerError}</div>}
+            {registerError && (
+              <div className="text-red-600 mb-2">{registerError}</div>
+            )}
             <form onSubmit={handleAddUser}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
@@ -396,7 +413,8 @@ function UsersPage() {
             {confirmationData.action === 'toggleActive' ? (
               <>
                 <h2 className="text-xl font-bold mb-4">
-                  {confirmationData.user.active ? 'Deactivate' : 'Activate'} User
+                  {confirmationData.user.active ? 'Deactivate' : 'Activate'}{' '}
+                  User
                 </h2>
                 <p className="mb-6 text-gray-700">
                   {confirmationData.user.active
@@ -408,7 +426,8 @@ function UsersPage() {
               <>
                 <h2 className="text-xl font-bold mb-4">Delete User</h2>
                 <p className="mb-6 text-gray-700">
-                  Are you sure you want to delete {confirmationData.user.email}? This action cannot be undone.
+                  Are you sure you want to delete {confirmationData.user.email}?
+                  This action cannot be undone.
                 </p>
               </>
             )}
@@ -434,11 +453,17 @@ function UsersPage() {
       {isPasswordModalOpen && selectedUserForPassword && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Change Password for {selectedUserForPassword.email}</h2>
-            {passwordError && <div className="text-red-600 mb-2">{passwordError}</div>}
+            <h2 className="text-xl font-bold mb-4">
+              Change Password for {selectedUserForPassword.email}
+            </h2>
+            {passwordError && (
+              <div className="text-red-600 mb-2">{passwordError}</div>
+            )}
             <form onSubmit={handleChangePasswordSubmit}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">New Password</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  New Password
+                </label>
                 <input
                   type="password"
                   value={newPassword}
