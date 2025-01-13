@@ -14,6 +14,7 @@ import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Transaction, BankAccount, Earmarking } from '@/types/types';
 import { createWithdrawal } from '@/app/organization/transactions/transactions';
 import { createTransfer } from '@/app/organization/transactions/transactions';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface TransactionManagerProps {
   initialTransactions: Transaction[];
@@ -28,6 +29,7 @@ export default function TransactionManager({
   earmarkings,
   organizationId,
 }: TransactionManagerProps) {
+  const { theme } = useTheme();
   const [transactions, setTransactions] =
     useState<Transaction[]>(initialTransactions);
   const [amount, setAmount] = useState('');
@@ -105,9 +107,9 @@ export default function TransactionManager({
 
   return (
     <div>
-      <Card className="mb-4">
+      <Card className={`mb-4 ${theme.card}`}>
         <CardHeader>
-          <CardTitle>New Transaction</CardTitle>
+          <CardTitle className={theme.text}>New Transaction</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4">
@@ -116,10 +118,10 @@ export default function TransactionManager({
                 setTransactionType(value as 'transfer' | 'withdrawal')
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className={`${theme.background} ${theme.text}`}>
                 <SelectValue placeholder="Transaction type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={theme.card}>
                 <SelectItem value="transfer">Transfer</SelectItem>
                 <SelectItem value="withdrawal">Withdrawal</SelectItem>
               </SelectContent>
@@ -131,13 +133,14 @@ export default function TransactionManager({
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Amount"
               step="0.01"
+              className={`${theme.background} ${theme.text}`}
             />
 
             <Select onValueChange={setFromAccount}>
-              <SelectTrigger>
+              <SelectTrigger className={`${theme.background} ${theme.text}`}>
                 <SelectValue placeholder="From account" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={theme.card}>
                 {accounts.map((account) => (
                   <SelectItem key={account.name} value={account.name}>
                     {account.name} ({account.balance.amount})
@@ -148,10 +151,10 @@ export default function TransactionManager({
 
             {transactionType === 'transfer' ? (
               <Select onValueChange={setToAccount} disabled={!fromAccount}>
-                <SelectTrigger>
+                <SelectTrigger className={`${theme.background} ${theme.text}`}>
                   <SelectValue placeholder="To account" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={theme.card}>
                   {accounts
                     .filter(
                       (account) =>
@@ -167,10 +170,10 @@ export default function TransactionManager({
               </Select>
             ) : (
               <Select onValueChange={setEarmarking}>
-                <SelectTrigger>
+                <SelectTrigger className={`${theme.background} ${theme.text}`}>
                   <SelectValue placeholder="Earmarking" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={theme.card}>
                   {earmarkings.map((earmarking) => (
                     <SelectItem key={earmarking.name} value={earmarking.name}>
                       {earmarking.name}
@@ -185,22 +188,24 @@ export default function TransactionManager({
               <div className="text-green-500">{successMessage}</div>
             )}
 
-            <Button onClick={createTransaction}>Create Transaction</Button>
+            <Button onClick={createTransaction} className={theme.primary}>Create Transaction</Button>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className={theme.card}>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle className={theme.text}>Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
             {transactions.map((transaction, index) => (
-              <li key={index} className="p-4 bg-secondary rounded-lg">
-                {transaction.type === 'transfer'
-                  ? `Transfer: ${transaction.amount} from ${accounts.find((a) => a.name === transaction.fromAccountId)?.name} to ${accounts.find((a) => a.name === transaction.toAccountId)?.name}`
-                  : `Withdrawal: ${transaction.amount} from ${accounts.find((a) => a.name === transaction.fromAccountId)?.name} (${earmarkings.find((e) => e.name === transaction.earmarkingId)?.name})`}
+              <li key={index} className={`p-4 rounded-lg ${theme.secondary}`}>
+                <span className={theme.text}>
+                  {transaction.type === 'transfer'
+                    ? `Transfer: ${transaction.amount} from ${accounts.find((a) => a.name === transaction.fromAccountId)?.name} to ${accounts.find((a) => a.name === transaction.toAccountId)?.name}`
+                    : `Withdrawal: ${transaction.amount} from ${accounts.find((a) => a.name === transaction.fromAccountId)?.name} (${earmarkings.find((e) => e.name === transaction.earmarkingId)?.name})`}
+                </span>
               </li>
             ))}
           </ul>

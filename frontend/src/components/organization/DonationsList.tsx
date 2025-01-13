@@ -11,6 +11,7 @@ import {
 } from './ui/select';
 import DonationDetails from './DonationDetails';
 import { Donation } from '@/types/types';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface DonationsListProps {
   initialDonations: Donation[];
@@ -19,6 +20,7 @@ interface DonationsListProps {
 export default function DonationsList({
   initialDonations,
 }: DonationsListProps) {
+  const { theme } = useTheme();
   const [donations, setDonations] = useState<Donation[]>(initialDonations);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -52,13 +54,13 @@ export default function DonationsList({
           placeholder="Search donations..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
+          className={`max-w-sm ${theme.background} ${theme.text}`}
         />
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className={`w-[180px] ${theme.background} ${theme.text}`}>
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className={theme.card}>
             <SelectItem value="all">All Statuses</SelectItem>
             {uniqueStatuses.map((status) => (
               <SelectItem key={status} value={status}>
@@ -71,7 +73,7 @@ export default function DonationsList({
 
       <div className="space-y-4">
         {filteredDonations.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
+          <p className={`text-center py-8 ${theme.textLight}`}>
             No donations found matching your criteria
           </p>
         ) : (

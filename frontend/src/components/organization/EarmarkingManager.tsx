@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Earmarking } from '@/types/types';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface EarmarkingManagerProps {
   initialEarmarkings: Earmarking[];
@@ -17,6 +18,7 @@ export default function EarmarkingManager({
   initialEarmarkings,
   organizationId,
 }: EarmarkingManagerProps) {
+  const { theme } = useTheme();
   const [earmarkings, setEarmarkings] =
     useState<Earmarking[]>(initialEarmarkings);
   const [newEarmarkingName, setNewEarmarkingName] = useState('');
@@ -65,9 +67,9 @@ export default function EarmarkingManager({
 
   return (
     <div>
-      <Card className="mb-4">
+      <Card className={`mb-4 ${theme.card}`}>
         <CardHeader>
-          <CardTitle>Add New Earmarking</CardTitle>
+          <CardTitle className={theme.text}>Add New Earmarking</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -76,8 +78,9 @@ export default function EarmarkingManager({
                 value={newEarmarkingName}
                 onChange={(e) => setNewEarmarkingName(e.target.value)}
                 placeholder="Earmarking name"
+                className={`${theme.background} ${theme.text}`}
               />
-              <Button onClick={addEarmarking}>Add</Button>
+              <Button onClick={addEarmarking} className={theme.primary}>Add</Button>
             </div>
             {error && <div className="text-red-500">{error}</div>}
             {successMessage && (
@@ -87,15 +90,15 @@ export default function EarmarkingManager({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className={theme.card}>
         <CardHeader>
-          <CardTitle>Existing Earmarkings</CardTitle>
+          <CardTitle className={theme.text}>Existing Earmarkings</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
             {earmarkings.map((earmarking) => (
-              <li key={earmarking.name} className="p-2 bg-secondary rounded-lg">
-                {earmarking.name}
+              <li key={earmarking.name} className={`p-2 rounded-lg ${theme.secondary}`}>
+                <span className={theme.text}>{earmarking.name}</span>
               </li>
             ))}
           </ul>

@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount } from '@/types/types';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -21,6 +22,7 @@ export default function BankAccountManager({
   initialAccounts,
   organizationId,
 }: BankAccountManagerProps) {
+  const { theme } = useTheme();
   const [accounts, setAccounts] = useState<BankAccount[]>(initialAccounts);
 
   useEffect(() => {
@@ -81,9 +83,9 @@ export default function BankAccountManager({
 
   return (
     <div>
-      <Card className="mb-4">
+      <Card className={`mb-4 ${theme.card}`}>
         <CardHeader>
-          <CardTitle>Add New Bank Account</CardTitle>
+          <CardTitle className={theme.text}>Add New Bank Account</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -92,7 +94,7 @@ export default function BankAccountManager({
                 value={newAccountName}
                 onChange={(e) => setNewAccountName(e.target.value)}
                 placeholder="Account name"
-                className="mb-2"
+                className={`mb-2 ${theme.background} ${theme.text}`}
               />
               <Input
                 value={newAccountAmount}
@@ -100,8 +102,9 @@ export default function BankAccountManager({
                 placeholder="Initial balance"
                 type="number"
                 step="0.01"
+                className={`${theme.background} ${theme.text}`}
               />
-              <Button onClick={addBankAccount} className="mt-2">
+              <Button onClick={addBankAccount} className={`mt-2 ${theme.primary}`}>
                 Add Account
               </Button>
             </div>
@@ -113,19 +116,19 @@ export default function BankAccountManager({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className={theme.card}>
         <CardHeader>
-          <CardTitle>Existing Bank Accounts</CardTitle>
+          <CardTitle className={theme.text}>Existing Bank Accounts</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
             {accounts.map((account) => (
               <li
                 key={account.name}
-                className="p-4 bg-secondary rounded-lg flex justify-between items-center"
+                className={`p-4 rounded-lg flex justify-between items-center ${theme.secondary}`}
               >
-                <span>{account.name}</span>
-                <span className="font-medium">{account.balance.amount}</span>
+                <span className={theme.text}>{account.name}</span>
+                <span className={`font-medium ${theme.text}`}>{account.balance.amount}</span>
               </li>
             ))}
           </ul>
