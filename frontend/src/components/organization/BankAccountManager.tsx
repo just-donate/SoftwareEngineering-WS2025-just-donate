@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount } from '@/types/types';
+import axiosInstance from '@/app/organization/api/axiosInstance';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,25 +37,15 @@ export default function BankAccountManager({
     if (!newAccountName || !newAccountAmount) return;
 
     try {
-      const response = await fetch(
-        `${API_URL}/organisation/${organizationId}/account`,
+      const response = await axiosInstance.post(
+        `/organisation/${organizationId}/account`,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+          name: newAccountName,
+          balance: {
+            amount: newAccountAmount,
           },
-          body: JSON.stringify({
-            name: newAccountName,
-            balance: {
-              amount: newAccountAmount,
-            },
-          }),
         },
       );
-
-      if (!response.ok) {
-        throw new Error('Failed to create bank account');
-      }
 
       // Optimistically update the UI
       const newAccount: BankAccount = {
