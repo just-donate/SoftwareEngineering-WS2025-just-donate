@@ -1,20 +1,49 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import logo from '@/assets/logo.png';
+
+interface EarmarkingResponse {
+  purposes: string[]; // adjust this interface according to your API response shape
+}
 
 const DonationPage: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [amount, setAmount] = useState('');
-  const [purpose, setPurpose] = useState('');
+  const [purpose, setPurpose] = useState('None');
   const [errorMessage, setErrorMessage] = useState('');
+  const [purposeOptions, setPurposeOptions] = useState<string[]>([]);
 
   /**
    * Name of the created organisation
    */
-  const orgName = "Just-Donate"
+  const orgName = "Just-Donate";
+
+  /**
+   * Fetch purpose options from the `/earmarking/list` endpoint on component mount.
+   */
+  useEffect(() => {
+    const fetchPurposeOptions = async () => {
+      try {
+        const response = await fetch('/earmarking/list');
+        if (!response.ok) {
+          throw new Error('Failed to fetch purpose options');
+        }
+        // Adjust the extraction of data based on your API's response format.
+        const data: EarmarkingResponse = await response.json();
+        // If your API returns an array directly, you could simply use:
+        // const data: string[] = await response.json();
+        setPurposeOptions(data.purposes);
+      } catch (error: any) {
+        console.error('Error fetching purposes:', error);
+        setErrorMessage('Unable to load donation purposes. Please try again later.');
+      }
+    };
+
+    fetchPurposeOptions();
+  }, []);
 
   const formatAmount = (value: string) => {
     // Remove invalid characters
@@ -72,6 +101,8 @@ const DonationPage: React.FC = () => {
         <p className="text-center text-gray-600 mb-6">
           Your contribution brings positive change to many lives. Join us in making a difference.
         </p>
+
+        {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
 
         <form onSubmit={validateAndSubmit}>
           <div className="mb-4">
@@ -140,16 +171,18 @@ const DonationPage: React.FC = () => {
               <option value="" disabled hidden>
                 Choose a purpose
               </option>
-              <option value="Wherever my help is needed most">
-                Wherever my help is needed most
-              </option>
-              <option value="Beach Cleaning">Beach Cleaning</option>
-              <option value="Women Empowerment">Women Empowerment</option>
-              <option value="Community Feeding">Community Feeding</option>
+              {purposeOptions.length > 0 ? (
+                purposeOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))
+              ) : (
+                // Optionally render a loading option while fetching
+                <option value="None">Loading options...</option>
+              )}
             </select>
           </div>
-
-          {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
           <button
             type="submit"

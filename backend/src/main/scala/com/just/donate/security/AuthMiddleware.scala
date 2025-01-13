@@ -4,7 +4,7 @@ import cats.data.{Kleisli, OptionT}
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.http4s.*
-import org.http4s.dsl.io.*
+import org.http4s.dsl.io.{/, *}
 import org.typelevel.vault.Key
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
 
@@ -19,7 +19,7 @@ object AuthMiddleware:
   def apply(protectedRoutes: HttpRoutes[IO]): HttpRoutes[IO] = Kleisli { req =>
     OptionT {
       // Enable themes to be loaded without authentication
-      if req.uri.toString.endsWith("theme") && req.method.eq(GET) then protectedRoutes(req).value
+      if req.uri.toString.endsWith("theme") || req.uri.toString.endsWith("earmarking/list") && req.method.eq(GET) then protectedRoutes(req).value
       else
         req.cookies.find(_.name == "jwtToken") match
           case Some(cookie) =>

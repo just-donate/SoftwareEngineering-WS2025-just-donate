@@ -88,7 +88,7 @@ object PaypalRoute:
                   newIpn.firstName,
                   newIpn.payerEmail,
                   newIpn.mcGross,
-                  if newIpn.itemName.isEmpty then None else Some(newIpn.itemName)
+                  Some(newIpn.itemName)
                 )
               )
 
