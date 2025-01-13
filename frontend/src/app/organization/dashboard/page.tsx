@@ -12,7 +12,7 @@ import withAuth from '../api/RequiresAuth';
 
 function DashboardPage() {
   return (
-    <div>
+    <div className="space-y-4">
       <h1 className="text-2xl font-bold mb-4">Organization Dashboard</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
@@ -72,6 +72,16 @@ function DashboardPage() {
           <CardContent>
             <Link href="/organization/manage-tracking">
               <Button>Customize Tracking Page</Button>
+            </Link>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>User Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link href="/organization/users">
+              <Button>Manage Users</Button>
             </Link>
           </CardContent>
         </Card>

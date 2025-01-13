@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import axiosInstance from '@/app/organization/api/axiosInstance';
 import axios from 'axios';
@@ -15,72 +16,146 @@ const navItems = [
   { href: '/organization/donations', label: 'Donations' },
   { href: '/organization/gallery', label: 'Gallery' },
   { href: '/organization/manage-tracking', label: 'Tracking Page' },
+  { href: '/organization/users', label: 'Users' },
 ];
 
 export const NavBar: React.FC = () => {
   const { theme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(0);
+
+  // Check authentication
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        await axiosInstance.get('/check-auth');
+        setIsAuthenticated(true);
+      } catch (err) {
+        setIsAuthenticated(false);
+      }
+    }
+    checkAuth();
+
+    // Update window width on resize
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    handleResize(); // Initial call
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [pathname]);
 
   async function logout() {
     try {
-      // Call the logout endpoint
       await axiosInstance.post('/logout');
-
-      // Redirect to the login page or home
+      setIsAuthenticated(false);
       router.push('/organization/login');
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          'Error during logout:',
-          error.response?.data || error.message,
-        );
-      } else if (error instanceof Error) {
-        // Fallback for standard JS errors
-        console.error('Error during logout:', error.message);
-      } else {
-        console.error('Error during logout:', error);
-      }
+      console.error('Error during logout:', error);
     }
   }
+
+  const visibleItems = windowWidth > 1024 ? navItems.slice(0, 5) : [];
+  const hiddenItems = windowWidth > 1024 ? navItems.slice(5) : navItems;
 
   return (
     <nav className={`${theme.primary} shadow-lg`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link
-            href="/"
-            className={`${theme.text} text-lg font-semibold hover:opacity-80 transition-opacity`}
-          >
-            {theme.ngoName}
-          </Link>
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  style={{
-                    backgroundColor:
-                      pathname === item.href ? theme.primary : 'transparent',
-                    color:
-                      pathname === item.href ? theme.text : theme.textLight,
-                  }}
-                  className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-opacity-20 hover:text-${theme.text}`}
-                >
-                  {item.label}
-                </Link>
-              ))}
+          {/* Left Side: Logo */}
+          <div className="flex-shrink-0">
+            <Link
+              href="/organization/dashboard"
+              className={`${theme.text} text-xl font-bold hover:opacity-80 transition-opacity`}
+            >
+              {theme.ngoName}
+            </Link>
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex items-center space-x-6">
+            {visibleItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`px-4 py-2 rounded-md text-sm font-medium text-white hover:text-blue-300 transition-colors ${
+                  pathname === item.href ? 'font-bold underline' : ''
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+            {isAuthenticated && (
               <button
                 onClick={logout}
-                className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-opacity-20 hover:text-${theme.text}`}
+                className="px-4 py-2 rounded-md text-sm font-medium text-white hover:text-blue-300 transition-colors"
               >
                 Logout
               </button>
-            </div>
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <div className="lg:hidden">
+            <button
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              className="text-white focus:outline-none"
+            >
+              {mobileMenuOpen ? (
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              ) : (
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-gray-800">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {hiddenItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2 rounded-md text-base font-medium transition-colors ${
+                  pathname === item.href ? 'bg-gray-900 text-white' : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+            {isAuthenticated && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                }}
+                className="block w-full text-left px-4 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white"
+              >
+                Logout
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

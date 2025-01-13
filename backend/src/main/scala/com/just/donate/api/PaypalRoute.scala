@@ -83,8 +83,8 @@ object PaypalRoute:
                 organisationMapper(requestDonation, "Paypal")
               )
               _ <- trackingId match
-                case None                      => BadRequest("Organisation not found")
-                case Some(Left(donationError)) => BadRequest(donationError.message)
+                case None                      => IO.println("No Tracking ID generated")
+                case Some(Left(donationError)) => IO.println(donationError.message)
                 case Some(Right(trackingId)) =>
                   val trackingLink = f"${conf.frontendUrl}/tracking?id=$trackingId"
                   emailService.sendEmail(

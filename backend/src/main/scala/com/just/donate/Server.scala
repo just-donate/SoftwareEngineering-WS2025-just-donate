@@ -96,7 +96,7 @@ object Server extends IOApp:
             Origin.Host(Uri.Scheme.https, Uri.RegName("just-donate.github.io"), None)
           )
         )
-        .withAllowMethodsIn(Set(Method.GET, Method.POST))
+        .withAllowMethodsIn(Set(Method.GET, Method.POST, Method.DELETE, Method.PUT))
         .withAllowCredentials(true)
         .withMaxAge(1.days)
         .apply(httpApp)
