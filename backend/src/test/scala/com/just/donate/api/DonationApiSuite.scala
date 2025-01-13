@@ -2,6 +2,7 @@ package com.just.donate.api
 
 import cats.effect.IO
 import com.just.donate.api.DonationRoute.RequestDonation
+import com.just.donate.api.PaypalRoute.paypalAccountName
 import com.just.donate.db.memory.MemoryOrganisationRepository
 import com.just.donate.helper.OrganisationHelper.*
 import com.just.donate.helper.TestHelper.*
@@ -33,7 +34,7 @@ class DonationApiSuite extends CatsEffectSuite:
     initRepo.unsafeRunSync()
 
   test("POST /donate/organisationId/account/accountName should return OK and update the organisation") {
-    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "account", "PayPal"))
+    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "account", paypalAccountName))
       .withEntity(RequestDonation("MyDonor", "mydonor@example.org", Money("100"), None))
     for
       resp <- donationRoute.run(req)
@@ -45,7 +46,7 @@ class DonationApiSuite extends CatsEffectSuite:
   }
 
   test("POST /donate/organisationId/account/accountName should return BadRequest if organisation not found") {
-    val req = Request[IO](Method.POST, testUri("unknown", "account", "Paypal"))
+    val req = Request[IO](Method.POST, testUri("unknown", "account", paypalAccountName))
       .withEntity(RequestDonation("MyDonor", "mydonor@example.org", Money("100"), None))
     for
       resp <- donationRoute.run(req)
@@ -55,7 +56,7 @@ class DonationApiSuite extends CatsEffectSuite:
   }
 
   test("POST /donate/organisationId/account/accountName should return BadRequest if account not found") {
-    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "unknown", "Paypal"))
+    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "unknown", paypalAccountName))
       .withEntity(RequestDonation("MyDonor", "mydonor@example.org", Money("100"), None))
     for
       resp <- donationRoute.run(req)
@@ -65,7 +66,7 @@ class DonationApiSuite extends CatsEffectSuite:
   }
 
   test("POST /donate/organisationId/account/accountName should return BadRequest if earmarking does not exist") {
-    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "account", "Paypal"))
+    val req = Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS), "account", paypalAccountName))
       .withEntity(RequestDonation("MyDonor", "mydonor@example.org", Money("100"), Some("unknown")))
     for
       resp <- donationRoute.run(req)

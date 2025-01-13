@@ -30,7 +30,7 @@ object OrganisationHelper:
           val org = optOrg.get
           val donor = Donor(org.getNewDonorId, "MyDonor", "mydonor@example.org")
           val (donation, donationPart) = Donation(donor.id, Money("100"))
-          org.donate(donor, donationPart, donation, "Paypal").toOption.get
+          org.donate(donor, donationPart, donation, paypalAccountName).toOption.get
         )
       _ <- repo.save(newOrg)
     yield ()

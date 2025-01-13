@@ -3,6 +3,7 @@ package com.just.donate.db
 import cats.effect.IO
 import com.dimafeng.testcontainers.munit.TestContainerForAll
 import com.dimafeng.testcontainers.{DockerComposeContainer, ExposedService}
+import com.just.donate.api.PaypalRoute.paypalAccountName
 import com.just.donate.db.mongo.MongoOrganisationRepository
 import com.just.donate.helper.OrganisationHelper.createNewRoots
 import com.just.donate.models.{Donation, Donor, Organisation}
@@ -80,16 +81,16 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
         (donation, donationPart) = Donation(donor.id, Money("100"))
         updatedOrg2 = org2
           .addAccount("Bank")
-          .addAccount("Paypal")
-          .donate(donor, donationPart, donation, "Paypal")
+          .addAccount(paypalAccountName)
+          .donate(donor, donationPart, donation, paypalAccountName)
           .toOption
           .get
         updatedOk <- repo.update(updatedOrg2)
-        _ = assertEquals(updatedOk.getAccount("Paypal").get.name, "Paypal")
+        _ = assertEquals(updatedOk.getAccount(paypalAccountName).get.name, paypalAccountName)
         _ = assertEquals(updatedOk.getAccount("Bank").get.name, "Bank")
         _ = assertEquals(updatedOk.totalBalance, Money("100"))
         found2 <- repo.findById(org2.id)
-        _ = assertEquals(found2.get.getAccount("Paypal").get.name, "Paypal")
+        _ = assertEquals(found2.get.getAccount(paypalAccountName).get.name, paypalAccountName)
         _ = assertEquals(found2.get.getAccount("Bank").get.name, "Bank")
         _ = assertEquals(found2.get.totalBalance, Money("100"))
 
@@ -127,7 +128,7 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
         found <- repo.findById(org.id)
         _ = assert(found.isDefined, "Expected to find organisation")
         _ = assertEquals(found.get.accounts.size, 4, "Expected 4 accounts")
-        _ = assert(found.get.accounts.exists(_._2.name == "Paypal"), "Expected Paypal account")
+        _ = assert(found.get.accounts.exists(_._2.name == paypalAccountName), "Expected Paypal account")
         _ = assert(found.get.accounts.exists(_._2.name == "Better Place"), "Expected Better Place account")
         _ = assert(found.get.accounts.exists(_._2.name == "Bank"), "Expected Bank account")
         _ = assert(found.get.accounts.exists(_._2.name == "Kenya"), "Expected Kenya account")
