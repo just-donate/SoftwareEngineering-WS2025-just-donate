@@ -43,12 +43,12 @@ object OrganisationRoute:
 
       case req @ POST -> Root / organisationId / "earmarking" / earmarking / "image" =>
         for
-          request <- req.as[RequestEarmarkingImage]
-          response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarkingImage(earmarking, request.image))
+          image <- req.as[RequestEarmarkingImage]
+          response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarkingImage(earmarking, EarmarkingImage(image.fileUrl)))
         yield response
 
       case GET -> Root / organisationId / "earmarking" / earmarking / "image" / "list" =>
-        loadOrganisation(organisationId)(repository)(_.getEarmarkingImages(earmarking).map(images => images.map(ResponseEarmarkingImage(_))))
+        loadOrganisation(organisationId)(repository)(_.getEarmarkingImages(earmarking).map(images => images.map(ResponseEarmarkingImage(_))).toSeq)
 
       case DELETE -> Root / organisationId / "earmarking" / earmarking =>
         loadAndSaveOrganisation(organisationId)(repository)(_.removeEarmarking(earmarking))
@@ -98,7 +98,7 @@ object OrganisationRoute:
 
   private[api] case class ResponseEarmarking(name: String)
 
-  private[api] case class RequestEarmarkingImage(image: EarmarkingImage)
+  private[api] case class RequestEarmarkingImage(fileUrl: String)
 
   private[api] case class ResponseEarmarkingImage(image: EarmarkingImage)
 

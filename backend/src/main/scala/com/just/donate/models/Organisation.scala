@@ -75,7 +75,6 @@ case class Organisation(
 
   def getEarmarkingImages(earmarking: String): Option[Seq[EarmarkingImage]] = earmarkingImages.get(earmarking)
 
-
   def getDonations: Seq[Donation] = donations.values.toSeq
 
   /**
