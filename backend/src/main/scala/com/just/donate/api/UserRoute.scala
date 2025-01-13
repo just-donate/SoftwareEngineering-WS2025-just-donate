@@ -19,6 +19,9 @@ object UserRoute:
   def userApi(userRepo: Repository[String, User], orgRepo: Repository[String, Organisation]): HttpRoutes[IO] =
     HttpRoutes.of[IO] {
 
+      case GET -> Root / "list" =>
+        Ok(userRepo.findAll()).map(response => response)
+
       // Register a new user: POST /user/register
       case req @ POST -> Root / "register" =>
         for
@@ -72,6 +75,21 @@ object UserRoute:
               yield r
             case None =>
               NotFound(s"User with email ${changeReq.email} not found.")
+        yield resp
+
+      case req @ POST -> Root / "delete" =>
+        for
+          deleteReq <- req.as[ChangePassword]
+          // Convert the provided string id to an ObjectId
+          maybeUser <- userRepo.findById(deleteReq.email)
+          resp <- maybeUser match
+            case Some(user) =>
+              for
+                _ <- userRepo.delete(user.email)
+                r <- Ok(s"User with email ${user.email} deleted.")
+              yield r
+            case None =>
+              NotFound(s"User with email ${deleteReq.email} not found.")
         yield resp
     }
 
