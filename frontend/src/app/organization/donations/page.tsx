@@ -1,34 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DonationsList from '@/components/organization/DonationsList';
 import { Donation } from '@/types/types';
-import axiosInstance from '../api/axiosInstance';
-import axios from 'axios';
+import { fetchDonations } from './donations';
+import DonationManager from '@/components/organization/DonationManager';
 import withAuth from '../api/RequiresAuth';
-
-async function fetchDonations(orgId: string): Promise<Donation[]> {
-  try {
-    const response = await axiosInstance.get(`/donate/${orgId}/donations`);
-    return response.data.donations;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      // Axios-specific error handling
-      console.error(
-        'Failed to fetch donations:',
-        error.response?.status,
-        error.response?.statusText,
-      );
-    } else {
-      // Non-Axios error handling
-      console.error('Failed to fetch donations:', error);
-    }
-    return [];
-  }
-}
 
 function DonationsPage() {
   const [donations, setDonations] = useState<Donation[]>([]);
+
+  // TODO: Get the organization ID from the session/context
   const organizationId = '591671920';
 
   useEffect(() => {
@@ -37,8 +18,10 @@ function DonationsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Donations</h1>
-      <DonationsList initialDonations={donations} />
+      <DonationManager
+        initialDonations={donations}
+        organizationId={organizationId}
+      />
     </div>
   );
 }
