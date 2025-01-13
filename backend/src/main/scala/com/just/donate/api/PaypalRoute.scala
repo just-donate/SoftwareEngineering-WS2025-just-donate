@@ -91,7 +91,7 @@ object PaypalRoute:
                   if newIpn.itemName.isEmpty then None else Some(newIpn.itemName)
                 )
               )
-              
+
               trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
                 organisationMapper(requestDonation, paypalAccountName)
               )

@@ -64,7 +64,7 @@ class PaypalApiSuite extends CatsEffectSuite:
     // Note: This is a hack because sys.env is read-only.
     // In a real test you might refactor to inject the validation URL.
     System.setProperty("PAYPAL_VALIDATION_URL", validationUrl)
-    PaypalRoute.paypalRoute(mockRepo, orgRepo, AppConfigMock(), EmailServiceMock())
+    PaypalRoute.paypalRoute(mockRepo, orgRepo, AppConfigMock(), EmailServiceMock(), null)
 
   override def beforeEach(context: BeforeEach): Unit =
     mockRepo.reset()

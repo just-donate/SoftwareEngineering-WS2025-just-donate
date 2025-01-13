@@ -11,6 +11,11 @@ const DonationPage: React.FC = () => {
   const [purpose, setPurpose] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  /**
+   * Name of the created organisation
+   */
+  const orgName = "Just-Donate"
+
   const formatAmount = (value: string) => {
     // Remove invalid characters
     let formatted = value.replace(/[^0-9.]/g, '');
@@ -45,12 +50,13 @@ const DonationPage: React.FC = () => {
     paypalForm.innerHTML = `
       <input type="hidden" name="cmd" value="_xclick" />
       <input type="hidden" name="business" value="sb-8rsvi36693121@business.example.com" />
-      <input type="hidden" name="item_name" value="${purpose || 'JustDonate - User Donation'}" />
+      <input type="hidden" name="item_name" value="${purpose}" />
       <input type="hidden" name="currency_code" value="EUR" />
       <input type="hidden" name="amount" value="${parsedAmount.toFixed(2)}" />
       <input type="hidden" name="return" value="https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/" />
       <input type="hidden" name="cancel_return" value="https://just-donate.github.io/SoftwareEngineering-WS2025-just-donate/" />
       <input type="hidden" name="invoice" value="${invoice}" />
+      <input type="hidden" name="custom" value="${orgName}" />
     `;
 
     document.body.appendChild(paypalForm);
