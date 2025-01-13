@@ -35,7 +35,7 @@ object UserRoute:
               val hashedPassword = CryptoUtils.hashPassword(registerReq.password)
 
               existingOrg.getOrElse(None) match
-                case com.just.donate.models.Organisation(_, _, _, _, _, _) =>
+                case com.just.donate.models.Organisation(_, _, _, _, _, _, _) =>
                   val newUser = User(email = registerReq.email, password = hashedPassword, orgId = registerReq.orgId)
                   for
                     _ <- userRepo.save(newUser)

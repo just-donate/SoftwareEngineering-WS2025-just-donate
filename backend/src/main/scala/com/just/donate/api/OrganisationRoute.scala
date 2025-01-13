@@ -2,7 +2,7 @@ package com.just.donate.api
 
 import cats.effect.*
 import com.just.donate.db.Repository
-import com.just.donate.models.{Organisation, ThemeConfig}
+import com.just.donate.models.{Organisation, ThemeConfig, EarmarkingImage}
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisation, loadOrganisation}
 import io.circe.*
@@ -12,6 +12,7 @@ import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+import java.time.LocalDateTime
 
 object OrganisationRoute:
 
@@ -39,6 +40,15 @@ object OrganisationRoute:
           earmarking <- req.as[RequestEarmarking]
           response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarking(earmarking.name))
         yield response
+
+      case req @ POST -> Root / organisationId / "earmarking" / earmarking / "image" =>
+        for
+          request <- req.as[RequestEarmarkingImage]
+          response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarkingImage(earmarking, request.image))
+        yield response
+
+      case GET -> Root / organisationId / "earmarking" / earmarking / "image" / "list" =>
+        loadOrganisation(organisationId)(repository)(_.getEarmarkingImages(earmarking).map(images => images.map(ResponseEarmarkingImage(_))))
 
       case DELETE -> Root / organisationId / "earmarking" / earmarking =>
         loadAndSaveOrganisation(organisationId)(repository)(_.removeEarmarking(earmarking))
@@ -87,6 +97,10 @@ object OrganisationRoute:
   private[api] case class RequestEarmarking(name: String)
 
   private[api] case class ResponseEarmarking(name: String)
+
+  private[api] case class RequestEarmarkingImage(image: EarmarkingImage)
+
+  private[api] case class ResponseEarmarkingImage(image: EarmarkingImage)
 
   private[api] case class RequestAccount(name: String, balance: Money)
 

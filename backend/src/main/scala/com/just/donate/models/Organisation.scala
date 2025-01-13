@@ -2,6 +2,7 @@ package com.just.donate.models
 
 import com.just.donate.config.Config
 import com.just.donate.models.Types.DonationGetter
+import com.just.donate.models.EarmarkingImage
 import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
 import com.just.donate.notify.EmailMessage
 import com.just.donate.utils.Money
@@ -16,7 +17,8 @@ case class Organisation(
   donations: Map[String, Donation] = Map.empty,
   expenses: Seq[Expense] = Seq.empty,
   donors: Map[String, Donor] = Map.empty,
-  theme: Option[ThemeConfig] = None
+  theme: Option[ThemeConfig] = None,
+  earmarkingImages: Map[String, Seq[EarmarkingImage]] = Map.empty
 ):
 
   def id: String = math.abs(name.hashCode).toString
@@ -60,6 +62,18 @@ case class Organisation(
    */
   def removeEarmarking(earmarking: String): Organisation =
     copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmarking))))
+
+
+  /**
+   * Add a new earmarking image to the organisation.
+   * @param earmarking the name of the earmarking.
+   * @param image the image to add.
+   * @return a new organisation with the earmarking image added.
+   */
+  def addEarmarkingImage(earmarking: String, image: EarmarkingImage): Organisation =
+    copy(earmarkingImages = earmarkingImages.updated(earmarking, earmarkingImages.getOrElse(earmarking, Seq.empty).appended(image)))
+
+  def getEarmarkingImages(earmarking: String): Option[Seq[EarmarkingImage]] = earmarkingImages.get(earmarking)
 
 
   def getDonations: Seq[Donation] = donations.values.toSeq
