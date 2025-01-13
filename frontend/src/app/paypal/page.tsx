@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import logo from '@/assets/logo.png';
+// Ensure axiosInstance is properly configured and imported
+import axiosInstance from '../organization/api/axiosInstance';
+import axios from 'axios';
 
-interface EarmarkingResponse {
-  purposes: string[]; // adjust this interface according to your API response shape
+interface Purpose {
+  name: string;
 }
 
 const DonationPage: React.FC = () => {
@@ -19,31 +22,40 @@ const DonationPage: React.FC = () => {
   /**
    * Name of the created organisation
    */
-  const orgName = "Just-Donate";
+  const orgName = 'Just-Donate';
+
+  // TODO: Get the organization ID from the session/context
+  const organizationId = '591671920';
 
   /**
-   * Fetch purpose options from the `/earmarking/list` endpoint on component mount.
+   * Fetch purpose options from the endpoint on component mount.
    */
   useEffect(() => {
     const fetchPurposeOptions = async () => {
       try {
-        const response = await fetch('/earmarking/list');
-        if (!response.ok) {
-          throw new Error('Failed to fetch purpose options');
-        }
-        // Adjust the extraction of data based on your API's response format.
-        const data: EarmarkingResponse = await response.json();
-        // If your API returns an array directly, you could simply use:
-        // const data: string[] = await response.json();
-        setPurposeOptions(data.purposes);
+        const response = await axiosInstance.get<Purpose[]>(
+          `organisation/${organizationId}/earmarking/list`,
+        );
+        // Extract purpose names from the response data
+        const options = response.data.map((item) => item.name);
+        setPurposeOptions(options);
       } catch (error: any) {
-        console.error('Error fetching purposes:', error);
-        setErrorMessage('Unable to load donation purposes. Please try again later.');
+        if (axios.isAxiosError(error)) {
+          console.error(
+            'Axios error fetching purposes:',
+            error.response || error,
+          );
+        } else {
+          console.error('Unexpected error:', error);
+        }
+        setErrorMessage(
+          'Unable to load donation purposes. Please try again later.',
+        );
       }
     };
 
     fetchPurposeOptions();
-  }, []);
+  }, [organizationId]);
 
   const formatAmount = (value: string) => {
     // Remove invalid characters
@@ -99,14 +111,20 @@ const DonationPage: React.FC = () => {
           Make a Difference with Your Donation
         </h2>
         <p className="text-center text-gray-600 mb-6">
-          Your contribution brings positive change to many lives. Join us in making a difference.
+          Your contribution brings positive change to many lives. Join us in
+          making a difference.
         </p>
 
-        {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
+        {errorMessage && (
+          <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
+        )}
 
         <form onSubmit={validateAndSubmit}>
           <div className="mb-4">
-            <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
+            <label
+              htmlFor="name"
+              className="block text-gray-700 font-medium mb-1"
+            >
               Name
             </label>
             <input
@@ -120,7 +138,10 @@ const DonationPage: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
+            <label
+              htmlFor="email"
+              className="block text-gray-700 font-medium mb-1"
+            >
               Email <span className="text-red-500">*</span>
             </label>
             <input
@@ -135,7 +156,10 @@ const DonationPage: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="amount" className="block text-gray-700 font-medium mb-1">
+            <label
+              htmlFor="amount"
+              className="block text-gray-700 font-medium mb-1"
+            >
               Donation Amount <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -159,7 +183,10 @@ const DonationPage: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="purpose" className="block text-gray-700 font-medium mb-1">
+            <label
+              htmlFor="purpose"
+              className="block text-gray-700 font-medium mb-1"
+            >
               Donation Purpose
             </label>
             <select
@@ -168,9 +195,8 @@ const DonationPage: React.FC = () => {
               onChange={(e) => setPurpose(e.target.value)}
               className="w-full border border-gray-300 rounded-md p-2"
             >
-              <option value="" disabled hidden>
-                Choose a purpose
-              </option>
+              {/* Default option that can be selected */}
+              <option value="None">Choose a purpose (or clear selection)</option>
               {purposeOptions.length > 0 ? (
                 purposeOptions.map((option) => (
                   <option key={option} value={option}>
@@ -178,8 +204,7 @@ const DonationPage: React.FC = () => {
                   </option>
                 ))
               ) : (
-                // Optionally render a loading option while fetching
-                <option value="None">Loading options...</option>
+                <option value="">Loading options...</option>
               )}
             </select>
           </div>
@@ -193,11 +218,7 @@ const DonationPage: React.FC = () => {
         </form>
 
         <p className="text-center text-gray-500 text-sm mt-6">
-          powered by{' '}
-          <Image
-            src={logo}
-            alt="just-donate-logo"
-          />
+          powered by <Image src={logo} alt="just-donate-logo" />
         </p>
       </div>
     </div>
