@@ -3,8 +3,8 @@ package com.just.donate.api
 import cats.effect.*
 import com.just.donate.config.Config
 import com.just.donate.db.Repository
-import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
-import com.just.donate.models.{Donation, Donor, Organisation}
+import com.just.donate.models.errors.DonationError
+import com.just.donate.models.{Donation, Donor, Earmarking, Organisation}
 import com.just.donate.notify.IEmailService
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisationOps, loadOrganisation}
@@ -60,7 +60,7 @@ object DonationRoute:
       donation.amountTotal,
       organisationId,
       donation.donationDate,
-      donation.earmarking.getOrElse(""),
+      donation.earmarking.map(_.name),
       donation.statusUpdates.map: status =>
         StatusResponse(status.status.toString.toLowerCase, status.date, status.description)
     )
@@ -76,11 +76,15 @@ object DonationRoute:
   def organisationMapper(requestDonation: RequestDonation, accountName: String)(
     org: Organisation
   ): (Organisation, Either[DonationError, String]) =
-    val existingDonor = org.getExistingDonor(requestDonation.donorEmail)
-    val donor = existingDonor.getOrElse(
-      Donor(org.getNewDonorId, requestDonation.donorName, requestDonation.donorEmail)
-    )
-    val (donation, donationPart) = requestDonation.earmarking match
+    val donor = org
+      .getExistingDonor(requestDonation.donorEmail)
+      .getOrElse(
+        Donor(org.getNewDonorId, requestDonation.donorName, requestDonation.donorEmail)
+      )
+
+    val earmarking = requestDonation.earmarking.flatMap(org.getEarmarking)
+
+    val (donation, donationPart) = earmarking match
       case Some(earmarking) => Donation(donor.id, requestDonation.amount, earmarking)
       case None             => Donation(donor.id, requestDonation.amount)
 
@@ -108,7 +112,7 @@ object DonationRoute:
     amount: Money,
     organisation: String,
     date: LocalDateTime,
-    earmarking: String,
+    earmarking: Option[String],
     status: Seq[StatusResponse]
   )
 

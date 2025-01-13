@@ -31,8 +31,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
       if (savedTheme) {
         setThemeState(savedTheme);
       }
-    } catch (error) {
-      console.error('Failed to fetch theme:', error);
+    } catch {
     }
   };
 

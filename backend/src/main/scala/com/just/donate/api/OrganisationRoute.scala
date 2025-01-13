@@ -2,7 +2,7 @@ package com.just.donate.api
 
 import cats.effect.*
 import com.just.donate.db.Repository
-import com.just.donate.models.{Organisation, ThemeConfig}
+import com.just.donate.models.{Earmarking, Organisation, ThemeConfig}
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisation, loadOrganisation}
 import io.circe.*
@@ -37,7 +37,9 @@ object OrganisationRoute:
       case req @ POST -> Root / organisationId / "earmarking" =>
         for
           earmarking <- req.as[RequestEarmarking]
-          response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarking(earmarking.name))
+          response <- loadAndSaveOrganisation(organisationId)(repository)(
+            _.addEarmarking(Earmarking(earmarking.name, earmarking.description))
+          )
         yield response
 
       case DELETE -> Root / organisationId / "earmarking" / earmarking =>
@@ -45,13 +47,17 @@ object OrganisationRoute:
 
       case GET -> Root / organisationId / "earmarking" / "list" =>
         loadOrganisation(organisationId)(repository)(
-          _.accounts.headOption.map(
-            _._2.boundDonations.map(_._1).map(ResponseEarmarking(_))
-          ).getOrElse(Seq())
+          _.accounts.headOption
+            .map(
+              _._2.boundDonations.map(_._1).map(e => ResponseEarmarking(e.name))
+            )
+            .getOrElse(Seq())
         )
 
       case GET -> Root / organisationId / "account" / "list" =>
-        loadOrganisation(organisationId)(repository)(_.accounts.map(a => ResponseAccount(a._1, a._2.totalBalance)).toSeq)
+        loadOrganisation(organisationId)(repository)(
+          _.accounts.map(a => ResponseAccount(a._1, a._2.totalBalance)).toSeq
+        )
 
       case req @ POST -> Root / organisationId / "account" =>
         for
@@ -71,20 +77,22 @@ object OrganisationRoute:
           response <- loadAndSaveOrganisation(organisationId)(repository)(_.setTheme(theme))
         yield response
 
-      case GET -> Root / organisationId / "theme" => for
-        organisation <- repository.findById(organisationId)
-        response <- organisation match
-          case Some(org) => org.theme match
-            case Some(value) => Ok(value)
+      case GET -> Root / organisationId / "theme" =>
+        for
+          organisation <- repository.findById(organisationId)
+          response <- organisation match
+            case Some(org) =>
+              org.theme match
+                case Some(value) => Ok(value)
+                case None        => NotFound()
             case None => NotFound()
-          case None => NotFound()
-      yield response
+        yield response
 
   case class RequestOrganisation(name: String)
 
   private[api] case class ResponseOrganisation(organisationId: String, name: String)
 
-  private[api] case class RequestEarmarking(name: String)
+  private[api] case class RequestEarmarking(name: String, description: String)
 
   private[api] case class ResponseEarmarking(name: String)
 

@@ -105,9 +105,11 @@ class OrganisationTransferSuite extends FunSuite:
   test("transfer earmarked money retains its earmarking after transfer") {
     var newRoots = createNewRoots()
 
-    newRoots = newRoots.addEarmarking("Education")
+    val educationEarmarking = Earmarking("Education", "Supporting education in Kenya")
+    newRoots = newRoots.addEarmarking(educationEarmarking)
+    
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
-    val (donation, donationPart) = Donation(donor.id, Money("200.00"), "Education")
+    val (donation, donationPart) = Donation(donor.id, Money("200.00"), educationEarmarking)
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
     newRoots = newRoots.transfer(Money(amountHundred), "Paypal", "Bank", AppConfigMock()).toOption.get._1
 
@@ -115,25 +117,29 @@ class OrganisationTransferSuite extends FunSuite:
     assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money(amountHundred))
 
     assertEquals(
-      newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Education"),
+      newRoots.getAccount("Paypal").get.totalEarmarkedBalance(educationEarmarking),
       Money(amountHundred)
     )
     assertEquals(
-      newRoots.getAccount("Bank").get.totalEarmarkedBalance("Education"),
+      newRoots.getAccount("Bank").get.totalEarmarkedBalance(educationEarmarking),
       Money(amountHundred)
     )
   }
 
   test("transfers always the oldest donation if multiple are available") {
     var newRoots = createNewRoots()
-    newRoots = newRoots.addEarmarking("Education")
-    newRoots = newRoots.addEarmarking("Health")
+
+    val educationEarmarking = Earmarking("Education", "Supporting education in Kenya")
+    val healthEarmarking = Earmarking("Health", "Supporting health in Kenya")
+
+    newRoots = newRoots.addEarmarking(educationEarmarking)
+    newRoots = newRoots.addEarmarking(healthEarmarking)
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
-    val (donation, donationPart) = Donation(donor.id, Money(amountHundred), "Education")
+    val (donation, donationPart) = Donation(donor.id, Money(amountHundred), educationEarmarking)
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
     val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
-    val (donation2, donationPart2) = Donation(donor2.id, Money(amountOneFifty), "Health")
+    val (donation2, donationPart2) = Donation(donor2.id, Money(amountOneFifty), healthEarmarking)
     newRoots = newRoots.donate(donor2, donationPart2, donation2, "Paypal").toOption.get
 
     newRoots = newRoots.transfer(Money("50.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
@@ -143,21 +149,21 @@ class OrganisationTransferSuite extends FunSuite:
 
     // Earmarked balances after partial transfer
     assertEquals(
-      newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Education"),
+      newRoots.getAccount("Paypal").get.totalEarmarkedBalance(educationEarmarking),
       Money("50.00")
     )
     assertEquals(
-      newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Health"),
+      newRoots.getAccount("Paypal").get.totalEarmarkedBalance(healthEarmarking),
       Money(amountOneFifty)
     )
 
     // The oldest donation (Education) is the one partially transferred
     assertEquals(
-      newRoots.getAccount("Bank").get.totalEarmarkedBalance("Education"),
+      newRoots.getAccount("Bank").get.totalEarmarkedBalance(educationEarmarking),
       Money("50.00")
     )
     assertEquals(
-      newRoots.getAccount("Bank").get.totalEarmarkedBalance("Health"),
+      newRoots.getAccount("Bank").get.totalEarmarkedBalance(healthEarmarking),
       Money("0.00")
     )
   }

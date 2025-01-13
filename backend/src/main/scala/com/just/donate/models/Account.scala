@@ -1,7 +1,7 @@
 package com.just.donate.models
 
 import com.just.donate.models.Types.DonationGetter
-import com.just.donate.models.errors.{DonationError, ModifyError, WithdrawError}
+import com.just.donate.models.errors.{DonationError, WithdrawError}
 import com.just.donate.utils.CollectionUtils.{map2, updated, updatedReturn}
 import com.just.donate.utils.Money
 import com.just.donate.utils.structs.ReservableQueue
@@ -10,7 +10,7 @@ import scala.math.Ordered.orderingToOrdered
 
 case class Account private (
   name: String,
-  boundDonations: Seq[(String, DonationQueue)],
+  boundDonations: Seq[(Earmarking, DonationQueue)],
   unboundDonations: DonationQueue
 ):
 
@@ -21,7 +21,7 @@ case class Account private (
    * @param earmarking earmarking to remove.
    * @return account without earmarking.
    */
-  def removeEarmarking(earmarking: String): Account =
+  def removeEarmarking(earmarking: Earmarking): Account =
     getBoundQueue(earmarking) match
       case None => throw new IllegalArgumentException("Earmarking not found")
       case Some(earmarkingQueue) =>
@@ -29,20 +29,21 @@ case class Account private (
           case Money.ZERO => copy(boundDonations = boundDonations.filterNot(_._1 == earmarking))
           case _          => throw new IllegalArgumentException("Earmarking has budget")
 
-  def addEarmarking(earmarking: String): Account =
+  def addEarmarking(earmarking: Earmarking): Account =
     copy(boundDonations = boundDonations :+ ((earmarking, DonationQueue(name, ReservableQueue(name)))))
 
-  def totalEarmarkedBalance(earmarking: String): Money =
+  def totalEarmarkedBalance(earmarking: Earmarking): Money =
     getBoundQueue(earmarking).map(_.totalBalance).getOrElse(Money.ZERO)
 
-  private def getBoundQueue(earmarking: String): Option[DonationQueue] =
+  private def getBoundQueue(earmarking: Earmarking): Option[DonationQueue] =
     boundDonations.filter(_._1 == earmarking).map(_._2).headOption
 
-  def withdrawal(amount: Money, earmarking: Option[String]): Either[WithdrawError, (Seq[DonationPart], Account)] =
+  def withdrawal(amount: Money, earmarking: Option[Earmarking]): Either[WithdrawError, (Seq[DonationPart], Account)] =
     if totalBalance < amount then Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
-    earmarking match
-      case Some(em) => withdrawalBound(amount, em)
-      case None     => withdrawalUnbound(amount)
+    else
+      earmarking match
+        case Some(em) => withdrawalBound(amount, em)
+        case None     => withdrawalUnbound(amount)
 
   private def withdrawalUnbound(amount: Money): Either[WithdrawError, (Seq[DonationPart], Account)] =
     // 1. Expense is unbound, withdraw from unbound donations
@@ -57,7 +58,7 @@ case class Account private (
 
   private def withdrawalBound(
     amount: Money,
-    earmarking: String
+    earmarking: Earmarking
   ): Either[WithdrawError, (Seq[DonationPart], Account)] =
     // 1. Expense is bound, withdraw from bound donations
     //    - if bound are not enough, check if up the queue are more and reserve them, go into minus
@@ -78,13 +79,13 @@ case class Account private (
 
   private def totalBalanceBound: Money = boundDonations.map(_._2.totalBalance).sum
 
-  def donate(donation: DonationPart, earmarking: Option[String] = None): Either[DonationError, Account] =
+  def donate(donation: DonationPart, earmarking: Option[Earmarking] = None): Either[DonationError, Account] =
     earmarking match
       case Some(earmark) => donate(donation, earmark)
       case None          => Right(copy(unboundDonations = unboundDonations.add(donation)))
 
-  def donate(donation: DonationPart, earmarking: String): Either[DonationError, Account] =
-    def donateRec(queues: Seq[(String, DonationQueue)]): (Boolean, Seq[(String, DonationQueue)]) = queues match
+  def donate(donation: DonationPart, earmarking: Earmarking): Either[DonationError, Account] =
+    def donateRec(queues: Seq[(Earmarking, DonationQueue)]): (Boolean, Seq[(Earmarking, DonationQueue)]) = queues match
       case Nil => (false, Nil)
       case (earmarkingQueue, queue) :: tail =>
         if earmarking == earmarkingQueue then (true, (earmarkingQueue, queue.add(donation)) +: tail)
@@ -98,7 +99,7 @@ case class Account private (
 
   private[models] def pull(amount: Money)(using
     donationGetter: DonationGetter
-  ): (Money, DonationPart, Option[String], Account) =
+  ): (Money, DonationPart, Option[Earmarking], Account) =
     // TODO: change to actual error handling
     if totalBalance < amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
 
@@ -111,7 +112,7 @@ case class Account private (
 
     (amount - donationPart.head.amount, donationPart.head, earmarking, updatedAccount)
 
-  private def findQueueWithOldestDonation(using donationGetter: DonationGetter): (Option[String], DonationQueue) =
+  private def findQueueWithOldestDonation(using donationGetter: DonationGetter): (Option[Earmarking], DonationQueue) =
     val allQueues = (None, unboundDonations) +: boundDonations.map(t => (Some(t._1), t._2))
     allQueues
       .filter(_._2.donationQueue._2.nonEmpty)

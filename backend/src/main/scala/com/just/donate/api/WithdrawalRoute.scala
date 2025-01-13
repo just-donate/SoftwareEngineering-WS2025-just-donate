@@ -25,7 +25,13 @@ object WithdrawalRoute:
           (for
             donation <- req.as[RequestWithdrawal]
             emailMessages <- loadAndSaveOrganisationOps(organisationId)(repository)(org =>
-              org.withdrawal(donation.amount, donation.fromAccount, donation.description, donation.earmarking, config) match
+              org.withdrawal(
+                donation.amount,
+                donation.fromAccount,
+                donation.description,
+                donation.earmarking.flatMap(org.getEarmarking),
+                config
+              ) match
                 case Left(error)                    => (org, Left(error))
                 case Right((newOrg, emailMessages)) => (newOrg, Right(emailMessages))
             )
@@ -40,4 +46,9 @@ object WithdrawalRoute:
             case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
           }
 
-  private[api] case class RequestWithdrawal(fromAccount: String, amount: Money, description: String, earmarking: Option[String])
+  private[api] case class RequestWithdrawal(
+    fromAccount: String,
+    amount: Money,
+    description: String,
+    earmarking: Option[String]
+  )
