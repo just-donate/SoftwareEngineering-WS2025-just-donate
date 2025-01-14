@@ -23,6 +23,7 @@ object OrganizationPublicRoute:
         ).onError(error => IO.println("Error getting earmarkings: " + error))
 
       case GET -> Root / organisationId / "theme" =>
+        // TODO: Load organization
         for
           organisation <- repository.findById(organisationId)
           response <- organisation match
