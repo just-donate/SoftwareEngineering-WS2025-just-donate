@@ -85,7 +85,7 @@ fi
 
 # Define the Pandoc command with all customizations
 pandoc "$INPUT_MD" \
-    --from=gfm \
+    --from=markdown \
     --to=pdf \
     --pdf-engine=xelatex \
     --standalone \

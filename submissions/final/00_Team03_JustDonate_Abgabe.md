@@ -3,6 +3,7 @@
 ## 0 Generelle Informationen
 
 Teammitglieder (in alphabetischer Reihenfolge): 
+
 - Lukas Brennauer
 - Gerrit Holzbaur
 - Anton Kluge
@@ -11,17 +12,23 @@ Teammitglieder (in alphabetischer Reihenfolge):
 
 Das [Miro Board](https://miro.com/app/board/uXjVLRFTGG0=/) enthält zusätzliche Dokumente zum Design Thinking Prozess (insbesondere zu Bestimmung der Personas und der Ideenfindung). 
 
+\newpage
+
 ## 1 Mindmap
 
 [Mindmap](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/01_Mindmap.png)
 
 ![](01_Mindmap.png)
 
+\newpage
+
 ## 2 Glossar
 
 [Glossar](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/02_Glossar.png)
 
 ![](02_Glossar.png)
+
+\newpage
 
 ## 3 Personas 
 ### 3.1 Wolfgang Habicht
@@ -36,6 +43,8 @@ Das [Miro Board](https://miro.com/app/board/uXjVLRFTGG0=/) enthält zusätzliche
 
 ![](03_Personas/02_EliasMiet.png)
 
+\newpage
+
 ### 3.3 Karl Schmidt
 
 [Karl Schmidt](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/03_Personas/03_KarlSchmidt.png)
@@ -47,6 +56,8 @@ Das [Miro Board](https://miro.com/app/board/uXjVLRFTGG0=/) enthält zusätzliche
 [Laura Schneider](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/03_Personas/04_LauraSchneider.png)
 
 ![](03_Personas/04_LauraSchneider.png)
+
+\newpage
 
 ### 3.5 Adrian Haacks
 
@@ -60,6 +71,8 @@ Das [Miro Board](https://miro.com/app/board/uXjVLRFTGG0=/) enthält zusätzliche
 
 ![](03_Personas/06_SebastianMeier.png)
 
+\newpage
+
 ### 3.7 Roland Maiberg
 
 [Roland Maiberg](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/03_Personas/07_RolandMaiberg.png)
@@ -72,17 +85,23 @@ Das [Miro Board](https://miro.com/app/board/uXjVLRFTGG0=/) enthält zusätzliche
 
 ![](03_Personas/08_ManfredHerber.png)
 
+\newpage
+
 ## 4 Domänenmodell 
 
 [Domänenmodell](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/04_Domänenmodell.png)
 
 ![](04_Domänenmodell.png)
 
+\newpage
+
 ## 5 Architekturmodell 
 
 [Domänenmodell](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/05_Architekturmodell.png)
 
 ![](05_Architekturmodell.png)
+
+\newpage
 
 ## 6 Projektplan 
 
