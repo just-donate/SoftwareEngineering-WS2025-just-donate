@@ -14,6 +14,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount, Earmarking } from '@/types/types';
 import { createWithdrawal } from '@/app/organization/transactions/transactions';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface WithdrawalManagerProps {
   accounts: BankAccount[];
@@ -26,6 +27,7 @@ export default function WithdrawalManager({
   earmarkings,
   organizationId,
 }: WithdrawalManagerProps) {
+  const { theme } = useTheme();
   const [amount, setAmount] = useState('');
   const [fromAccount, setFromAccount] = useState('');
   const [earmarking, setEarmarking] = useState('');
@@ -65,9 +67,9 @@ export default function WithdrawalManager({
   };
 
   return (
-    <Card>
+    <Card className={theme.card}>
       <CardHeader>
-        <CardTitle>New Withdrawal</CardTitle>
+        <CardTitle className={theme.text}>New Withdrawal</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-4">
@@ -77,13 +79,14 @@ export default function WithdrawalManager({
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Amount"
             step="0.01"
+            className={`${theme.background} ${theme.text}`}
           />
 
           <Select onValueChange={setFromAccount}>
-            <SelectTrigger>
+            <SelectTrigger className={`${theme.background} ${theme.text}`}>
               <SelectValue placeholder="From account" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={theme.card}>
               {accounts.map((account) => (
                 <SelectItem key={account.name} value={account.name}>
                   {account.name} ({account.balance.amount})
@@ -93,10 +96,10 @@ export default function WithdrawalManager({
           </Select>
 
           <Select onValueChange={setEarmarking}>
-            <SelectTrigger>
+            <SelectTrigger className={`${theme.background} ${theme.text}`}>
               <SelectValue placeholder="Earmarking (optional)" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={theme.card}>
               {earmarkings.map((earmarking) => (
                 <SelectItem key={earmarking.name} value={earmarking.name}>
                   {earmarking.name}
@@ -109,6 +112,7 @@ export default function WithdrawalManager({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description"
+            className={`${theme.background} ${theme.text}`}
           />
 
           {error && <div className="text-red-500">{error}</div>}
@@ -116,7 +120,9 @@ export default function WithdrawalManager({
             <div className="text-green-500">{successMessage}</div>
           )}
 
-          <Button onClick={createNewWithdrawal}>Create Withdrawal</Button>
+          <Button onClick={createNewWithdrawal} className={theme.primary}>
+            Create Withdrawal
+          </Button>
         </div>
       </CardContent>
     </Card>
