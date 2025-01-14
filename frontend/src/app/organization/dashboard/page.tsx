@@ -1,77 +1,75 @@
 'use client';
 
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/organization/ui/card';
+import { Button } from '@/components/organization/ui/button';
 import Link from 'next/link';
-import { Button } from '../../../components/organization/ui/button';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '../../../components/organization/ui/card';
+import { useTheme } from '@/contexts/ThemeContext';
 import withAuth from '../api/RequiresAuth';
 
 function DashboardPage() {
+  const { theme } = useTheme();
+  
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Organization Dashboard</h1>
+      <h1 className={`text-2xl font-bold mb-4 ${theme.text}`}>Organization Dashboard</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card>
+        <Card className={theme.card}>
           <CardHeader>
-            <CardTitle>Earmarkings</CardTitle>
+            <CardTitle className={theme.text}>Earmarkings</CardTitle>
           </CardHeader>
           <CardContent>
             <Link href="/organization/earmarkings">
-              <Button>Manage Earmarkings</Button>
+              <Button className={theme.primary}>Manage Earmarkings</Button>
             </Link>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={theme.card}>
           <CardHeader>
-            <CardTitle>Bank Accounts</CardTitle>
+            <CardTitle className={theme.text}>Bank Accounts</CardTitle>
           </CardHeader>
           <CardContent>
             <Link href="/organization/bank-accounts">
-              <Button>Manage Bank Accounts</Button>
+              <Button className={theme.primary}>Manage Bank Accounts</Button>
             </Link>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={theme.card}>
           <CardHeader>
-            <CardTitle>Transactions</CardTitle>
+            <CardTitle className={theme.text}>Transactions</CardTitle>
           </CardHeader>
           <CardContent>
             <Link href="/organization/transactions">
-              <Button>Create Transaction</Button>
+              <Button className={theme.primary}>Create Transaction</Button>
             </Link>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={theme.card}>
           <CardHeader>
-            <CardTitle>Donations</CardTitle>
+            <CardTitle className={theme.text}>Donations</CardTitle>
           </CardHeader>
           <CardContent>
             <Link href="/organization/donations">
-              <Button>Manage Donations</Button>
+              <Button className={theme.primary}>Manage Donations</Button>
             </Link>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={theme.card}>
           <CardHeader>
-            <CardTitle>Gallery</CardTitle>
+            <CardTitle className={theme.text}>Gallery</CardTitle>
           </CardHeader>
           <CardContent>
             <Link href="/organization/gallery">
-              <Button>View Gallery</Button>
+              <Button className={theme.primary}>View Gallery</Button>
             </Link>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={theme.card}>
           <CardHeader>
-            <CardTitle>Tracking Page</CardTitle>
+            <CardTitle className={theme.text}>Tracking Page</CardTitle>
           </CardHeader>
           <CardContent>
             <Link href="/organization/manage-tracking">
-              <Button>Customize Tracking Page</Button>
+              <Button className={theme.primary}>Customize Tracking Page</Button>
             </Link>
           </CardContent>
         </Card>

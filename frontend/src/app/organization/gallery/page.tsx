@@ -19,6 +19,7 @@ import {
 import { Input } from '../../../components/organization/ui/input';
 import Image from 'next/image';
 import withAuth from '../api/RequiresAuth';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Mock data for demonstration
 const mockEarmarkings: Earmarking[] = [
@@ -48,6 +49,7 @@ const mockPhotos: Photo[] = [
 ];
 
 function GalleryPage() {
+  const { theme } = useTheme();
   const [earmarkings] = useState<Earmarking[]>(mockEarmarkings);
   const [photos, setPhotos] = useState<Photo[]>(mockPhotos);
   const [selectedEarmarking, setSelectedEarmarking] = useState<string>('');
@@ -79,19 +81,19 @@ function GalleryPage() {
     : photos;
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Photo Gallery</h1>
-      <Card className="mb-4">
+    <div className={`container mx-auto p-4`}>
+      <h1 className={`text-2xl font-bold mb-4 ${theme.text}`}>Photo Gallery</h1>
+      <Card className={theme.card}>
         <CardHeader>
-          <CardTitle>Upload Photo</CardTitle>
+          <CardTitle className={theme.text}>Upload Photo</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <Select onValueChange={setSelectedEarmarking}>
-              <SelectTrigger>
+              <SelectTrigger className={`${theme.background} ${theme.text}`}>
                 <SelectValue placeholder="Select Earmarking" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={theme.card}>
                 {earmarkings.map((earmarking) => (
                   <SelectItem key={earmarking.name} value={earmarking.name}>
                     {earmarking.name}
@@ -99,19 +101,25 @@ function GalleryPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Input type="file" onChange={handleFileChange} accept="image/*" />
+            <Input 
+              type="file" 
+              onChange={handleFileChange} 
+              accept="image/*"
+              className={`${theme.background} ${theme.text}`}
+            />
             <Button
               onClick={handleUpload}
               disabled={!file || !selectedEarmarking}
+              className={theme.primary}
             >
               Upload Photo
             </Button>
           </div>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="${theme.card} mt-4">
         <CardHeader>
-          <CardTitle>Photos</CardTitle>
+          <CardTitle className={theme.text}>Photos</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

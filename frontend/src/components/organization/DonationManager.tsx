@@ -25,6 +25,7 @@ import DonationsList from '@/components/organization/DonationsList';
 import { BankAccount, Earmarking } from '@/types/types';
 import { fetchBankAccounts } from '@/app/organization/bank-accounts/bank-accounts';
 import { fetchEarmarkings } from '@/app/organization/earmarkings/earmarkings';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface DonationManagerProps {
   initialDonations: Donation[];
@@ -35,6 +36,7 @@ export default function DonationManager({
   initialDonations,
   organizationId,
 }: DonationManagerProps) {
+  const { theme } = useTheme();
   const [donations, setDonations] = useState<Donation[]>(initialDonations);
   const [aviableAccounts, setAviableAccounts] = useState<BankAccount[]>([]);
   const [aviableEarmarkings, setAviableEarmarkings] = useState<Earmarking[]>(
@@ -93,9 +95,9 @@ export default function DonationManager({
 
   return (
     <div>
-      <Card className="mb-4">
+      <Card className={theme.card}>
         <CardHeader className="mb-4">
-          <CardTitle>Donations</CardTitle>
+          <CardTitle className={theme.text}>Donations</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -104,22 +106,25 @@ export default function DonationManager({
                 value={donorName}
                 onChange={(e) => setDonorName(e.target.value)}
                 placeholder="Donor Name"
+                className={`${theme.background} ${theme.text}`}
               />
               <Input
                 value={donorEmail}
                 onChange={(e) => setDonorEmail(e.target.value)}
                 placeholder="Donor Email"
+                className={`${theme.background} ${theme.text}`}
               />
               <Input
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount"
+                className={`${theme.background} ${theme.text}`}
               />
               <Select value={earmarking} onValueChange={setEarmarking}>
-                <SelectTrigger>
+                <SelectTrigger className={`${theme.background} ${theme.text}`}>
                   <SelectValue placeholder="Select Earmarking" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={theme.card}>
                   {aviableEarmarkings.map((earmarking) => (
                     <SelectItem key={earmarking.name} value={earmarking.name}>
                       {earmarking.name}
@@ -128,10 +133,10 @@ export default function DonationManager({
                 </SelectContent>
               </Select>
               <Select value={accountName} onValueChange={setAccountName}>
-                <SelectTrigger>
+                <SelectTrigger className={`${theme.background} ${theme.text}`}>
                   <SelectValue placeholder="Select Account" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={theme.card}>
                   {aviableAccounts.map((account) => (
                     <SelectItem key={account.name} value={account.name}>
                       {account.name}
@@ -139,7 +144,7 @@ export default function DonationManager({
                   ))}
                 </SelectContent>
               </Select>
-              <Button onClick={addDonation}>Create Donation</Button>
+              <Button onClick={addDonation} className={theme.primary}>Create Donation</Button>
               {successMessage && (
                 <p className="text-green-500">{successMessage}</p>
               )}
@@ -149,7 +154,9 @@ export default function DonationManager({
         </CardContent>
       </Card>
 
-      <DonationsList initialDonations={donations} />
+      <div className="mt-4">
+        <DonationsList initialDonations={donations} />
+      </div>
     </div>
   );
 }

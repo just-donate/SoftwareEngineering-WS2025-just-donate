@@ -13,6 +13,8 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount } from '@/types/types';
 import { createTransfer } from '@/app/organization/transactions/transactions';
+import { useTheme } from '@/contexts/ThemeContext';
+
 interface TransferManagerProps {
   accounts: BankAccount[];
   organizationId: string;
@@ -22,6 +24,7 @@ export default function TransferManager({
   accounts,
   organizationId,
 }: TransferManagerProps) {
+  const { theme } = useTheme();
   const [amount, setAmount] = useState('');
   const [fromAccount, setFromAccount] = useState('');
   const [toAccount, setToAccount] = useState('');
@@ -65,9 +68,9 @@ export default function TransferManager({
   };
 
   return (
-    <Card>
+    <Card className={theme.card}>
       <CardHeader>
-        <CardTitle>New Transfer</CardTitle>
+        <CardTitle className={theme.text}>New Transfer</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-4">
@@ -77,13 +80,14 @@ export default function TransferManager({
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Amount"
             step="0.01"
+            className={`${theme.background} ${theme.text}`}
           />
 
           <Select onValueChange={setFromAccount}>
-            <SelectTrigger>
+            <SelectTrigger className={`${theme.background} ${theme.text}`}>
               <SelectValue placeholder="From account" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={theme.card}>
               {accounts.map((account) => (
                 <SelectItem key={account.name} value={account.name}>
                   {account.name} ({account.balance.amount})
@@ -93,10 +97,10 @@ export default function TransferManager({
           </Select>
 
           <Select onValueChange={setToAccount} disabled={!fromAccount}>
-            <SelectTrigger>
+            <SelectTrigger className={`${theme.background} ${theme.text}`}>
               <SelectValue placeholder="To account" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={theme.card}>
               {accounts
                 .filter(
                   (account) =>
@@ -116,7 +120,7 @@ export default function TransferManager({
             <div className="text-green-500">{successMessage}</div>
           )}
 
-          <Button onClick={createNewTransfer}>Create Transfer</Button>
+          <Button onClick={createNewTransfer} className={theme.primary}>Create Transfer</Button>
         </div>
       </CardContent>
     </Card>
