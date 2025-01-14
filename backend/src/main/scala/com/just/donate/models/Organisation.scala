@@ -255,18 +255,19 @@ case class Organisation(
 
     val queues = Seq(updatedFrom.unboundDonations) :++ updatedFrom.boundDonations.map(_._2).toSeq
     var emailMessages = Seq.empty[EmailMessage]
-    var remainingParts = parts
+    val donationSet = parts.map(_._2.donation.get).toSet
+    var remainingDonations = donationSet.toSeq
 
-    while remainingParts.nonEmpty do
-      val (optEarmarking, donationPart) = remainingParts.head
-      remainingParts = remainingParts.tail
+    while remainingDonations.nonEmpty do
+      val donation = remainingDonations.head
+      remainingDonations = remainingDonations.tail
 
       val fromQueueHasRemainingPart = queues.exists(queue =>
-        queue.donationQueue.queue.exists(reservable => reservable.value.donation.get.id == donationPart.donation.get.id)
+        queue.donationQueue.queue.exists(reservable => reservable.value.donation.get.id == donation.id)
       )
 
       if !fromQueueHasRemainingPart then
-        donors.get(donationPart.donation.get.donorId) match
+        donors.get(donation.donorId) match
           case None => return Left(TransferError.INVALID_DONOR)
           case Some(donor) =>
             emailMessages = emailMessages :+ EmailMessage(
