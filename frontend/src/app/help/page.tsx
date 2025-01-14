@@ -76,13 +76,15 @@ export default function HelpPage() {
           <section id="tracking-donation" className="mb-8">
             <h2 className="text-3xl font-bold mb-4">Tracking Your Donation</h2>
             <p className="mb-4">
-              After entering your tracking ID or link and clicking "Search", you
-              will be taken to your donation tracking page where you can:
+              After entering your tracking ID or link and clicking
+              &quot;Search&quot;, you will be taken to your donation tracking
+              page where you can:
             </p>
             <ul className="list-disc ml-5 space-y-2">
               <li>
-                View the donation amount and its current status (e.g., Received,
-                Processing, Fully Utilized).
+                View the donation amount and its current status (e.g.,
+                &quot;Received&quot;, &quot;Processing&quot;, or &quot;Fully
+                Utilized&quot;).
               </li>
               <li>
                 Review any status updates or notifications about the use of your
@@ -101,12 +103,14 @@ export default function HelpPage() {
             </h2>
             <p className="mb-2">
               <strong>Registration:</strong> If you are a first-time user, click
-              the "Register" button and provide your email and a password.
+              the <strong>Register</strong> button and provide your email and a
+              password.
             </p>
             <p className="mb-2">
-              <strong>Login:</strong> On the "Login" page, enter your registered
-              email, password, and (if necessary) your Organisation ID.
-              Successful authentication will take you to your dashboard.
+              <strong>Login:</strong> Use the <strong>Login</strong> page to
+              enter your registered email, password, and (if necessary) your
+              Organisation ID. Successful authentication will take you to your
+              dashboard.
             </p>
             <p>
               If your credentials are invalid, you will see an error prompting
@@ -124,16 +128,16 @@ export default function HelpPage() {
             </p>
             <ul className="list-disc ml-5 space-y-2">
               <li>
-                <strong>Donation Status:</strong> View your donation amount,
+                <strong>Donation Status:</strong> Check your donation amount,
                 current status, and updates.
               </li>
               <li>
-                <strong>Account Management:</strong> (If applicable) See which
-                accounts (e.g., Paypal, Bank) your donation has been credited
-                to.
+                <strong>Account Management:</strong> (For users with account
+                access) See which accounts (e.g., &quot;Paypal&quot;,
+                &quot;Bank&quot;) have been credited.
               </li>
               <li>
-                <strong>Timeline and Notifications:</strong> Read a timeline of
+                <strong>Timeline and Notifications:</strong> View a timeline of
                 status updates and receive email notifications regarding your
                 donation.
               </li>
@@ -149,14 +153,14 @@ export default function HelpPage() {
             <ul className="list-disc ml-5 space-y-2">
               <li>
                 <strong>Forgot Tracking Link:</strong> If you have forgotten
-                your tracking link, click the "Forgot Tracking Link?" button on
-                the homepage, enter your email address, and a new tracking link
-                will be emailed to you.
+                your tracking link, click the &quot;Forgot Tracking Link?&quot;
+                button on the homepage, enter your email address, and a new
+                tracking link will be sent to you.
               </li>
               <li>
                 <strong>Notifications:</strong> The system will send email
-                notifications when there are updates regarding your donation's
-                status.
+                notifications when there are updates regarding your
+                donation&#39;s status.
               </li>
             </ul>
           </section>
@@ -167,10 +171,10 @@ export default function HelpPage() {
               If you need further assistance, please contact our support team
               at:{' '}
               <a
-                href="mailto:support@just-donate.org"
+                href="mailto:contact.just.donate@gmail.com"
                 className="underline text-blue-600"
               >
-                support@just-donate.org
+                contact.just.donate@gmail.com
               </a>
               .
             </p>
