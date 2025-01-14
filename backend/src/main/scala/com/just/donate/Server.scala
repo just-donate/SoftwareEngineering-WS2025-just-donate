@@ -9,11 +9,11 @@ import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
-import com.just.donate.api.{CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute}
-import com.just.donate.config.{AppConfig, AppEnvironment, Config}
-import com.just.donate.db.mongo.{MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository}
+import com.just.donate.api.{ CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute }
+import com.just.donate.config.{ AppConfig, AppEnvironment, Config }
+import com.just.donate.db.mongo.{ MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository }
 import com.just.donate.models.Organisation
-import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
+import com.just.donate.notify.{ DevEmailService, EmailService, IEmailService }
 import com.just.donate.security.AuthMiddleware
 import org.http4s.*
 import org.http4s.client.Client

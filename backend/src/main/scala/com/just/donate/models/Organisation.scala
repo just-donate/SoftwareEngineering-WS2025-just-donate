@@ -237,9 +237,7 @@ case class Organisation(
     toAccount: Account,
     config: Config
   ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
-    if fromAccount.totalBalance < amount then
-      println("org - insufficient funds")
-      return Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
+    if fromAccount.totalBalance < amount then return Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
 
     if amount <= Money.ZERO then return Left(TransferError.NON_POSITIVE_AMOUNT)
 

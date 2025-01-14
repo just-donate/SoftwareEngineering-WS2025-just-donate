@@ -27,15 +27,9 @@ object TransferRoute:
           (for
             transfer <- req.as[RequestTransfer]
             emailMessages <- loadAndSaveOrganisationOps(organisationId)(repository)(org =>
-              try
-                org.transfer(transfer.amount, transfer.fromAccount, transfer.toAccount, config) match
-                  case Left(error)                    => (org, Left(error))
-                  case Right((newOrg, emailMessages)) => (newOrg, Right(emailMessages))
-              catch
-                case (e: Throwable) =>
-                  e.printStackTrace()
-                  println(e)
-                  (org, Left(TransferError.INVALID_ACCOUNT))
+              org.transfer(transfer.amount, transfer.fromAccount, transfer.toAccount, config) match
+                case Left(error)                    => (org, Left(error))
+                case Right((newOrg, emailMessages)) => (newOrg, Right(emailMessages))
             )
             response <- emailMessages match
               case None                      => BadRequest("Organisation not found")

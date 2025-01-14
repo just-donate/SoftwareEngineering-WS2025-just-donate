@@ -39,9 +39,7 @@ case class Account private (
     getBoundQueue(earmarking).map(_.totalBalance).getOrElse(Money.ZERO)
 
   def withdrawal(amount: Money, earmarking: Option[Earmarking]): Either[WithdrawError, (Seq[DonationPart], Account)] =
-    if totalBalance < amount then
-      println("acc - insufficient funds")
-      Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
+    if totalBalance < amount then Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
     else
       earmarking match
         case Some(em) => withdrawalBound(amount, em)
@@ -57,9 +55,7 @@ case class Account private (
     // TODO: For now a simple implementation, where we just pull the amount from the unbound donations
     val (donationParts, remaining, updatedFrom) = this.unboundDonations.pull(amount)
 
-    if remaining.isDefined && remaining.get > Money.ZERO then
-      println("acc unbound - insufficient funds")
-      Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
+    if remaining.isDefined && remaining.get > Money.ZERO then Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
     else Right(donationParts, copy(unboundDonations = updatedFrom))
 
   private def withdrawalBound(
@@ -84,7 +80,6 @@ case class Account private (
       case Some((remaining, donationParts)) =>
         remaining match
           case Some(d) =>
-            println("acc bound - insufficient funds")
             Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
           case None => Right((donationParts, copy(boundDonations = updatedFrom)))
 
