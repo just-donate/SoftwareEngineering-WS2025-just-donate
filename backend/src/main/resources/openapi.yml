@@ -1,0 +1,621 @@
+openapi: 3.0.3
+info:
+  title: just-donate API
+  version: "1.0.0"
+  description: |-
+    The just-donate API provides endpoints to manage organizations, handle donations,
+    process withdrawals and fund transfers, manage authentication, send notifications,
+    and process PayPal Instant Payment Notifications (IPN). This specification covers:
+      - Authentication routes (login, logout, check-auth)
+      - Organisation routes (create, list, get by ID, delete, add/list earmarking, add/delete account)
+      - Donation routes (make donation, get donations by donor or all)
+      - Transfer routes (fund transfer between accounts)
+      - Withdrawal routes (withdraw funds from an account)
+      - Notification routes (send email notifications)
+      - PayPal IPN processing
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: User Login
+      description: >
+        Validates user credentials and issues a JWT token in an HTTP-only cookie.
+        Accepts a JSON payload with the username, password, and orgId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                orgId:
+                  type: string
+              required:
+                - username
+                - password
+                - orgId
+      responses:
+        '200':
+          description: Login successful; JWT cookie is set.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+        '403':
+          description: Invalid credentials.
+
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: User Logout
+      description: >
+        Logs out the user by expiring the authentication cookie (jwtToken).
+      responses:
+        '200':
+          description: Logout successful.
+
+  /check-auth:
+    get:
+      tags:
+        - Authentication
+      summary: Check Authentication
+      description: >
+        Checks that a valid JWT (from the jwtToken cookie) is present and not expired.
+      responses:
+        '200':
+          description: Authenticated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Authenticated"
+        '403':
+          description: Missing or invalid token.
+
+  /organisation:
+    post:
+      tags:
+        - Organisation
+      summary: Create Organisation
+      description: >
+        Creates a new organisation. Accepts a JSON payload with the organisation’s name.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestOrganisation'
+      responses:
+        '200':
+          description: Organisation created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganisationResponse'
+        '400':
+          description: Bad request.
+    get:
+      tags:
+        - Organisation
+      summary: Get Organisation Details
+      description: >
+        Retrieves details of an organisation by specifying its organisationId as a query parameter.
+      parameters:
+        - in: query
+          name: organisationId
+          required: true
+          schema:
+            type: string
+          description: Organisation unique identifier.
+      responses:
+        '200':
+          description: Organisation details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganisationResponse'
+        '404':
+          description: Organisation not found.
+
+  /organisation/list:
+    get:
+      tags:
+        - Organisation
+      summary: List Organisations
+      description: >
+        Retrieves a list of all organisation IDs.
+      responses:
+        '200':
+          description: List of organisations successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /organisation/{organisationId}:
+    get:
+      tags:
+        - Organisation
+      summary: Get Organisation by ID
+      description: >
+        Retrieves details of the organisation with the specified organisationId.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation unique identifier.
+      responses:
+        '200':
+          description: Organisation found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganisationResponse'
+        '404':
+          description: Organisation not found.
+    delete:
+      tags:
+        - Organisation
+      summary: Delete Organisation
+      description: >
+        Deletes the organisation with the provided organisationId.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation unique identifier.
+      responses:
+        '200':
+          description: Organisation deleted successfully.
+        '404':
+          description: Organisation not found.
+
+  /organisation/{organisationId}/earmarking:
+    post:
+      tags:
+        - Organisation
+      summary: Add Earmarking
+      description: >
+        Adds a new earmarking (with a name and description) to the specified organisation.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+              required:
+                - name
+                - description
+      responses:
+        '200':
+          description: Earmarking added successfully.
+        '404':
+          description: Organisation not found.
+
+  /organisation/{organisationId}/earmarking/list:
+    get:
+      tags:
+        - Organisation
+      summary: List Earmarkings
+      description: >
+        Retrieves a list of all earmarkings registered for the given organisation.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation ID.
+      responses:
+        '200':
+          description: List of earmarkings retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    description:
+                      type: string
+        '404':
+          description: Organisation not found.
+
+  /organisation/{organisationId}/account:
+    post:
+      tags:
+        - Organisation
+      summary: Create Account
+      description: >
+        Creates a new account within the specified organisation. The request includes the account name and an initial balance.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestAccount'
+      responses:
+        '200':
+          description: Account added successfully.
+        '404':
+          description: Organisation not found.
+
+  /organisation/{organisationId}/account/{accountName}:
+    delete:
+      tags:
+        - Organisation
+      summary: Delete Account
+      description: >
+        Removes the account specified by accountName from the organisation.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation ID.
+        - name: accountName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Account name.
+      responses:
+        '200':
+          description: Account deleted successfully.
+        '404':
+          description: Organisation or account not found.
+
+  /donate/{organisationId}/account/{accountName}:
+    post:
+      tags:
+        - Donation
+      summary: Make a Donation
+      description: >
+        Records a donation to a specific account within the organisation. The body should include donor name,
+        donor email, donation amount (Money), and an optional earmarking.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation ID.
+        - name: accountName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The target account for the donation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestDonation'
+      responses:
+        '200':
+          description: Donation processed successfully.
+        '400':
+          description: Error processing donation.
+
+  /donate/{organisationId}/donor/{donorId}:
+    get:
+      tags:
+        - Donation
+      summary: Get Donations for a Specific Donor
+      description: >
+        Retrieves all donation records associated with the specified donor within the organisation.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation ID.
+        - name: donorId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Donor identifier.
+      responses:
+        '200':
+          description: Donations retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  donations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DonationResponse'
+        '404':
+          description: Organisation not found.
+
+  /donate/{organisationId}/donations:
+    get:
+      tags:
+        - Donation
+      summary: Get All Donations for an Organisation
+      description: >
+        Retrieves all donation records for the specified organisation.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation ID.
+      responses:
+        '200':
+          description: Donations retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  donations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DonationResponse'
+        '404':
+          description: Organisation not found.
+
+  /transfer/{organisationId}:
+    post:
+      tags:
+        - Transfer
+      summary: Transfer Funds Between Accounts
+      description: >
+        Transfers a specified amount from one account to another within the same organisation.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestTransfer'
+      responses:
+        '200':
+          description: Transfer completed successfully.
+        '400':
+          description: Error during transfer (e.g., insufficient funds).
+
+  /withdraw/{organisationId}/account/{accountName}:
+    post:
+      tags:
+        - Withdrawal
+      summary: Withdraw Funds from an Account
+      description: >
+        Processes a withdrawal from the specified account. The request payload should include the withdrawal amount,
+        a description, and optionally an earmarking to specify from which allocated funds to withdraw.
+      parameters:
+        - name: organisationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organisation ID.
+        - name: accountName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The account name from which to withdraw funds.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestWithdrawal'
+      responses:
+        '200':
+          description: Withdrawal processed successfully.
+        '400':
+          description: Error processing withdrawal.
+
+  /notify/{donor}:
+    post:
+      tags:
+        - Notification
+      summary: Send Notification
+      description: >
+        Sends an email notification to the donor identified in the URL. Accepts an optional JSON payload with a message.
+      parameters:
+        - name: donor
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Donor identifier (typically the email).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        '200':
+          description: Notification sent successfully.
+
+  /paypal-ipn:
+    post:
+      tags:
+        - Paypal
+      summary: Process PayPal IPN
+      description: >
+        Receives PayPal Instant Payment Notification (IPN) data as URL-encoded form data.
+        The backend immediately responds with HTTP 200 to acknowledge receipt and asynchronously processes
+        the IPN data by validating it with PayPal and recording the donation if verified.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              description: Key-value pairs from PayPal IPN
+              additionalProperties:
+                type: string
+      responses:
+        '200':
+          description: IPN received and processing initiated.
+        '400':
+          description: Error processing IPN data.
+
+components:
+  schemas:
+    Money:
+      type: object
+      properties:
+        amount:
+          type: string
+          example: "100.00"
+    OrganisationResponse:
+      type: object
+      properties:
+        organisationId:
+          type: string
+        name:
+          type: string
+    DonationResponse:
+      type: object
+      properties:
+        donationId:
+          type: string
+        amount:
+          $ref: '#/components/schemas/Money'
+        date:
+          type: string
+          format: date-time
+        earmarking:
+          type: string
+          nullable: true
+        status:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+              date:
+                type: string
+                format: date-time
+              description:
+                type: string
+    NotificationRequest:
+      type: object
+      properties:
+        message:
+          type: string
+    RequestOrganisation:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+    RequestAccount:
+      type: object
+      properties:
+        name:
+          type: string
+        balance:
+          $ref: '#/components/schemas/Money'
+      required:
+        - name
+        - balance
+    RequestDonation:
+      type: object
+      properties:
+        donorName:
+          type: string
+        donorEmail:
+          type: string
+        amount:
+          $ref: '#/components/schemas/Money'
+        earmarking:
+          type: string
+          nullable: true
+      required:
+        - donorName
+        - donorEmail
+        - amount
+    RequestTransfer:
+      type: object
+      properties:
+        fromAccount:
+          type: string
+        toAccount:
+          type: string
+        amount:
+          $ref: '#/components/schemas/Money'
+      required:
+        - fromAccount
+        - toAccount
+        - amount
+    RequestWithdrawal:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/Money'
+        description:
+          type: string
+        earmarking:
+          type: string
+          nullable: true
+      required:
+        - amount
+        - description

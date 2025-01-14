@@ -8,7 +8,7 @@ import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
-import com.just.donate.api.public.{DonationPublicRoute, OrganizationPublicRoute}
+import com.just.donate.api.public.{DonationPublicRoute, OrganizationPublicRoute, SwaggerUiRoute}
 import com.just.donate.api.{CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute}
 import com.just.donate.config.{AppConfig, AppEnvironment, Config}
 import com.just.donate.db.mongo.{MongoErrorLogRepository, MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository}
@@ -102,7 +102,8 @@ object Server extends IOApp:
         "transfer" -> securedTransferRoute,
         "withdraw" -> securedWithdrawalRoute,
         "notify" -> securedNotificationRoute,
-        "paypal-ipn" -> paypalRoute(paypalRepository, organisationRepository, appConfig, emailService, errorLogger)
+        "paypal-ipn" -> paypalRoute(paypalRepository, organisationRepository, appConfig, emailService, errorLogger),
+        "api-docs" -> SwaggerUiRoute.routes,
       ).orNotFound
 
       val corsService = CORS.policy
