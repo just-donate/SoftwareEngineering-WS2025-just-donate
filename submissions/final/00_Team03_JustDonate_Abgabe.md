@@ -1,6 +1,15 @@
 # Abgabe - Team 03 Just Donate 
 
-Lukas Brennauer, Gerrit Holzbaur, Anton Kluge, Jakob Limmer, Sarp Sahinalp
+## 0 Generelle Informationen
+
+Teammitglieder (in alphabetischer Reihenfolge): 
+- Lukas Brennauer
+- Gerrit Holzbaur
+- Anton Kluge
+- Jakob Limmer
+- Sarp Sahinalp
+
+Das [Miro Board](https://miro.com/app/board/uXjVLRFTGG0=/) enthält zusätzliche Dokumente zum Design Thinking Prozess (insbesondere zu Bestimmung der Personas und der Ideenfindung). 
 
 ## 1 Mindmap
 ![](01_Mindmap.png)
