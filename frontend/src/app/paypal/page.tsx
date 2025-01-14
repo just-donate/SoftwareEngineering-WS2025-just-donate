@@ -3,39 +3,44 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import logo from '@/assets/logo.png';
-// Ensure axiosInstance is properly configured and imported
 import axiosInstance from '../organization/api/axiosInstance';
 import axios from 'axios';
+
+// Import shadcn/ui components (adjust imports as needed)
+import { Input } from '@/components/organization/ui/input';
+import { Button } from '@/components/organization/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/organization/ui/select';
 
 interface Purpose {
   name: string;
 }
 
 const DonationPage: React.FC = () => {
+  const EMPTY_VALUE = '__empty__';
+
   const [email, setEmail] = useState('');
   const [amount, setAmount] = useState('');
-  const [purpose, setPurpose] = useState('empty');
+  const [purpose, setPurpose] = useState(EMPTY_VALUE);
   const [errorMessage, setErrorMessage] = useState('');
   const [purposeOptions, setPurposeOptions] = useState<string[]>([]);
 
-  /**
-   * Name of the created organisation
-   */
+  // Organization Info
   const orgName = 'Just-Donate';
-
-  // TODO: Get the organization ID from the session/context
   const organizationId = '591671920';
 
-  /**
-   * Fetch purpose options from the endpoint on component mount.
-   */
+  // Fetch purpose options on mount
   useEffect(() => {
     const fetchPurposeOptions = async () => {
       try {
         const response = await axiosInstance.get<Purpose[]>(
-          `organisation/${organizationId}/earmarking/list`,
+          `public/organisation/${organizationId}/earmarking/list`,
         );
-        // Extract purpose names from the response data
         const options = response.data.map((item) => item.name);
         setPurposeOptions(options);
       } catch (error) {
@@ -57,37 +62,29 @@ const DonationPage: React.FC = () => {
   }, [organizationId]);
 
   const formatAmount = (value: string) => {
-    // Remove invalid characters
     let formatted = value.replace(/[^0-9.]/g, '');
-
-    // Limit to two decimal places
     if (formatted.includes('.')) {
       const parts = formatted.split('.');
       parts[1] = parts[1].slice(0, 2);
       formatted = parts.join('.');
     }
-
     setAmount(formatted);
   };
 
   const validateAndSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       setErrorMessage('Please enter a valid donation amount greater than 0.');
       return;
     }
-
     setErrorMessage('');
     const invoice = Math.floor(Math.random() * 1000000000);
 
-    // Simulate PayPal form submission
+    // Create and submit a PayPal form programmatically
     const paypalForm = document.createElement('form');
     paypalForm.method = 'POST';
     paypalForm.action = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
-
-    // sb-swv8l35388930@business.example.com
     paypalForm.innerHTML = `
       <input type="hidden" name="cmd" value="_xclick" />
       <input type="hidden" name="business" value="sb-8rsvi36693121@business.example.com" />
@@ -99,7 +96,6 @@ const DonationPage: React.FC = () => {
       <input type="hidden" name="invoice" value="${invoice}" />
       <input type="hidden" name="custom" value="${orgName}/${email}" />
     `;
-
     document.body.appendChild(paypalForm);
     paypalForm.submit();
   };
@@ -127,14 +123,14 @@ const DonationPage: React.FC = () => {
             >
               Email <span className="text-red-500">*</span>
             </label>
-            <input
+            <Input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="mustermann@beispiel.com"
               required
-              className="w-full border border-gray-300 rounded-md p-2"
+              className="w-full"
             />
           </div>
 
@@ -146,22 +142,18 @@ const DonationPage: React.FC = () => {
               Donation Amount <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-gray-500">€</span>
-              <input
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                €
+              </span>
+              <Input
                 type="text"
                 id="amount"
                 value={amount}
                 onChange={(e) => formatAmount(e.target.value)}
                 placeholder="0.00"
                 required
-                className="w-full pl-8 border border-gray-300 rounded-md p-2"
+                className="w-full pl-8 placeholder-gray-400"
               />
-              <datalist id="amounts">
-                <option value="5" />
-                <option value="25" />
-                <option value="50" />
-                <option value="100" />
-              </datalist>
             </div>
           </div>
 
@@ -172,38 +164,50 @@ const DonationPage: React.FC = () => {
             >
               Donation Purpose
             </label>
-            <select
-              id="purpose"
+            <Select
               value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2"
+              onValueChange={(value) => setPurpose(value)}
             >
-              {/* Default option that can be selected */}
-              <option value="empty">
-                Choose a purpose (or clear selection)
-              </option>
-              {purposeOptions.length > 0 ? (
-                purposeOptions.map((option) => (
-                  <option key={option} value={option}>
+              <SelectTrigger className="w-full">
+                <SelectValue
+                  placeholder="Choose a purpose (or clear selection)"
+                  className="placeholder-gray-400"
+                />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {/* Use the non-empty special value */}
+                <SelectItem
+                  value={EMPTY_VALUE}
+                  className="bg-white hover:bg-gray-100 focus:bg-gray-200"
+                >
+                  Choose a purpose (or clear selection)
+                </SelectItem>
+                {purposeOptions.map((option) => (
+                  <SelectItem
+                    key={option}
+                    value={option}
+                    className="bg-white hover:bg-gray-100 focus:bg-gray-200"
+                  >
                     {option}
-                  </option>
-                ))
-              ) : (
-                <option value="">Loading options...</option>
-              )}
-            </select>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
+            className="w-full bg-blue-500 hover:bg-blue-600"
           >
             Donate Now
-          </button>
+          </Button>
         </form>
 
         <p className="text-center text-gray-500 text-sm mt-6">
-          powered by <Image src={logo} alt="just-donate-logo" />
+          powered by{' '}
+          <span className="inline-block">
+            <Image src={logo} alt="just-donate-logo" width={120} height={40} />
+          </span>
         </p>
       </div>
     </div>

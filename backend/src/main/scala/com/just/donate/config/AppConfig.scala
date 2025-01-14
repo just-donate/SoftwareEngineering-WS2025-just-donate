@@ -1,6 +1,5 @@
 package com.just.donate.config
 
-import com.just.donate.config.AppEnvironment.DEVELOPMENT
 import com.typesafe.config.{ConfigFactory, Config as TypesafeConfig}
 
 import scala.util.Properties

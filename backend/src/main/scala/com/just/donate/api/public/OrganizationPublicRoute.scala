@@ -20,7 +20,7 @@ object OrganizationPublicRoute:
       case GET -> Root / organisationId / "earmarking" / "list" =>
         loadOrganisation(organisationId)(repository)(
           _.getEarmarkings.map(e => ResponseEarmarking(e.name, e.description)).toSeq
-        ).onError(error => IO.println("Error getting earmarkings: " + error))
+        )
 
       case GET -> Root / organisationId / "theme" =>
         // TODO: Load organization

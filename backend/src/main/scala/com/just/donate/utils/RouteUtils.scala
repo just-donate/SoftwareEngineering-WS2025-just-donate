@@ -15,8 +15,6 @@ object RouteUtils:
     organisationId: String
   )(repository: Repository[String, Organisation])(mapper: Organisation => R): IO[Response[IO]] = for
     organisation <- repository.findById(organisationId)
-    _ <- IO.println("Organisation: " + organisation)
-    _ <- IO.println("Organisation ID: " + organisationId)
     response <- organisation match
       case Some(organisation) => Ok(mapper(organisation))
       case None               => NotFound()

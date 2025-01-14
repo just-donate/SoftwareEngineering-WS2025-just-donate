@@ -33,7 +33,7 @@ object PaypalRoute:
 
         // Immediately respond to PayPal to avoid IPN timeouts
         response <- Ok("").handleErrorWith { error =>
-          IO.println(s"Failed to send immediate response to PayPal: $error") *> InternalServerError(
+          IO.println(s"Failed to send immediate response to PayPal: $error") >> InternalServerError(
             "Error processing IPN"
           )
         }
@@ -46,8 +46,8 @@ object PaypalRoute:
               // Map the incoming IPN data to a domain model
               newIpn <- PayPalIPNMapper.mapToPayPalIPN(urlForm).handleErrorWith { error =>
                 val errMsg = s"Failed to map IPN: $error"
-                IO.println(errMsg) *>
-                  errorLogger.logError("IPN", errMsg, rawBody) *>
+                IO.println(errMsg) >>
+                  errorLogger.logError("IPN", errMsg, rawBody) >>
                   IO.raiseError(error)
               }
 
@@ -56,18 +56,19 @@ object PaypalRoute:
                 IO.unit
               } else {
                 val errMsg = s"Invalid payment status: ${newIpn.paymentStatus}. Expected: Completed"
-                IO.println(errMsg) *>
-                  errorLogger.logError("IPN", errMsg, rawBody) *>
+                IO.println(errMsg) >>
+                  errorLogger.logError("IPN", errMsg, rawBody) >>
                   IO.raiseError(new IllegalArgumentException("Invalid payment status"))
               }
 
               // Check for duplicates
               existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
+
               _ <- existingIpn match {
                 case Some(_) =>
                   val errMsg = s"Duplicate IPN detected for IPN track ID: ${newIpn.ipnTrackId}"
-                  IO.println(errMsg) *>
-                    errorLogger.logError("IPN", errMsg, rawBody) *>
+                  IO.println(errMsg) >>
+                    errorLogger.logError("IPN", errMsg, rawBody) >>
                     IO.raiseError(new IllegalStateException("Duplicate IPN detected"))
                 case None => IO.unit
               }
@@ -75,8 +76,8 @@ object PaypalRoute:
               // Save the IPN if all checks pass
               _ <- paypalRepo.save(newIpn).handleErrorWith { error =>
                 val errMsg = s"Failed to save IPN: $error"
-                IO.println(errMsg) *>
-                  errorLogger.logError("IPN", errMsg, rawBody) *>
+                IO.println(errMsg) >>
+                  errorLogger.logError("IPN", errMsg, rawBody) >>
                   IO.raiseError(error)
               }
 
@@ -87,7 +88,7 @@ object PaypalRoute:
                   newIpn.firstName + " " + newIpn.lastName,
                   newIpn.notificationEmail,
                   newIpn.mcGross,
-                  if newIpn.itemName.isEmpty || newIpn.itemName == "empty" then None else Some(newIpn.itemName)
+                  if newIpn.itemName.isEmpty || newIpn.itemName == "__empty__" then None else Some(newIpn.itemName)
                 )
               )
 
@@ -95,12 +96,14 @@ object PaypalRoute:
                 organisationMapper(requestDonation, paypalAccountName)
               )
 
+              _ <- IO.println(s"Tracking ID: $trackingId")
+
               _ <- trackingId match {
                 case None =>
-                  errorLogger.logError("IPN", "No Tracking ID generated", rawBody) *>
+                  errorLogger.logError("IPN", "No Tracking ID generated", rawBody) >>
                   IO.println("No Tracking ID generated")
                 case Some(Left(donationError)) =>
-                  errorLogger.logError("IPN", donationError.message, rawBody) *>
+                  errorLogger.logError("IPN", donationError.message, rawBody) >>
                   IO.println(donationError.message)
                 case Some(Right(trackingId)) =>
                   val trackingLink = s"${conf.frontendUrl}/tracking?id=$trackingId"
@@ -173,11 +176,11 @@ object PaypalRoute:
         case Right(response) =>
           IO.pure(response)
         case Left(error) if attemptNumber < maxRetries =>
-          IO.println(s"Validation attempt $attemptNumber failed: $error. Retrying...") *>
-            Temporal[IO].sleep(delay) *>
+          IO.println(s"Validation attempt $attemptNumber failed: $error. Retrying...") >>
+            Temporal[IO].sleep(delay) >>
             attempt(attemptNumber + 1)
         case Left(error) =>
-          IO.println(s"Validation failed after $maxRetries attempts: $error") *>
+          IO.println(s"Validation failed after $maxRetries attempts: $error") >>
             IO.raiseError[String](error)
       }
 
