@@ -170,12 +170,16 @@ class OrganisationTransferSuite extends FunSuite:
 
    test("transfer multiple donation parts") {
      var newRoots = createNewRoots()
-     newRoots = newRoots.addEarmarking("Education")
-     newRoots = newRoots.addEarmarking("Health")
+
+     val educationEarmarking = Earmarking("Health", "Supporting education in Kenya")
+     val healthEarmarking = Earmarking("Health", "Supporting health in Kenya")
+     
+     newRoots = newRoots.addEarmarking(educationEarmarking)
+     newRoots = newRoots.addEarmarking(healthEarmarking)
 
      val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
-     val (donation, donationPart) = Donation(donor.id, Money(amountHundred), "Education")
-     val (donation2, donationPart2) = Donation(donor.id, Money(amountOneFifty), "Education")
+     val (donation, donationPart) = Donation(donor.id, Money(amountHundred), educationEarmarking)
+     val (donation2, donationPart2) = Donation(donor.id, Money(amountOneFifty), educationEarmarking)
      newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
      newRoots = newRoots.donate(donor, donationPart2, donation2, "Paypal").toOption.get
 
@@ -185,11 +189,11 @@ class OrganisationTransferSuite extends FunSuite:
      assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money("120.00"))
 
      assertEquals(
-       newRoots.getAccount("Paypal").get.totalEarmarkedBalance("Education"),
+       newRoots.getAccount("Paypal").get.totalEarmarkedBalance(educationEarmarking),
        Money("130.00")
      )
      assertEquals(
-       newRoots.getAccount("Bank").get.totalEarmarkedBalance("Education"),
+       newRoots.getAccount("Bank").get.totalEarmarkedBalance(educationEarmarking),
        Money("120.00")
      )
    }
