@@ -35,10 +35,11 @@ class OrganisationDonateSuite extends FunSuite:
 
   test("reflect bound donations in the total balance and earmarked balances") {
     var newRoots = createNewRoots()
+    val educationEarmarking = Earmarking("Education", "Supporting education in Kenya")
 
-    newRoots = newRoots.addEarmarking("Education")
+    newRoots = newRoots.addEarmarking(educationEarmarking)
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
-    val (donation, donationPart) = Donation(donor.id, Money(amountTwoHundred), "Education")
+    val (donation, donationPart) = Donation(donor.id, Money(amountTwoHundred), educationEarmarking)
     newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
 
     val paypalOption = newRoots.getAccount("Paypal")
@@ -47,8 +48,8 @@ class OrganisationDonateSuite extends FunSuite:
     assertEquals(paypal.totalBalance, Money(amountTwoHundred))
     assertEquals(newRoots.totalBalance, Money(amountTwoHundred))
 
-    assertEquals(paypal.totalEarmarkedBalance("Education"), Money(amountTwoHundred))
-    assertEquals(newRoots.totalEarmarkedBalance("Education"), Money(amountTwoHundred))
+    assertEquals(paypal.totalEarmarkedBalance(educationEarmarking), Money(amountTwoHundred))
+    assertEquals(newRoots.totalEarmarkedBalance(educationEarmarking), Money(amountTwoHundred))
 
     // TODO: Fix this test as it was commented out due to an error
     // intercept[IllegalStateException] {

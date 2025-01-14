@@ -3,20 +3,36 @@
 import { BankAccount } from '@/types/types';
 import axiosInstance from '../api/axiosInstance';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not set');
-}
-
 export async function fetchBankAccounts(orgId: string): Promise<BankAccount[]> {
   try {
-    const response = await axiosInstance.get(
+    const response = await axiosInstance.get<BankAccount[]>(
       `/organisation/${orgId}/account/list`,
     );
     return response.data;
   } catch (error) {
     console.error('Failed to fetch bank accounts:', error);
     return [];
+  }
+}
+
+export async function postBankAccount(
+  orgId: string,
+  name: string,
+  amount: string,
+) {
+  try {
+    const response = await axiosInstance.post(
+      `/organisation/${orgId}/account`,
+      {
+        name,
+        balance: {
+          amount,
+        },
+      },
+    );
+    return response;
+  } catch (error) {
+    console.error('Failed to add bank account:', error);
+    throw error;
   }
 }

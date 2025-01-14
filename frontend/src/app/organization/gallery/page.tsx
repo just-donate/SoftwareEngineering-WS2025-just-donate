@@ -23,8 +23,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 // Mock data for demonstration
 const mockEarmarkings: Earmarking[] = [
-  { name: 'Project A' },
-  { name: 'Project B' },
+  { name: 'Project A', description: 'Description for Project A' },
+  { name: 'Project B', description: 'Description for Project B' },
 ];
 
 const mockPhotos: Photo[] = [

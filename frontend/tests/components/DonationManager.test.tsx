@@ -6,6 +6,10 @@ import {
   createDonation,
   fetchDonations,
 } from '../../src/app/organization/donations/donations';
+import {
+  createDonation,
+  fetchDonations,
+} from '../../src/app/organization/donations/donations';
 import { fetchEarmarkings } from '../../src/app/organization/earmarkings/earmarkings';
 import { fetchBankAccounts } from '../../src/app/organization/bank-accounts/bank-accounts';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -122,6 +126,9 @@ describe('DonationManager Component', () => {
       expect(
         screen.getByText(/Donation created successfully/i),
       ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Donation created successfully/i),
+      ).toBeInTheDocument();
     });
   });
 
@@ -146,6 +153,9 @@ describe('DonationManager Component', () => {
       expect(
         screen.getByText(/Please fill in all fields/i),
       ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Please fill in all fields/i),
+      ).toBeInTheDocument();
     });
   });
 
@@ -164,6 +174,15 @@ describe('DonationManager Component', () => {
       );
     });
 
+    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), {
+      target: { value: 'Jane Doe' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), {
+      target: { value: 'jane@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/Amount/i), {
+      target: { value: '50.0' },
+    });
     fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), {
       target: { value: 'Jane Doe' },
     });
@@ -205,6 +224,11 @@ describe('DonationManager Component', () => {
       expect(
         screen.getByText(/Please fill in all fields/i),
       ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Please fill in all fields/i),
+      ).toBeInTheDocument();
     });
   });
+});
+
 });

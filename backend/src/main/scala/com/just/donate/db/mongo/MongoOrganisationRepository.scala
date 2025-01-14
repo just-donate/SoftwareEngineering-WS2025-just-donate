@@ -1,18 +1,12 @@
 package com.just.donate.db.mongo
 
 import cats.effect.IO
-import com.just.donate.db.mongo.MongoRepository
 import com.just.donate.db.mongo.MongoRepository.ObservableOps
 import com.just.donate.models.Organisation
-import com.mongodb.client.result.DeleteResult
 import io.circe.*
 import io.circe.generic.auto.*
 import io.circe.parser.*
 import io.circe.syntax.*
-import org.http4s.*
-import org.http4s.circe.*
-import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
-import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.mongodb.scala.*
 import org.mongodb.scala.model.*
 
@@ -24,7 +18,10 @@ class MongoOrganisationRepository(collection: MongoCollection[Document])
       .find(Filters.eq("_id", id))
       .first()
       .toIO
-      .map(_.headOption.flatMap(doc => parse(doc.getString("data")).flatMap(_.as[Organisation]).toOption))
+      .map(_.headOption.flatMap(doc => parse(doc.getString("data")).flatMap(_.as[Organisation]).fold(
+        error => throw new Exception(error),
+        organisation => Some(organisation)
+      )))
 
   def findAll(): IO[Seq[Organisation]] =
     collection

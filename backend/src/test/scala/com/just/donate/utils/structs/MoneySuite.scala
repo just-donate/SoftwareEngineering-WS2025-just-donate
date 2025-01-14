@@ -112,6 +112,9 @@ class MoneySuite extends FunSuite:
     val m28 = Money("-999999999.0000")
     assertMoneyEquals("-999999999.0", m28)
 
+    val m29 = Money("2")
+    assertMoneyEquals("2.0", m29)
+
   }
 
   // Test addition

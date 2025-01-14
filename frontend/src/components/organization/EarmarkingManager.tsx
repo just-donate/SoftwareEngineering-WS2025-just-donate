@@ -3,16 +3,16 @@
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Earmarking } from '@/types/types';
 import { useTheme } from '@/contexts/ThemeContext';
+import axiosInstance from '@/app/organization/api/axiosInstance';
 
 interface EarmarkingManagerProps {
   initialEarmarkings: Earmarking[];
   organizationId: string;
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function EarmarkingManager({
   initialEarmarkings,
@@ -22,6 +22,7 @@ export default function EarmarkingManager({
   const [earmarkings, setEarmarkings] =
     useState<Earmarking[]>(initialEarmarkings);
   const [newEarmarkingName, setNewEarmarkingName] = useState('');
+  const [newEarmarkingDescription, setNewEarmarkingDescription] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -33,27 +34,27 @@ export default function EarmarkingManager({
     if (!newEarmarkingName) return;
 
     try {
-      const response = await fetch(
-        `${API_URL}/organisation/${organizationId}/earmarking`,
+      await axiosInstance.post(
+        `/organisation/${organizationId}/earmarking`,
         {
-          method: 'POST',
+          name: newEarmarkingName,
+          description: newEarmarkingDescription,
+        },
+        {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name: newEarmarkingName }),
         },
       );
-
-      if (!response.ok) {
-        throw new Error('Failed to create earmarking');
-      }
 
       // Optimistically update the UI
       const newEarmarking: Earmarking = {
         name: newEarmarkingName,
+        description: newEarmarkingDescription,
       };
       setEarmarkings([...earmarkings, newEarmarking]);
       setNewEarmarkingName('');
+      setNewEarmarkingDescription('');
       setSuccessMessage('Earmarking created successfully!');
       setError('');
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -73,14 +74,23 @@ export default function EarmarkingManager({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex space-x-2">
+            <div className="space-y-2">
               <Input
                 value={newEarmarkingName}
                 onChange={(e) => setNewEarmarkingName(e.target.value)}
                 placeholder="Earmarking name"
                 className={`${theme.background} ${theme.text}`}
               />
-              <Button onClick={addEarmarking} className={theme.primary}>
+              <Textarea
+                value={newEarmarkingDescription}
+                onChange={(e) => setNewEarmarkingDescription(e.target.value)}
+                placeholder="Description"
+                className="min-h-[100px] resize-none"
+              />
+              <Button
+                onClick={addEarmarking}
+                className={`${theme.primary} flex justify-start`}
+              >
                 Add
               </Button>
             </div>
@@ -103,7 +113,12 @@ export default function EarmarkingManager({
                 key={earmarking.name}
                 className={`p-2 rounded-lg ${theme.secondary}`}
               >
-                <span className={theme.text}>{earmarking.name}</span>
+                <div className={`font-medium ${theme.text}`}>{earmarking.name}</div>
+                {earmarking.description && (
+                  <div className={`text-sm text-muted-foreground ${theme.text}`}>
+                    {earmarking.description}
+                  </div>
+                )}
               </li>
             ))}
           </ul>

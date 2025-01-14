@@ -61,7 +61,7 @@ export default function DonationManager({
       donorName,
       donorEmail,
       amount: { amount: amount },
-      earmarking,
+      earmarking: earmarking === '' ? null : earmarking,
       accountName,
     };
 
