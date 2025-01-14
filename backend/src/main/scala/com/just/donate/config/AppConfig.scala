@@ -6,7 +6,7 @@ import scala.util.Properties
 
 object AppConfig:
   def apply(): AppConfig =
-    val environment = sys.env.getOrElse("ENV", "dev") match
+    val environment = sys.env.getOrElse("ENV", "prod") match
       case "dev" | "development" => AppEnvironment.DEVELOPMENT
       case "prod" | "production" => AppEnvironment.PRODUCTION
       case env                   => throw new RuntimeException(f"Unknown environment: ${env}")

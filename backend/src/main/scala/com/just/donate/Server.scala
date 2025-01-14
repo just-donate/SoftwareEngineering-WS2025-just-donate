@@ -15,9 +15,8 @@ import com.just.donate.db.mongo.{MongoErrorLogRepository, MongoOrganisationRepos
 import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
 import com.just.donate.security.AuthMiddleware
 import com.just.donate.utils.ErrorLogger
+import com.mongodb.{ServerApi, ServerApiVersion}
 import org.http4s.*
-import org.http4s.client.Client
-import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.*
 import org.http4s.headers.Origin
 import org.http4s.implicits.*
@@ -27,6 +26,7 @@ import org.mongodb.scala.*
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.DurationInt
 
 object Server extends IOApp:
@@ -36,12 +36,9 @@ object Server extends IOApp:
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   def run(args: List[String]): IO[ExitCode] =
-    mongoResource(appConfig.mongoUri).flatMap { mongoClient =>
-      httpClientResource.map { httpClient =>
-        (mongoClient, httpClient)
-      }
-    }.use { client =>
-      val database = client._1.getDatabase("just-donate")
+    // Create a new client and connect to the server
+    mongoResource(appConfig.mongoUri)use { mongoClient =>
+      val database = mongoClient.getDatabase("just-donate")
 
       val organisationCollection = database.getCollection("organisations")
       val paypalCollection = database.getCollection("paypal_ipn")
@@ -138,7 +135,3 @@ object Server extends IOApp:
   /** Acquire and safely release the Mongo client (using Resource). */
   private def mongoResource(uri: String): Resource[IO, MongoClient] =
     Resource.make(IO(MongoClient(uri)))(client => IO(client.close()))
-
-  /** Acquire and safely release the HTTP client (using Resource). */
-  private def httpClientResource: Resource[IO, Client[IO]] =
-    EmberClientBuilder.default[IO].build

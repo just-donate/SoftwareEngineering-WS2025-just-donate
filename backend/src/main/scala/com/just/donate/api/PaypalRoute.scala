@@ -23,7 +23,7 @@ object PaypalRoute:
   val paypalAccountName = "PayPal"
 
   def paypalRoute(paypalRepo: Repository[String, PayPalIPN], orgRepo: Repository[String, Organisation], conf: Config, emailService: IEmailService, errorLogger: ErrorLogger): HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case req @ POST -> Root =>
+    case req@POST -> Root =>
       for
         // Parse the request body
         urlForm <- req.as[UrlForm].map(_.values)
@@ -38,6 +38,7 @@ object PaypalRoute:
           )
         }
 
+        // Inside your route:
         _ <- validateWithRetry(rawBody, maxRetries = 3, delay = 5.seconds).flatMap {
           case "VERIFIED" =>
             for
@@ -51,7 +52,9 @@ object PaypalRoute:
                   IO.raiseError(error)
               }
 
-              // Check whether the payment status is completed
+              _ <- IO.println("IPN mapped")
+
+              // Check if payment status is completed
               _ <- if (newIpn.paymentStatus.equals("Completed")) {
                 IO.unit
               } else {
@@ -61,9 +64,10 @@ object PaypalRoute:
                   IO.raiseError(new IllegalArgumentException("Invalid payment status"))
               }
 
-              // Check for duplicates
-              existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
+              _ <- IO.println("Payment status is completed")
 
+              // Check for duplicate IPN
+              existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
               _ <- existingIpn match {
                 case Some(_) =>
                   val errMsg = s"Duplicate IPN detected for IPN track ID: ${newIpn.ipnTrackId}"
@@ -73,6 +77,8 @@ object PaypalRoute:
                 case None => IO.unit
               }
 
+              _ <- IO.println("No duplicate IPN detected")
+
               // Save the IPN if all checks pass
               _ <- paypalRepo.save(newIpn).handleErrorWith { error =>
                 val errMsg = s"Failed to save IPN: $error"
@@ -81,14 +87,15 @@ object PaypalRoute:
                   IO.raiseError(error)
               }
 
-              // Call the donation endpoint
-              // Item name is set by the donation-paypal.html as earmarking
+              _ <- IO.println("IPN saved")
+
+              // Prepare the donation request
               requestDonation <- IO.pure(
                 RequestDonation(
                   newIpn.firstName + " " + newIpn.lastName,
                   newIpn.notificationEmail,
                   newIpn.mcGross,
-                  if newIpn.itemName.isEmpty || newIpn.itemName == "__empty__" then None else Some(newIpn.itemName)
+                  if (newIpn.itemName.isEmpty || newIpn.itemName == "__empty__") None else Some(newIpn.itemName)
                 )
               )
 
