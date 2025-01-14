@@ -51,8 +51,18 @@ object OrganisationRoute:
         )
 
       case GET -> Root / organisationId / "account" / "list" =>
-        loadOrganisation(organisationId)(repository)(
-          _.accounts.map(a => ResponseAccount(a._1, a._2.totalBalance)).toSeq
+        loadOrganisation(organisationId)(repository)(org =>
+          org.accounts
+            .map(a =>
+              ResponseAccount(
+                a._1,
+                a._2.totalBalance,
+                org.getEarmarkings
+                  .map(e => (e.name, a._2.totalEarmarkedBalance(e)))
+                  .toSeq :+ ("Frei", a._2.unboundDonations.totalBalance)
+              )
+            )
+            .toSeq
         )
 
       case req @ POST -> Root / organisationId / "account" =>
@@ -94,6 +104,4 @@ object OrganisationRoute:
 
   private[api] case class RequestAccount(name: String, balance: Money)
 
-  private[api] case class ResponseAccount(name: String, balance: Money)
-
-  private[api] case class RequestDonation(donor: String, amount: Money, earmarking: Option[String])
+  private[api] case class ResponseAccount(name: String, balance: Money, byEarmarking: Seq[(String, Money)])

@@ -50,4 +50,5 @@ export interface Photo {
 export interface BankAccount {
   name: string;
   balance: Money;
+  byEarmarking: Array<[string, Money]>;
 }
