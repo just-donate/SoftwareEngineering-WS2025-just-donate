@@ -28,6 +28,17 @@ case class Organisation(
 
   def getEarmarking(name: String): Option[Earmarking] = earmarkings.find(e => e.name == name || e.id == name)
 
+  /**
+   * Add a new earmarking image to the organisation.
+   * @param earmarking the name of the earmarking.
+   * @param image the image to add.
+   * @return a new organisation with the earmarking image added.
+   */
+  def addEarmarkingImage(earmarking: String, image: EarmarkingImage): Organisation =
+    copy(earmarkingImages = earmarkingImages.updated(earmarking, earmarkingImages.getOrElse(earmarking, Seq.empty).appended(image)))
+
+  def getEarmarkingImages(earmarking: String): Option[Seq[EarmarkingImage]] = earmarkingImages.get(earmarking)
+
   def setTheme(theme: ThemeConfig): Organisation = copy(theme = Some(theme))
 
   /**
