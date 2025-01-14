@@ -3,7 +3,6 @@ import { StatusTimeline } from './StatusTimeline';
 import { customStyles } from '@/styles/custom';
 import { dateFormatter } from '@/lib/utils';
 import { DonationMap } from './DonationMap';
-import { EarmarkingImage } from '@/types/types';
 import { fetchEarmarkingImages } from '@/app/organization/gallery/gallery';
 import { useState, useEffect } from 'react';
 
