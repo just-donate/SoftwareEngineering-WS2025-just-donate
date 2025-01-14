@@ -5,7 +5,10 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount } from '@/types/types';
-import { fetchBankAccounts, postBankAccount } from '@/app/organization/bank-accounts/bank-accounts';
+import {
+  fetchBankAccounts,
+  postBankAccount,
+} from '@/app/organization/bank-accounts/bank-accounts';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -34,7 +37,11 @@ export default function BankAccountManager({
   const [successMessage, setSuccessMessage] = useState('');
 
   const addBankAccount = async () => {
-    const result = await postBankAccount(organizationId, newAccountName, newAccountAmount);
+    const result = await postBankAccount(
+      organizationId,
+      newAccountName,
+      newAccountAmount,
+    );
     if (result.status === 200) {
       setSuccessMessage('Bank account added successfully');
       setError('');

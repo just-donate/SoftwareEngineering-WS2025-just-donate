@@ -18,7 +18,7 @@ export async function fetchBankAccounts(orgId: string): Promise<BankAccount[]> {
 export async function postBankAccount(
   orgId: string,
   name: string,
-  amount: string
+  amount: string,
 ) {
   try {
     const response = await axiosInstance.post(
@@ -28,7 +28,7 @@ export async function postBankAccount(
         balance: {
           amount,
         },
-      }
+      },
     );
     return response;
   } catch (error) {

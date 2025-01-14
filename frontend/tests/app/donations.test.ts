@@ -1,5 +1,7 @@
-import { fetchDonations, createDonation } from '../../src/app/organization/donations/donations';
-import axios from 'axios';
+import {
+  fetchDonations,
+  createDonation,
+} from '../../src/app/organization/donations/donations';
 import axiosInstance from '../../src/app/organization/api/axiosInstance';
 
 // Mock the axiosInstance
@@ -23,7 +25,13 @@ describe('Donations API', () => {
               earmarking: 'General Purpose',
               organisation: 'Organization 1',
               date: '2024-01-01',
-              status: [{ status: 'Completed', date: '2024-01-01', description: 'Donation completed successfully' }],
+              status: [
+                {
+                  status: 'Completed',
+                  date: '2024-01-01',
+                  description: 'Donation completed successfully',
+                },
+              ],
             },
           ],
         },
@@ -34,7 +42,9 @@ describe('Donations API', () => {
       const donations = await fetchDonations(mockOrgId);
 
       expect(donations).toEqual(mockResponse.data.donations);
-      expect(axiosInstance.get).toHaveBeenCalledWith(`/donate/${mockOrgId}/donations`);
+      expect(axiosInstance.get).toHaveBeenCalledWith(
+        `/donate/${mockOrgId}/donations`,
+      );
     });
 
     it('handles errors when fetching donations', async () => {
@@ -46,7 +56,9 @@ describe('Donations API', () => {
       const donations = await fetchDonations(mockOrgId);
 
       expect(donations).toEqual([]); // Should return an empty array on error
-      expect(axiosInstance.get).toHaveBeenCalledWith(`/donate/${mockOrgId}/donations`);
+      expect(axiosInstance.get).toHaveBeenCalledWith(
+        `/donate/${mockOrgId}/donations`,
+      );
     });
   });
 
@@ -65,8 +77,8 @@ describe('Donations API', () => {
         donorName: 'John Doe',
         donorEmail: 'john@example.com',
         amount: { amount: '100.0' },
-        earmarking: 'General Purpose'
-      }
+        earmarking: 'General Purpose',
+      };
 
       const mockResponse = {
         status: 200,
@@ -120,7 +132,7 @@ describe('Donations API', () => {
     });
   });
 
-  it('fails if status code is not 200', async() => {
+  it('fails if status code is not 200', async () => {
     const mockOrgId = '591671920';
     const mockDonationData = {
       donorName: 'John Doe',
@@ -135,7 +147,7 @@ describe('Donations API', () => {
     };
 
     (axiosInstance.post as jest.Mock).mockResolvedValue(mockResponse);
-    
+
     const result = await createDonation(
       mockOrgId,
       mockDonationData.donorName,
@@ -143,11 +155,11 @@ describe('Donations API', () => {
       mockDonationData.amount,
       mockDonationData.earmarking,
       mockDonationData.accountName,
-    )
+    );
 
     expect(result).toEqual({
       success: false,
       error: 'Failed to create donation',
     });
-  })
-}); 
+  });
+});
