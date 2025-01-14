@@ -91,7 +91,7 @@ object PaypalRoute:
                   emailService.sendEmail(
                     requestDonation.donorEmail,
                     EmailMessage.prepareString(
-                      org.theme.map(_.donationEmailTemplate),
+                      org.theme.map(_.emailTemplates.donationTemplate),
                       DonationMessage(
                         donor,
                         conf,

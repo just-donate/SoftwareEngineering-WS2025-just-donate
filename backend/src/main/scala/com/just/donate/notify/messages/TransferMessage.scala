@@ -8,13 +8,13 @@ import com.just.donate.models.Account
 case class TransferMessage(val donor: Donor, config: Config, organisation: Organisation, sourceAccount: Account)
     extends MessageType:
   val defaultTemplate: String =
-    """Your recent donation to {{organisation-name}} has been fully transferred away from the account {{from-account-name}}.
+    """Your recent donation to {{organisation-name}} has been fully transferred away from the account {{source-account-name}}.
       |To see more details about the status of your donation, visit the following link
       |{{tracking-link-with-id}}
       |or enter your tracking id
       |{{tracking-id}}
       |on our tracking page
-      |{{tracking-url}}""".stripMargin
+      |{{tracking-link}}""".stripMargin
 
   val replacements: Seq[(String, String)] = Seq(
     ("tracking-id", donor.id),

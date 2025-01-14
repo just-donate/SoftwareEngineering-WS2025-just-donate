@@ -1,8 +1,8 @@
 package com.just.donate.models
 
 import com.just.donate.models.Types.DonationGetter
-import com.just.donate.models.errors.{DonationError, WithdrawError}
-import com.just.donate.utils.CollectionUtils.{updated, updatedReturn}
+import com.just.donate.models.errors.{ DonationError, WithdrawError }
+import com.just.donate.utils.CollectionUtils.{ updated, updatedReturn }
 import com.just.donate.utils.Money
 import com.just.donate.utils.structs.ReservableQueue
 

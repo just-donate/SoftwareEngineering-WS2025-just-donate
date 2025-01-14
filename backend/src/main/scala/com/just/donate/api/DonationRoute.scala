@@ -38,7 +38,7 @@ object DonationRoute:
                 emailService.sendEmail(
                   requestDonation.donorEmail,
                   EmailMessage.prepareString(
-                    org.theme.map(_.donationEmailTemplate),
+                    org.theme.map(_.emailTemplates.donationTemplate),
                     DonationMessage(
                       donor,
                       config
@@ -75,7 +75,7 @@ object DonationRoute:
 
   def organisationMapper(requestDonation: RequestDonation, accountName: String)(
     org: Organisation
-  ): (Organisation, Either[DonationError, String]) =
+  ): (Organisation, Either[DonationError, (Organisation, Donor)]) =
     val donor = org
       .getExistingDonor(requestDonation.donorEmail)
       .getOrElse(

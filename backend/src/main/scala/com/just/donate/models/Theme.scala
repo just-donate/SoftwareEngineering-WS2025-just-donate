@@ -12,6 +12,12 @@ case class StatusColors(
   used: String
 )
 
+case class EmailTemplates(
+  donationTemplate: String,
+  transferTemplate: String,
+  withdrawalTemplate: String
+)
+
 // Define the main ThemeConfig case class
 case class ThemeConfig(
   primary: String,
@@ -27,7 +33,5 @@ case class ThemeConfig(
   ngoUrl: String,
   helpUrl: String,
   statusColors: StatusColors,
-  donationEmailTemplate: String,
-  transferEmailTemplate: String,
-  withdrawalEmailTemplate: String
+  emailTemplates: EmailTemplates
 )
