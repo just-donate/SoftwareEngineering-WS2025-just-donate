@@ -13,6 +13,7 @@ import {
 } from '../../src/app/organization/gallery/gallery';
 import { fetchEarmarkings } from '../../src/app/organization/earmarkings/earmarkings';
 import { Earmarking, EarmarkingImage } from '../../src/types/types';
+import '@testing-library/jest-dom';
 
 // Mock the fetchEarmarkingImages and uploadEarmarkingImage functions
 jest.mock('../../src/app/organization/gallery/gallery', () => ({
