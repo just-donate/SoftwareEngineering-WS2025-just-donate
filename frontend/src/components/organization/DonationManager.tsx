@@ -107,18 +107,21 @@ export default function DonationManager({
                 onChange={(e) => setDonorName(e.target.value)}
                 placeholder="Donor Name"
                 className={`${theme.background} ${theme.text}`}
+                data-testid="donor-name-input"
               />
               <Input
                 value={donorEmail}
                 onChange={(e) => setDonorEmail(e.target.value)}
                 placeholder="Donor Email"
                 className={`${theme.background} ${theme.text}`}
+                data-testid="donor-email-input"
               />
               <Input
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount"
                 className={`${theme.background} ${theme.text}`}
+                data-testid="amount-input"
               />
               <Select value={earmarking} onValueChange={setEarmarking}>
                 <SelectTrigger className={`${theme.background} ${theme.text}`}>
