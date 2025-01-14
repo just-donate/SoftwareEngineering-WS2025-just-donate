@@ -81,7 +81,7 @@ function GalleryPage() {
     : photos;
 
   return (
-    <div className={`container mx-auto p-4`}>
+    <div className={'container mx-auto p-4'}>
       <h1 className={`text-2xl font-bold mb-4 ${theme.text}`}>Photo Gallery</h1>
       <Card className={theme.card}>
         <CardHeader>
@@ -101,9 +101,9 @@ function GalleryPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Input 
-              type="file" 
-              onChange={handleFileChange} 
+            <Input
+              type="file"
+              onChange={handleFileChange}
               accept="image/*"
               className={`${theme.background} ${theme.text}`}
             />

@@ -120,7 +120,9 @@ export default function WithdrawalManager({
             <div className="text-green-500">{successMessage}</div>
           )}
 
-          <Button onClick={createNewWithdrawal} className={theme.primary}>Create Withdrawal</Button>
+          <Button onClick={createNewWithdrawal} className={theme.primary}>
+            Create Withdrawal
+          </Button>
         </div>
       </CardContent>
     </Card>

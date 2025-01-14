@@ -104,7 +104,10 @@ export default function BankAccountManager({
                 step="0.01"
                 className={`${theme.background} ${theme.text}`}
               />
-              <Button onClick={addBankAccount} className={`mt-2 ${theme.primary}`}>
+              <Button
+                onClick={addBankAccount}
+                className={`mt-2 ${theme.primary}`}
+              >
                 Add Account
               </Button>
             </div>
@@ -128,7 +131,9 @@ export default function BankAccountManager({
                 className={`p-4 rounded-lg flex justify-between items-center ${theme.secondary}`}
               >
                 <span className={theme.text}>{account.name}</span>
-                <span className={`font-medium ${theme.text}`}>{account.balance.amount}</span>
+                <span className={`font-medium ${theme.text}`}>
+                  {account.balance.amount}
+                </span>
               </li>
             ))}
           </ul>

@@ -188,7 +188,9 @@ export default function TransactionManager({
               <div className="text-green-500">{successMessage}</div>
             )}
 
-            <Button onClick={createTransaction} className={theme.primary}>Create Transaction</Button>
+            <Button onClick={createTransaction} className={theme.primary}>
+              Create Transaction
+            </Button>
           </div>
         </CardContent>
       </Card>

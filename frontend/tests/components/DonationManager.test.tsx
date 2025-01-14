@@ -2,7 +2,10 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import DonationManager from '../../src/components/organization/DonationManager';
 import { BankAccount, Donation, Earmarking } from '../../src/types/types';
-import { createDonation, fetchDonations } from '../../src/app/organization/donations/donations';
+import {
+  createDonation,
+  fetchDonations,
+} from '../../src/app/organization/donations/donations';
 import { fetchEarmarkings } from '../../src/app/organization/earmarkings/earmarkings';
 import { fetchBankAccounts } from '../../src/app/organization/bank-accounts/bank-accounts';
 import '@testing-library/jest-dom';
@@ -62,7 +65,10 @@ describe('DonationManager Component', () => {
     (fetchBankAccounts as jest.Mock).mockResolvedValue(mockBankAccounts);
     (fetchEarmarkings as jest.Mock).mockResolvedValue(mockEarmarkings);
     render(
-      <DonationManager initialDonations={mockInitialDonations} organizationId={organizationId} />
+      <DonationManager
+        initialDonations={mockInitialDonations}
+        organizationId={organizationId}
+      />,
     );
   });
 
@@ -75,9 +81,15 @@ describe('DonationManager Component', () => {
   it('creates a new donation', async () => {
     (createDonation as jest.Mock).mockResolvedValueOnce({ success: true });
 
-    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), { target: { value: 'jane@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/Amount/i), { target: { value: '50.0' } });
+    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), {
+      target: { value: 'Jane Doe' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), {
+      target: { value: 'jane@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/Amount/i), {
+      target: { value: '50.0' },
+    });
 
     // Open the Select for earmarking
     fireEvent.click(screen.getByText(/Select Earmarking/i));
@@ -90,27 +102,42 @@ describe('DonationManager Component', () => {
     fireEvent.click(screen.getByText(/Create Donation/i));
 
     await waitFor(() => {
-      expect(screen.getByText(/Donation created successfully/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Donation created successfully/i),
+      ).toBeInTheDocument();
     });
   });
 
   it('creates a new donation with empty fields', async () => {
-    (createDonation as jest.Mock).mockResolvedValueOnce({ success: false, error: 'Error' });
+    (createDonation as jest.Mock).mockResolvedValueOnce({
+      success: false,
+      error: 'Error',
+    });
 
     fireEvent.click(screen.getByText(/Create Donation/i));
 
     await waitFor(() => {
-      expect(screen.getByText(/Please fill in all fields/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Please fill in all fields/i),
+      ).toBeInTheDocument();
     });
   });
 
   it('creates a new donation with error', async () => {
+    (createDonation as jest.Mock).mockResolvedValueOnce({
+      success: false,
+      error: 'Error',
+    });
 
-    (createDonation as jest.Mock).mockResolvedValueOnce({ success: false, error: 'Error' });
-
-    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), { target: { value: 'jane@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/Amount/i), { target: { value: '50.0' } });
+    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), {
+      target: { value: 'Jane Doe' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), {
+      target: { value: 'jane@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/Amount/i), {
+      target: { value: '50.0' },
+    });
 
     // Open the Select for earmarking
     fireEvent.click(screen.getByText(/Select Earmarking/i));
@@ -131,7 +158,9 @@ describe('DonationManager Component', () => {
     fireEvent.click(screen.getByText(/Create Donation/i));
 
     await waitFor(() => {
-      expect(screen.getByText(/Please fill in all fields/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Please fill in all fields/i),
+      ).toBeInTheDocument();
     });
   });
-}); 
+});

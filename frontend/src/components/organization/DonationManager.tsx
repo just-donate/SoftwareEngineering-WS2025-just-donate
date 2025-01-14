@@ -144,7 +144,9 @@ export default function DonationManager({
                   ))}
                 </SelectContent>
               </Select>
-              <Button onClick={addDonation} className={theme.primary}>Create Donation</Button>
+              <Button onClick={addDonation} className={theme.primary}>
+                Create Donation
+              </Button>
               {successMessage && (
                 <p className="text-green-500">{successMessage}</p>
               )}

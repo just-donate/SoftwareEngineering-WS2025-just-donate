@@ -120,7 +120,9 @@ export default function TransferManager({
             <div className="text-green-500">{successMessage}</div>
           )}
 
-          <Button onClick={createNewTransfer} className={theme.primary}>Create Transfer</Button>
+          <Button onClick={createNewTransfer} className={theme.primary}>
+            Create Transfer
+          </Button>
         </div>
       </CardContent>
     </Card>

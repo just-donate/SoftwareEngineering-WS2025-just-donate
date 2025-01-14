@@ -80,7 +80,9 @@ export default function EarmarkingManager({
                 placeholder="Earmarking name"
                 className={`${theme.background} ${theme.text}`}
               />
-              <Button onClick={addEarmarking} className={theme.primary}>Add</Button>
+              <Button onClick={addEarmarking} className={theme.primary}>
+                Add
+              </Button>
             </div>
             {error && <div className="text-red-500">{error}</div>}
             {successMessage && (
@@ -97,7 +99,10 @@ export default function EarmarkingManager({
         <CardContent>
           <ul className="space-y-2">
             {earmarkings.map((earmarking) => (
-              <li key={earmarking.name} className={`p-2 rounded-lg ${theme.secondary}`}>
+              <li
+                key={earmarking.name}
+                className={`p-2 rounded-lg ${theme.secondary}`}
+              >
                 <span className={theme.text}>{earmarking.name}</span>
               </li>
             ))}

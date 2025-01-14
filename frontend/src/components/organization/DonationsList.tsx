@@ -57,7 +57,9 @@ export default function DonationsList({
           className={`max-w-sm ${theme.background} ${theme.text}`}
         />
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className={`w-[180px] ${theme.background} ${theme.text}`}>
+          <SelectTrigger
+            className={`w-[180px] ${theme.background} ${theme.text}`}
+          >
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent className={theme.card}>
