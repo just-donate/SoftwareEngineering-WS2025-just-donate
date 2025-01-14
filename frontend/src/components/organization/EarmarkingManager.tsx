@@ -113,9 +113,13 @@ export default function EarmarkingManager({
                 key={earmarking.name}
                 className={`p-2 rounded-lg ${theme.secondary}`}
               >
-                <div className={`font-medium ${theme.text}`}>{earmarking.name}</div>
+                <div className={`font-medium ${theme.text}`}>
+                  {earmarking.name}
+                </div>
                 {earmarking.description && (
-                  <div className={`text-sm text-muted-foreground ${theme.text}`}>
+                  <div
+                    className={`text-sm text-muted-foreground ${theme.text}`}
+                  >
                     {earmarking.description}
                   </div>
                 )}
