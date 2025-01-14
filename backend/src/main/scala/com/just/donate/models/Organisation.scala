@@ -2,13 +2,13 @@ package com.just.donate.models
 
 import com.just.donate.config.Config
 import com.just.donate.models.Types.DonationGetter
-import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
+import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
 import com.just.donate.notify.EmailMessage
-import com.just.donate.notify.messages.{TransferMessage, WithdrawalMessage}
+import com.just.donate.notify.messages.{ TransferMessage, WithdrawalMessage }
 import com.just.donate.utils.Money
 
 import java.time.LocalDateTime
-import java.util.{Optional, UUID}
+import java.util.{ Optional, UUID }
 import scala.math.Ordered.orderingToOrdered
 
 case class Organisation(
@@ -72,7 +72,7 @@ case class Organisation(
   def removeEarmarking(earmarking: String): Organisation =
     getEarmarking(earmarking) match
       case Some(earmark) => copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmark))))
-      case None => this
+      case None          => this
 
   def getDonations: Seq[Donation] = donations.values.toSeq
 
@@ -143,7 +143,7 @@ case class Organisation(
       case Some(acc) =>
         val newAccount = donationPart.earmarking match
           case Some(earmark) => acc.donate(donationPart, earmark)
-          case None => acc.donate(donationPart)
+          case None          => acc.donate(donationPart)
 
         newAccount match
           case Left(e) => Left(e)
@@ -180,7 +180,7 @@ case class Organisation(
     config: Config
   ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
     getAccount(accountName) match
-      case None => Left(WithdrawError.INVALID_ACCOUNT)
+      case None          => Left(WithdrawError.INVALID_ACCOUNT)
       case Some(account) => withdrawal(amount, account, description, earmarking, config)
 
   def withdrawal(
@@ -196,7 +196,7 @@ case class Organisation(
         val newAccounts = accounts.updated(account.name, updatedAccount)
         val expense = Expense(description, amount, earmarking, donationParts)
         val newDonations = getDonationsAfterWithdrawal(donationParts) match
-          case Left(error) => return Left(error)
+          case Left(error)  => return Left(error)
           case Right(value) => value
 
         val updatedOrg = copy(accounts = newAccounts, donations = newDonations, expenses = expenses.appended(expense))
@@ -220,7 +220,7 @@ case class Organisation(
   ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
     (getAccount(fromAccount), getAccount(toAccount)) match
       case (Some(from), Some(to)) => transfer(amount, from, to, config)
-      case _ => Left(TransferError.INVALID_ACCOUNT)
+      case _                      => Left(TransferError.INVALID_ACCOUNT)
 
   /**
    * Transfer between accounts in the organisation. This function is the entry point for transferring between accounts.
@@ -237,7 +237,9 @@ case class Organisation(
     toAccount: Account,
     config: Config
   ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
-    if fromAccount.totalBalance < amount then return Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
+    if fromAccount.totalBalance < amount then
+      println("org - insufficient funds")
+      return Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
 
     if amount <= Money.ZERO then return Left(TransferError.NON_POSITIVE_AMOUNT)
 
@@ -247,7 +249,7 @@ case class Organisation(
     val updatedTo = parts.foldLeft(toAccount): (account, donationPart) =>
       donationPart match
         case (Some(earmarking), donationPart) => account.donate(donationPart, earmarking).toOption.get
-        case (None, donationPart) => account.donate(donationPart).toOption.get
+        case (None, donationPart)             => account.donate(donationPart).toOption.get
 
     val updatedOrg = copy(
       accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
@@ -261,28 +263,27 @@ case class Organisation(
       val (optEarmarking, donationPart) = remainingParts.head
       remainingParts = remainingParts.tail
 
-      val fromQueueHasRemainingPart = queues.exists(queue => queue.donationQueue.queue.exists(
-        reservable =>
-          reservable.value.donation.get.id == donationPart.donation.get.id
-      ))
+      val fromQueueHasRemainingPart = queues.exists(queue =>
+        queue.donationQueue.queue.exists(reservable => reservable.value.donation.get.id == donationPart.donation.get.id)
+      )
 
       if !fromQueueHasRemainingPart then
         donors.get(donationPart.donation.get.donorId) match
           case None => return Left(TransferError.INVALID_DONOR)
           case Some(donor) =>
             emailMessages = emailMessages :+ EmailMessage(
-                donor.email,
-                EmailMessage.prepareString(
-                  theme.map(_.emailTemplates.transferTemplate),
-                  TransferMessage(
-                    donor,
-                    config,
-                    this,
-                    fromAccount
-                  )
-                ),
-                "Just Donate: News about your donation"
-              )
+              donor.email,
+              EmailMessage.prepareString(
+                theme.map(_.emailTemplates.transferTemplate),
+                TransferMessage(
+                  donor,
+                  config,
+                  this,
+                  fromAccount
+                )
+              ),
+              "Just Donate: News about your donation"
+            )
 
     Right(updatedOrg, emailMessages)
 
@@ -322,7 +323,7 @@ case class Organisation(
       val donationIsFullyUsed = donationPart.donation.get.amountRemaining == Money.ZERO
       if donationIsFullyUsed then
         val donor = donors.get(donationPart.donation.get.donorId) match
-          case None => return Left(WithdrawError.INVALID_DONOR)
+          case None        => return Left(WithdrawError.INVALID_DONOR)
           case Some(donor) => donor
         val trackingId = donor.id
         val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId}"
@@ -343,3 +344,4 @@ case class Organisation(
         )
 
     Right(emailMessages)
+

@@ -6,6 +6,7 @@ import com.just.donate.config.Config
 import com.just.donate.db.Repository
 import com.just.donate.models.Organisation
 import com.just.donate.models.errors.WithdrawError
+import com.just.donate.models.errors.TransferError
 import com.just.donate.notify.IEmailService
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
@@ -26,9 +27,15 @@ object TransferRoute:
           (for
             transfer <- req.as[RequestTransfer]
             emailMessages <- loadAndSaveOrganisationOps(organisationId)(repository)(org =>
-              org.transfer(transfer.amount, transfer.fromAccount, transfer.toAccount, config) match
-                case Left(error)                    => (org, Left(error))
-                case Right((newOrg, emailMessages)) => (newOrg, Right(emailMessages))
+              try
+                org.transfer(transfer.amount, transfer.fromAccount, transfer.toAccount, config) match
+                  case Left(error)                    => (org, Left(error))
+                  case Right((newOrg, emailMessages)) => (newOrg, Right(emailMessages))
+              catch
+                case (e: Throwable) =>
+                  e.printStackTrace()
+                  println(e)
+                  (org, Left(TransferError.INVALID_ACCOUNT))
             )
             response <- emailMessages match
               case None                      => BadRequest("Organisation not found")
