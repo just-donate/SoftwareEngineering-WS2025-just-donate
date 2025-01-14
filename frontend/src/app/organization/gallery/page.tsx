@@ -2,7 +2,6 @@
 
 import GalleryManager from '../../../components/organization/GalleryManager';
 import withAuth from '../api/RequiresAuth';
-import { useTheme } from '@/contexts/ThemeContext';
 
 function GalleryPage() {
   const organisationId = '591671920';
