@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount } from '@/types/types';
+import { fetchBankAccounts, postBankAccount } from '@/app/organization/bank-accounts/bank-accounts';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,49 +34,11 @@ export default function BankAccountManager({
   const [successMessage, setSuccessMessage] = useState('');
 
   const addBankAccount = async () => {
-    if (!newAccountName || !newAccountAmount) return;
-
-    try {
-      const response = await fetch(
-        `${API_URL}/organisation/${organizationId}/account`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: newAccountName,
-            balance: {
-              amount: newAccountAmount,
-            },
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to create bank account');
-      }
-
-      // Optimistically update the UI
-      const newAccount: BankAccount = {
-        name: newAccountName,
-        balance: {
-          amount: newAccountAmount,
-        },
-      };
-      setAccounts([...accounts, newAccount]);
-      setNewAccountName('');
-      setNewAccountAmount('');
-      setSuccessMessage('Bank account created successfully!');
+    const result = await postBankAccount(organizationId, newAccountName, newAccountAmount);
+    if (result.status === 200) {
+      setSuccessMessage('Bank account added successfully');
       setError('');
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : 'Failed to create bank account',
-      );
-      setSuccessMessage('');
+      fetchBankAccounts(organizationId).then(setAccounts);
     }
   };
 
