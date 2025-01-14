@@ -172,15 +172,6 @@ describe('DonationManager Component', () => {
       );
     });
 
-    await act(async () => {
-      renderWithThemeProvider(
-        <DonationManager
-          initialDonations={mockInitialDonations}
-          organizationId={organizationId}
-        />,
-      );
-    });
-
     fireEvent.change(screen.getByTestId('donor-name-input'), {
       target: { value: 'Jane Doe' },
     });
