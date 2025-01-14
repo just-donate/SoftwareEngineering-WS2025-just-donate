@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { theme } = useTheme();
   const orgId = '591671920';
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -67,11 +69,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border border-gray-300 rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+    <div
+      className={`max-w-md mx-auto mt-10 p-6 border border-gray-300 rounded-lg shadow ${theme.card}`}
+    >
+      <h1
+        className={`text-2xl font-bold mb-6 text-center ${theme.text} ${theme.font}`}
+      >
+        Login
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-gray-700 mb-1">
+          <label htmlFor="email" className={`block mb-1 ${theme.text}`}>
             Email:
           </label>
           <input
@@ -80,11 +88,11 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 ${theme.text} ${theme.background}`}
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-gray-700 mb-1">
+          <label htmlFor="password" className={`block mb-1 ${theme.text}`}>
             Password:
           </label>
           <input
@@ -93,13 +101,13 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 ${theme.text} ${theme.background}`}
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          className={`w-full py-2 rounded transition ${theme.primary}`}
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
