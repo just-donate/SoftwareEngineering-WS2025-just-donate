@@ -14,7 +14,7 @@ object AppConfig:
 
     AppConfig(
       environment match
-        case AppEnvironment.DEVELOPMENT => ConfigFactory.load("application.dev")
+        case AppEnvironment.DEVELOPMENT => ConfigFactory.load("application.dev.conf")
         case AppEnvironment.PRODUCTION  => ConfigFactory.load()
       ,
       environment

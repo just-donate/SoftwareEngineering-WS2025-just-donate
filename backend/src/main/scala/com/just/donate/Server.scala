@@ -8,6 +8,7 @@ import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
+import com.just.donate.api.public.OrganizationPublicRoute
 import com.just.donate.api.{CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute}
 import com.just.donate.config.{AppConfig, AppEnvironment, Config}
 import com.just.donate.db.mongo.{MongoErrorLogRepository, MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository}
@@ -67,6 +68,7 @@ object Server extends IOApp:
         case AppEnvironment.PRODUCTION  => new EmailService(appConfig)
 
       val securedOrganisationApi: HttpRoutes[IO] = AuthMiddleware.apply(organisationApi(organisationRepository))
+      val publicOrganisationApi: HttpRoutes[IO] = OrganizationPublicRoute.publicApi(organisationRepository)
       val securedLogoutRoute: HttpRoutes[IO] = AuthMiddleware.apply(LogoutRoute.logoutRoute(appConfig))
       val securedCheckAuthRoute: HttpRoutes[IO] = AuthMiddleware.apply(CheckAuthRoute.checkAuthRoute)
       val securedRegisterRoute: HttpRoutes[IO] =
@@ -85,6 +87,7 @@ object Server extends IOApp:
         "check-auth" -> securedCheckAuthRoute,
         "logout" -> securedLogoutRoute,
         "organisation" -> securedOrganisationApi,
+        "public/organisation" -> publicOrganisationApi,
         "donate" -> securedDonationRoute,
         "transfer" -> securedTransferRoute,
         "withdraw" -> securedWithdrawalRoute,
