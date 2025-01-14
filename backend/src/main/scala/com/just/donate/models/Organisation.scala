@@ -7,7 +7,7 @@ import com.just.donate.notify.EmailMessage
 import com.just.donate.utils.Money
 
 import java.time.LocalDateTime
-import java.util.{Optional, UUID}
+import java.util.UUID
 import scala.math.Ordered.orderingToOrdered
 
 case class Organisation(
@@ -22,7 +22,7 @@ case class Organisation(
   def id: String = math.abs(name.hashCode).toString
 
   def getEarmarkings: Set[String] = accounts.values.flatMap(_.boundDonations.map(_._1)).toSet
-  
+
   def setTheme(theme: ThemeConfig): Organisation = copy(theme = Some(theme))
 
   /**
@@ -60,7 +60,6 @@ case class Organisation(
    */
   def removeEarmarking(earmarking: String): Organisation =
     copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmarking))))
-
 
   def getDonations: Seq[Donation] = donations.values.toSeq
 
@@ -223,48 +222,17 @@ case class Organisation(
 
     if fromAccount.name == toAccount.name then return Left(TransferError.SAME_SOURCE_AND_DESTINATION_ACCOUNT)
 
-    val (remaining, donationPart, earmarked, updatedFrom) = fromAccount.pull(amount)
-    val updatedTo = toAccount.donate(donationPart, earmarked)
-
+    val (parts, updatedFrom) = fromAccount.pull(amount)
+    val updatedTo = parts.foldLeft(toAccount): (account, donationPart) =>
+        donationPart match
+          case (Some(earmarking), donationPart) => account.donate(donationPart, earmarking).toOption.get
+          case (None, donationPart)             => account.donate(donationPart).toOption.get
+    
     val updatedOrg = copy(
-      accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo.toOption.get)
+      accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
     )
-
-    val fromQueue = earmarked match
-      case None             => updatedFrom.unboundDonations
-      case Some(earmarking) => updatedFrom.boundDonations.find { (key, _) => key == earmarking }.get._2
-    val fromQueueHasRemainingPart =
-      fromQueue.donationQueue.queue.exists(reservable =>
-        reservable.value.donation.get.id == donationPart.donation.get.id
-      )
-
-    val emailMessage: Option[EmailMessage] =
-      if !fromQueueHasRemainingPart then
-        donors.get(donationPart.donation.get.donorId) match
-          case None => return Left(TransferError.INVALID_DONOR)
-          case Some(donor) =>
-            val trackingId = donor.id
-            val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
-            Some(
-              EmailMessage(
-                donor.email,
-                f"""Your recent donation to ${name} has been fully transferred away from the account ${fromAccount.name}.
-                   |To see more details about the status of your donation, visit the following link
-                   |${trackingLink}
-                   |or enter your tracking id
-                   |${trackingId}
-                   |on our tracking page
-                   |${config.frontendUrl}""".stripMargin,
-                "Just Donate: News about your donation"
-              )
-            )
-      else None
-
-    if remaining == Money.ZERO then Right(updatedOrg, emailMessage.toSeq)
-    else
-      updatedOrg.transfer(remaining, fromAccount, toAccount, config).map {
-        case (org, emailMessages) => (org, emailMessages.prependedAll(emailMessage))
-      }
+    
+    Right((updatedOrg, Seq.empty[EmailMessage]))
 
   def totalBalance: Money =
     accounts.map(_._2.totalBalance).sum
