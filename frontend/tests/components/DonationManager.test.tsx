@@ -51,9 +51,11 @@ const mockBankAccounts: BankAccount[] = [
 const mockEarmarkings: Earmarking[] = [
   {
     name: 'General Purpose',
+    description: 'General Purpose',
   },
   {
     name: 'Special Purpose',
+    description: 'Special Purpose',
   },
 ];
 

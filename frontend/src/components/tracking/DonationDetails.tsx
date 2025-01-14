@@ -3,6 +3,9 @@ import { StatusTimeline } from './StatusTimeline';
 import { customStyles } from '@/styles/custom';
 import { dateFormatter } from '@/lib/utils';
 import { DonationMap } from './DonationMap';
+import { EarmarkingImage } from '@/types/types';
+import { fetchEarmarkingImages } from '@/app/organization/gallery/gallery';
+import { useState, useEffect } from 'react';
 
 interface DonationDetailsProps {
   donation: Donation;
@@ -15,12 +18,12 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({
 }) => {
   const position: [number, number] = [-3.315502, 40.016154];
 
-  // Placeholder images
-  const images = [
-    'https://via.placeholder.com/300x200?text=Image+1',
-    'https://via.placeholder.com/300x200?text=Image+2',
-  ];
+  const [images, setImages] = useState<string[]>([]);
 
+  useEffect(() => {
+    fetchEarmarkingImages(donation.organisation, donation.earmarking).then(images => setImages(images.map(image => image.image.fileUrl)));
+  }, [donation.organisation, donation.earmarking]);
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div

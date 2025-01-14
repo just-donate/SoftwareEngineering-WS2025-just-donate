@@ -104,8 +104,8 @@ export default function GalleryManager({
               value={earmarkingToUpload}
               onValueChange={setEarmarkingToUpload}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Earmarking" />
+              <SelectTrigger data-testid="select-earmarking-upload">
+                <SelectValue placeholder="Select Earmarking to upload to" />
               </SelectTrigger>
               <SelectContent>
                 {earmarkings.map((earmarking) => (
@@ -115,12 +115,13 @@ export default function GalleryManager({
                 ))}
               </SelectContent>
             </Select>
-            <Input type="file" onChange={handleFileChange} accept="image/*" />
+            <Input type="file" onChange={handleFileChange} accept="image/*" data-testid="photo-upload"/>
             <Button
               onClick={handleUpload}
               disabled={!earmarkingToUpload || !file}
+              data-testid="upload-button"
             >
-              Upload Photo
+              Upload
             </Button>
             {error && <p className="text-red-500">{error}</p>}
             {success && <p className="text-green-500">{success}</p>}
@@ -131,7 +132,7 @@ export default function GalleryManager({
         value={selectedEarmarking}
         onValueChange={updateSelectedEarmarking}
       >
-        <SelectTrigger>
+        <SelectTrigger data-testid="select-earmarking-view">
           <SelectValue placeholder="Select Earmarking" />
         </SelectTrigger>
         <SelectContent>
