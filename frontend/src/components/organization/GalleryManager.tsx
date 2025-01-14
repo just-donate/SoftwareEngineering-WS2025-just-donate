@@ -115,7 +115,12 @@ export default function GalleryManager({
                 ))}
               </SelectContent>
             </Select>
-            <Input type="file" onChange={handleFileChange} accept="image/*" data-testid="photo-upload"/>
+            <Input
+              type="file"
+              onChange={handleFileChange}
+              accept="image/*"
+              data-testid="photo-upload"
+            />
             <Button
               onClick={handleUpload}
               disabled={!earmarkingToUpload || !file}

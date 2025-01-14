@@ -1,7 +1,16 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import GalleryManager from '../../src/components/organization/GalleryManager';
-import { fetchEarmarkingImages, uploadEarmarkingImage } from '../../src/app/organization/gallery/gallery';
+import {
+  fetchEarmarkingImages,
+  uploadEarmarkingImage,
+} from '../../src/app/organization/gallery/gallery';
 import { fetchEarmarkings } from '../../src/app/organization/earmarkings/earmarkings';
 import { Earmarking, EarmarkingImage } from '../../src/types/types';
 
@@ -16,7 +25,7 @@ jest.mock('../../src/app/organization/earmarkings/earmarkings', () => ({
 }));
 
 const mockEarmarkings: Earmarking[] = [
-    { name: 'Test Earmarking', description: 'Test Description' },
+  { name: 'Test Earmarking', description: 'Test Description' },
 ];
 
 describe('GalleryManager', () => {
@@ -43,8 +52,13 @@ describe('GalleryManager', () => {
 
     // Wait for the images to be fetched and rendered
     await waitFor(() => {
-      expect(fetchEarmarkingImages).toHaveBeenCalledWith(organisationId, expect.any(String)); // Check if the function was called
-      expect(screen.getByAltText('Photo for Test Earmarking')).toBeInTheDocument(); // Check if the first image is rendered
+      expect(fetchEarmarkingImages).toHaveBeenCalledWith(
+        organisationId,
+        expect.any(String),
+      ); // Check if the function was called
+      expect(
+        screen.getByAltText('Photo for Test Earmarking'),
+      ).toBeInTheDocument(); // Check if the first image is rendered
     });
   });
 
@@ -57,7 +71,9 @@ describe('GalleryManager', () => {
 
     // Simulate file selection
     const fileInput = screen.getByTestId('photo-upload');
-    const file = new File(['dummy content'], 'example.png', { type: 'image/png' });
+    const file = new File(['dummy content'], 'example.png', {
+      type: 'image/png',
+    });
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Simulate selecting an earmarking by clicking the first select earmarking and then the option
@@ -72,13 +88,22 @@ describe('GalleryManager', () => {
 
     // Wait for the upload to complete
     await waitFor(() => {
-      expect(uploadEarmarkingImage).toHaveBeenCalledWith(organisationId, 'Test Earmarking', file);
-      expect(screen.getByText(/photo uploaded successfully/i)).toBeInTheDocument(); // Check success message
+      expect(uploadEarmarkingImage).toHaveBeenCalledWith(
+        organisationId,
+        'Test Earmarking',
+        file,
+      );
+      expect(
+        screen.getByText(/photo uploaded successfully/i),
+      ).toBeInTheDocument(); // Check success message
     });
   });
 
   it('displays an error message on upload failure', async () => {
-    (uploadEarmarkingImage as jest.Mock).mockResolvedValue({ success: false, error: 'Upload failed' });
+    (uploadEarmarkingImage as jest.Mock).mockResolvedValue({
+      success: false,
+      error: 'Upload failed',
+    });
 
     await act(async () => {
       render(<GalleryManager organisationId={organisationId} />);
@@ -86,7 +111,9 @@ describe('GalleryManager', () => {
 
     // Simulate file selection
     const fileInput = screen.getByTestId('photo-upload');
-    const file = new File(['dummy content'], 'example.png', { type: 'image/png' });
+    const file = new File(['dummy content'], 'example.png', {
+      type: 'image/png',
+    });
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     // Simulate selecting an earmarking by clicking the select and then the option
