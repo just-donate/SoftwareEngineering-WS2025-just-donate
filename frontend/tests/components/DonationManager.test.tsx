@@ -172,7 +172,6 @@ describe('DonationManager Component', () => {
       );
     });
 
-
     await act(async () => {
       renderWithThemeProvider(
         <DonationManager
