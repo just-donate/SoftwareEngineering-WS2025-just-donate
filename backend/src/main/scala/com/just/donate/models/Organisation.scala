@@ -8,7 +8,7 @@ import com.just.donate.notify.EmailMessage
 import com.just.donate.utils.Money
 
 import java.time.LocalDateTime
-import java.util.{Optional, UUID}
+import java.util.UUID
 import scala.math.Ordered.orderingToOrdered
 
 case class Organisation(
@@ -17,14 +17,17 @@ case class Organisation(
   donations: Map[String, Donation] = Map.empty,
   expenses: Seq[Expense] = Seq.empty,
   donors: Map[String, Donor] = Map.empty,
+  earmarkings: Seq[Earmarking] = Seq.empty,
   theme: Option[ThemeConfig] = None,
   earmarkingImages: Map[String, Seq[EarmarkingImage]] = Map.empty
 ):
 
   def id: String = math.abs(name.hashCode).toString
 
-  def getEarmarkings: Set[String] = accounts.values.flatMap(_.boundDonations.map(_._1)).toSet
-  
+  def getEarmarkings: Set[Earmarking] = earmarkings.toSet
+
+  def getEarmarking(name: String): Option[Earmarking] = earmarkings.find(e => e.name == name || e.id == name)
+
   def setTheme(theme: ThemeConfig): Organisation = copy(theme = Some(theme))
 
   /**
@@ -52,8 +55,11 @@ case class Organisation(
    * @param earmarking the name of the earmarking.
    * @return a new organisation with the earmarking added to all accounts.
    */
-  def addEarmarking(earmarking: String): Organisation =
-    copy(accounts = accounts.map(t => (t._1, t._2.addEarmarking(earmarking))))
+  def addEarmarking(earmarking: Earmarking): Organisation =
+    copy(
+      accounts = accounts.map(t => (t._1, t._2.addEarmarking(earmarking))),
+      earmarkings = earmarkings.appended(earmarking)
+    )
 
   /**
    * Remove an earmarking from all accounts in the organisation.
@@ -61,19 +67,9 @@ case class Organisation(
    * @return a new organisation with the earmarking removed from all accounts.
    */
   def removeEarmarking(earmarking: String): Organisation =
-    copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmarking))))
-
-
-  /**
-   * Add a new earmarking image to the organisation.
-   * @param earmarking the name of the earmarking.
-   * @param image the image to add.
-   * @return a new organisation with the earmarking image added.
-   */
-  def addEarmarkingImage(earmarking: String, image: EarmarkingImage): Organisation =
-    copy(earmarkingImages = earmarkingImages.updated(earmarking, earmarkingImages.getOrElse(earmarking, Seq.empty).appended(image)))
-
-  def getEarmarkingImages(earmarking: String): Option[Seq[EarmarkingImage]] = earmarkingImages.get(earmarking)
+    getEarmarking(earmarking) match
+      case Some(earmark) => copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmark))))
+      case None          => this
 
   def getDonations: Seq[Donation] = donations.values.toSeq
 
@@ -171,7 +167,7 @@ case class Organisation(
     amount: Money,
     accountName: String,
     description: String,
-    earmarking: Option[String],
+    earmarking: Option[Earmarking],
     config: Config
   ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
     getAccount(accountName) match
@@ -182,7 +178,7 @@ case class Organisation(
     amount: Money,
     account: Account,
     description: String,
-    earmarking: Option[String],
+    earmarking: Option[Earmarking],
     config: Config
   ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
     account.withdrawal(amount, earmarking) match
@@ -236,53 +232,22 @@ case class Organisation(
 
     if fromAccount.name == toAccount.name then return Left(TransferError.SAME_SOURCE_AND_DESTINATION_ACCOUNT)
 
-    val (remaining, donationPart, earmarked, updatedFrom) = fromAccount.pull(amount)
-    val updatedTo = toAccount.donate(donationPart, earmarked)
+    val (parts, updatedFrom) = fromAccount.pull(amount)
+    val updatedTo = parts.foldLeft(toAccount): (account, donationPart) =>
+      donationPart match
+        case (Some(earmarking), donationPart) => account.donate(donationPart, earmarking).toOption.get
+        case (None, donationPart)             => account.donate(donationPart).toOption.get
 
     val updatedOrg = copy(
-      accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo.toOption.get)
+      accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
     )
 
-    val fromQueue = earmarked match
-      case None             => updatedFrom.unboundDonations
-      case Some(earmarking) => updatedFrom.boundDonations.find { (key, _) => key == earmarking }.get._2
-    val fromQueueHasRemainingPart =
-      fromQueue.donationQueue.queue.exists(reservable =>
-        reservable.value.donation.get.id == donationPart.donation.get.id
-      )
-
-    val emailMessage: Option[EmailMessage] =
-      if !fromQueueHasRemainingPart then
-        donors.get(donationPart.donation.get.donorId) match
-          case None => return Left(TransferError.INVALID_DONOR)
-          case Some(donor) =>
-            val trackingId = donor.id
-            val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
-            Some(
-              EmailMessage(
-                donor.email,
-                f"""Your recent donation to ${name} has been fully transferred away from the account ${fromAccount.name}.
-                   |To see more details about the status of your donation, visit the following link
-                   |${trackingLink}
-                   |or enter your tracking id
-                   |${trackingId}
-                   |on our tracking page
-                   |${config.frontendUrl}""".stripMargin,
-                "Just Donate: News about your donation"
-              )
-            )
-      else None
-
-    if remaining == Money.ZERO then Right(updatedOrg, emailMessage.toSeq)
-    else
-      updatedOrg.transfer(remaining, fromAccount, toAccount, config).map {
-        case (org, emailMessages) => (org, emailMessages.prependedAll(emailMessage))
-      }
+    Right((updatedOrg, Seq.empty[EmailMessage]))
 
   def totalBalance: Money =
     accounts.map(_._2.totalBalance).sum
 
-  def totalEarmarkedBalance(earmarking: String): Money =
+  def totalEarmarkedBalance(earmarking: Earmarking): Money =
     accounts.map(_._2.totalEarmarkedBalance(earmarking)).sum
 
   def getDonations(donorId: String): Seq[Donation] =
@@ -318,7 +283,7 @@ case class Organisation(
           case None        => return Left(WithdrawError.INVALID_DONOR)
           case Some(donor) => donor
         val trackingId = donor.id
-        val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+        val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId}"
 
         emailMessages = emailMessages.appended(
           EmailMessage(

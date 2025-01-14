@@ -2,7 +2,7 @@ package com.just.donate.api
 
 import cats.effect.*
 import com.just.donate.db.Repository
-import com.just.donate.models.{Organisation, ThemeConfig, EarmarkingImage}
+import com.just.donate.models.{Organisation, ThemeConfig, EarmarkingImage, Earmarking}
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisation, loadOrganisation}
 import io.circe.*
@@ -38,7 +38,9 @@ object OrganisationRoute:
       case req @ POST -> Root / organisationId / "earmarking" =>
         for
           earmarking <- req.as[RequestEarmarking]
-          response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarking(earmarking.name))
+          response <- loadAndSaveOrganisation(organisationId)(repository)(
+            _.addEarmarking(Earmarking(earmarking.name, earmarking.description))
+          )
         yield response
 
       case req @ POST -> Root / organisationId / "earmarking" / earmarking / "image" =>
@@ -52,18 +54,19 @@ object OrganisationRoute:
         // We need to flatten the array to get a single array of EarmarkingImage objects
         loadOrganisation(organisationId)(repository)(_.getEarmarkingImages(earmarking).map(images => images.map(ResponseEarmarkingImage(_))).toSeq.flatten)
 
+        
       case DELETE -> Root / organisationId / "earmarking" / earmarking =>
         loadAndSaveOrganisation(organisationId)(repository)(_.removeEarmarking(earmarking))
 
       case GET -> Root / organisationId / "earmarking" / "list" =>
         loadOrganisation(organisationId)(repository)(
-          _.accounts.headOption.map(
-            _._2.boundDonations.map(_._1).map(ResponseEarmarking(_))
-          ).getOrElse(Seq())
+          _.getEarmarkings.map(e => ResponseEarmarking(e.name, e.description)).toSeq
         )
 
       case GET -> Root / organisationId / "account" / "list" =>
-        loadOrganisation(organisationId)(repository)(_.accounts.map(a => ResponseAccount(a._1, a._2.totalBalance)).toSeq)
+        loadOrganisation(organisationId)(repository)(
+          _.accounts.map(a => ResponseAccount(a._1, a._2.totalBalance)).toSeq
+        )
 
       case req @ POST -> Root / organisationId / "account" =>
         for
@@ -83,22 +86,24 @@ object OrganisationRoute:
           response <- loadAndSaveOrganisation(organisationId)(repository)(_.setTheme(theme))
         yield response
 
-      case GET -> Root / organisationId / "theme" => for
-        organisation <- repository.findById(organisationId)
-        response <- organisation match
-          case Some(org) => org.theme match
-            case Some(value) => Ok(value)
+      case GET -> Root / organisationId / "theme" =>
+        for
+          organisation <- repository.findById(organisationId)
+          response <- organisation match
+            case Some(org) =>
+              org.theme match
+                case Some(value) => Ok(value)
+                case None        => NotFound()
             case None => NotFound()
-          case None => NotFound()
-      yield response
+        yield response
 
   case class RequestOrganisation(name: String)
 
   private[api] case class ResponseOrganisation(organisationId: String, name: String)
 
-  private[api] case class RequestEarmarking(name: String)
+  private[api] case class RequestEarmarking(name: String, description: String)
 
-  private[api] case class ResponseEarmarking(name: String)
+  private[api] case class ResponseEarmarking(name: String, description: String)
 
   private[api] case class RequestEarmarkingImage(fileUrl: String)
 
