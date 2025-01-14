@@ -78,7 +78,7 @@ export const NavBar: React.FC = () => {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-4 py-2 rounded-md text-sm font-medium text-white hover:text-blue-300 transition-colors ${
+                className={`hover:opacity-80 transition-opacity" ${
                   pathname === item.href ? 'font-bold underline' : ''
                 }`}
               >
