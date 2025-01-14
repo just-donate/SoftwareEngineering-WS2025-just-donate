@@ -43,7 +43,7 @@ export default function WithdrawalManager({
       const result = await createWithdrawal(
         organizationId,
         fromAccount,
-        earmarking,
+        earmarking === '' ? null : earmarking,
         { amount: amount },
         description,
       );

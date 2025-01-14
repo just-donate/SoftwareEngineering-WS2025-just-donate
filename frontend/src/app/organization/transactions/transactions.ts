@@ -54,7 +54,7 @@ export async function createTransfer(
 export async function createWithdrawal(
   orgId: string,
   fromAccount: string,
-  earmarking: string,
+  earmarking: string | null,
   amount: Money,
   description: string,
 ): Promise<{ success: boolean; error?: string }> {
