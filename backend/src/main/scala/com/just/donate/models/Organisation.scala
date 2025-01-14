@@ -16,12 +16,15 @@ case class Organisation(
   donations: Map[String, Donation] = Map.empty,
   expenses: Seq[Expense] = Seq.empty,
   donors: Map[String, Donor] = Map.empty,
+  earmarkings: Seq[Earmarking] = Seq.empty,
   theme: Option[ThemeConfig] = None
 ):
 
   def id: String = math.abs(name.hashCode).toString
 
-  def getEarmarkings: Set[String] = accounts.values.flatMap(_.boundDonations.map(_._1)).toSet
+  def getEarmarkings: Set[Earmarking] = earmarkings.toSet
+
+  def getEarmarking(name: String): Option[Earmarking] = earmarkings.find(e => e.name == name || e.id == name)
 
   def setTheme(theme: ThemeConfig): Organisation = copy(theme = Some(theme))
 
@@ -50,8 +53,11 @@ case class Organisation(
    * @param earmarking the name of the earmarking.
    * @return a new organisation with the earmarking added to all accounts.
    */
-  def addEarmarking(earmarking: String): Organisation =
-    copy(accounts = accounts.map(t => (t._1, t._2.addEarmarking(earmarking))))
+  def addEarmarking(earmarking: Earmarking): Organisation =
+    copy(
+      accounts = accounts.map(t => (t._1, t._2.addEarmarking(earmarking))),
+      earmarkings = earmarkings.appended(earmarking)
+    )
 
   /**
    * Remove an earmarking from all accounts in the organisation.
@@ -59,7 +65,9 @@ case class Organisation(
    * @return a new organisation with the earmarking removed from all accounts.
    */
   def removeEarmarking(earmarking: String): Organisation =
-    copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmarking))))
+    getEarmarking(earmarking) match
+      case Some(earmark) => copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmark))))
+      case None          => this
 
   def getDonations: Seq[Donation] = donations.values.toSeq
 
@@ -157,7 +165,7 @@ case class Organisation(
     amount: Money,
     accountName: String,
     description: String,
-    earmarking: Option[String],
+    earmarking: Option[Earmarking],
     config: Config
   ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
     getAccount(accountName) match
@@ -168,7 +176,7 @@ case class Organisation(
     amount: Money,
     account: Account,
     description: String,
-    earmarking: Option[String],
+    earmarking: Option[Earmarking],
     config: Config
   ): Either[WithdrawError, (Organisation, Seq[EmailMessage])] =
     account.withdrawal(amount, earmarking) match
@@ -224,20 +232,20 @@ case class Organisation(
 
     val (parts, updatedFrom) = fromAccount.pull(amount)
     val updatedTo = parts.foldLeft(toAccount): (account, donationPart) =>
-        donationPart match
-          case (Some(earmarking), donationPart) => account.donate(donationPart, earmarking).toOption.get
-          case (None, donationPart)             => account.donate(donationPart).toOption.get
-    
+      donationPart match
+        case (Some(earmarking), donationPart) => account.donate(donationPart, earmarking).toOption.get
+        case (None, donationPart)             => account.donate(donationPart).toOption.get
+
     val updatedOrg = copy(
       accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
     )
-    
+
     Right((updatedOrg, Seq.empty[EmailMessage]))
 
   def totalBalance: Money =
     accounts.map(_._2.totalBalance).sum
 
-  def totalEarmarkedBalance(earmarking: String): Money =
+  def totalEarmarkedBalance(earmarking: Earmarking): Money =
     accounts.map(_._2.totalEarmarkedBalance(earmarking)).sum
 
   def getDonations(donorId: String): Seq[Donation] =
@@ -273,7 +281,7 @@ case class Organisation(
           case None        => return Left(WithdrawError.INVALID_DONOR)
           case Some(donor) => donor
         val trackingId = donor.id
-        val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+        val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId}"
 
         emailMessages = emailMessages.appended(
           EmailMessage(

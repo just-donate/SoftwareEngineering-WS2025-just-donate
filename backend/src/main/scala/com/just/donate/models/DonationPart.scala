@@ -31,5 +31,5 @@ case class DonationPart(amount: Money, donationId: String, donationDate: LocalDa
   def donation(using donationGetter: DonationGetter): Option[Donation] =
     donationGetter(donationId)
 
-  def earmarking(using donationGetter: DonationGetter): Option[String] =
+  def earmarking(using donationGetter: DonationGetter): Option[Earmarking] =
     donationGetter(donationId).flatMap(_.earmarking)

@@ -14,7 +14,7 @@ import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
 
 object UserRoute:
-  
+
   // Define the user API, given a repository instance for User.
   def userApi(userRepo: Repository[String, User], orgRepo: Repository[String, Organisation]): HttpRoutes[IO] =
     HttpRoutes.of[IO] {
@@ -34,8 +34,8 @@ object UserRoute:
               // No duplicate found—proceed to hash the password and create the user.
               val hashedPassword = CryptoUtils.hashPassword(registerReq.password)
 
-              existingOrg.getOrElse(None) match
-                case com.just.donate.models.Organisation(_, _, _, _, _, _) =>
+              existingOrg match
+                case Some(_: Organisation) =>
                   val newUser = User(email = registerReq.email, password = hashedPassword, orgId = registerReq.orgId)
                   for
                     _ <- userRepo.save(newUser)

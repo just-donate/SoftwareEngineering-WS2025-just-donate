@@ -29,6 +29,7 @@ export interface Organization {
 
 export interface Earmarking {
   name: string;
+  description: string;
 }
 
 export interface Transaction {
