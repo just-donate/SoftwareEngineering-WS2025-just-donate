@@ -2,10 +2,11 @@ package com.just.donate.models
 
 import com.just.donate.models.Types.DonationGetter
 import com.just.donate.models.errors.{DonationError, WithdrawError}
-import com.just.donate.utils.CollectionUtils.{map2, updated, updatedReturn}
+import com.just.donate.utils.CollectionUtils.{updated, updatedReturn}
 import com.just.donate.utils.Money
 import com.just.donate.utils.structs.ReservableQueue
 
+import scala.annotation.tailrec
 import scala.math.Ordered.orderingToOrdered
 
 case class Account private (
@@ -53,8 +54,10 @@ case class Account private (
     // 2. Expense is unbound, but not enough unbound donations, return false
 
     // TODO: For now a simple implementation, where we just pull the amount from the unbound donations
-    val (donationParts, updatedFrom) = this.unboundDonations.pull(amount)
-    Right(donationParts, copy(unboundDonations = updatedFrom))
+    val (donationParts, remaining, updatedFrom) = this.unboundDonations.pull(amount)
+
+    if remaining.isDefined && remaining.get > Money.ZERO then Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
+    else Right(donationParts, copy(unboundDonations = updatedFrom))
 
   private def withdrawalBound(
     amount: Money,
@@ -67,11 +70,18 @@ case class Account private (
     //    - if unbound are not enough, do not go into minus, as an account must be covered, return false
 
     // TODO: For now a simple implementation, where we just pull the amount from the bound donations
-    val (updatedFrom, donationParts) =
-      boundDonations.updatedReturn(b => b._1 == earmarking)(b => b._2.pull(amount).map2(q => (b._1, q)))
-    donationParts match
-      case Some(donationParts) => Right((donationParts, copy(boundDonations = updatedFrom)))
-      case None                => Left(WithdrawError.INVALID_EARMARKING)
+    val (updatedFrom, returned) =
+      boundDonations.updatedReturn(b => b._1 == earmarking)((earmarking, queue) =>
+        val (donationParts, remaining, updatedQueue) = queue.pull(amount)
+        ((remaining, donationParts), (earmarking, updatedQueue))
+      )
+
+    returned match
+      case None => return Left(WithdrawError.INVALID_EARMARKING)
+      case Some((remaining, donationParts)) =>
+        remaining match
+          case Some(d) => Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
+          case None    => Right((donationParts, copy(boundDonations = updatedFrom)))
 
   def totalBalance: Money = totalBalanceUnbound + totalBalanceBound
 
@@ -99,18 +109,22 @@ case class Account private (
 
   private[models] def pull(amount: Money)(using
     donationGetter: DonationGetter
-  ): (Money, DonationPart, Option[Earmarking], Account) =
+  ): (Seq[(Option[String], DonationPart)], Account) =
     // TODO: change to actual error handling
     if totalBalance < amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
 
     val (earmarking, queue) = findQueueWithOldestDonation
-    val (donationPart, updatedQueue) = queue.pull(amount, Some(1))
+    val (donationPart, remaining, updatedQueue) = queue.pull(amount, Some(1))
 
     val updatedAccount = earmarking match
       case None    => copy(unboundDonations = updatedQueue)
       case Some(e) => copy(boundDonations = boundDonations.updated(b => b._1 == e)((e, updatedQueue)))
 
-    (amount - donationPart.head.amount, donationPart.head, earmarking, updatedAccount)
+    remaining match
+      case None => (donationPart.map((earmarking, _)), updatedAccount)
+      case Some(r) =>
+        val (donationPart2, updatedAccount2) = updatedAccount.pull(r)
+        (donationPart.map((earmarking, _)) ++ donationPart2, updatedAccount2)
 
   private def findQueueWithOldestDonation(using donationGetter: DonationGetter): (Option[Earmarking], DonationQueue) =
     val allQueues = (None, unboundDonations) +: boundDonations.map(t => (Some(t._1), t._2))

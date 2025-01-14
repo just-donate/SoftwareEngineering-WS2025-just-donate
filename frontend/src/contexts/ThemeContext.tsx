@@ -74,10 +74,14 @@ export const useTheme = () => {
 
 export async function getTheme(organizationId: string): Promise<Theme | null> {
   try {
-    const response = await axiosInstance.get<string>(
+    const response = await axiosInstance.get<Theme>(
       `/organisation/${organizationId}/theme`,
     );
-    return JSON.parse(response.data);
+    if (response.data) {
+      return response.data;
+    } else {
+      return null;
+    }
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 404) {

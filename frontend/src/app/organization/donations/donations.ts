@@ -29,7 +29,7 @@ export async function createDonation(
   donorName: string,
   donorEmail: string,
   amount: Money,
-  earmarking: string,
+  earmarking: string | null,
   accountName: string,
 ) {
   try {
