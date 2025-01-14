@@ -6,10 +6,6 @@ import {
   createDonation,
   fetchDonations,
 } from '../../src/app/organization/donations/donations';
-import {
-  createDonation,
-  fetchDonations,
-} from '../../src/app/organization/donations/donations';
 import { fetchEarmarkings } from '../../src/app/organization/earmarkings/earmarkings';
 import { fetchBankAccounts } from '../../src/app/organization/bank-accounts/bank-accounts';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -56,9 +52,11 @@ const mockBankAccounts: BankAccount[] = [
 const mockEarmarkings: Earmarking[] = [
   {
     name: 'General Purpose',
+    description: 'General purpose earmarking',
   },
   {
     name: 'Special Purpose',
+    description: 'Special purpose earmarking',
   },
 ];
 
@@ -231,4 +229,3 @@ describe('DonationManager Component', () => {
   });
 });
 
-});
