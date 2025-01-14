@@ -71,7 +71,7 @@ Explanation:
 4. API Routes Explanation  
 ─────────────────────────────────────────────────────────────
 
-Below is a detailed explanation of every API route:
+Below is a detailed explanation of every API route, also available in the backend over [Swagger UI](https://just-donate-api-556297337052.europe-west3.run.app/api-docs/swagger-ui)
 
 ────────────────────────────  
 Authentication Routes  
