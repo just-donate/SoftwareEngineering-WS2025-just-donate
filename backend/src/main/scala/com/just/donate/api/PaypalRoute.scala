@@ -52,8 +52,6 @@ object PaypalRoute:
                   IO.raiseError(error)
               }
 
-              _ <- IO.println("IPN mapped")
-
               // Check if payment status is completed
               _ <- if (newIpn.paymentStatus.equals("Completed")) {
                 IO.unit
@@ -63,8 +61,6 @@ object PaypalRoute:
                   errorLogger.logError("IPN", errMsg, rawBody) >>
                   IO.raiseError(new IllegalArgumentException("Invalid payment status"))
               }
-
-              _ <- IO.println("Payment status is completed")
 
               // Check for duplicate IPN
               existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
@@ -77,8 +73,6 @@ object PaypalRoute:
                 case None => IO.unit
               }
 
-              _ <- IO.println("No duplicate IPN detected")
-
               // Save the IPN if all checks pass
               _ <- paypalRepo.save(newIpn).handleErrorWith { error =>
                 val errMsg = s"Failed to save IPN: $error"
@@ -86,8 +80,6 @@ object PaypalRoute:
                   errorLogger.logError("IPN", errMsg, rawBody) >>
                   IO.raiseError(error)
               }
-
-              _ <- IO.println("IPN saved")
 
               // Prepare the donation request
               requestDonation <- IO.pure(
