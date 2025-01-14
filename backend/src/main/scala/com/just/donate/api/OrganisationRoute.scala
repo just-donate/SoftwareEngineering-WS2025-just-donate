@@ -2,7 +2,7 @@ package com.just.donate.api
 
 import cats.effect.*
 import com.just.donate.db.Repository
-import com.just.donate.models.{Earmarking, Organisation, ThemeConfig}
+import com.just.donate.models.{Organisation, ThemeConfig, EarmarkingImage, Earmarking}
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisation, loadOrganisation}
 import io.circe.*
@@ -12,6 +12,7 @@ import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+import java.time.LocalDateTime
 
 object OrganisationRoute:
 
@@ -42,6 +43,18 @@ object OrganisationRoute:
           )
         yield response
 
+      case req @ POST -> Root / organisationId / "earmarking" / earmarking / "image" =>
+        for
+          image <- req.as[RequestEarmarkingImage]
+          response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarkingImage(earmarking, EarmarkingImage(image.fileUrl)))
+        yield response
+
+      case GET -> Root / organisationId / "earmarking" / earmarking / "image" / "list" =>
+        // This returns an array of arrays of EarmarkingImage objects
+        // We need to flatten the array to get a single array of EarmarkingImage objects
+        loadOrganisation(organisationId)(repository)(_.getEarmarkingImages(earmarking).map(images => images.map(ResponseEarmarkingImage(_))).toSeq.flatten)
+
+        
       case DELETE -> Root / organisationId / "earmarking" / earmarking =>
         loadAndSaveOrganisation(organisationId)(repository)(_.removeEarmarking(earmarking))
 
@@ -91,6 +104,10 @@ object OrganisationRoute:
   private[api] case class RequestEarmarking(name: String, description: String)
 
   private[api] case class ResponseEarmarking(name: String, description: String)
+
+  private[api] case class RequestEarmarkingImage(fileUrl: String)
+
+  private[api] case class ResponseEarmarkingImage(image: EarmarkingImage)
 
   private[api] case class RequestAccount(name: String, balance: Money)
 

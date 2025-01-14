@@ -32,6 +32,12 @@ export interface Earmarking {
   description: string;
 }
 
+export interface EarmarkingImage {
+  image: {
+    fileUrl: string;
+  };
+}
+
 export interface Transaction {
   amount: number;
   fromAccountId: string;
