@@ -55,9 +55,9 @@ object UserRoute:
               // No duplicate found—proceed to hash the password and create the user.
               val hashedPassword = CryptoUtils.hashPassword(registerReq.password)
 
-              existingOrg.getOrElse(None) match
-                case com.just.donate.models.Organisation(_, _, _, _, _, _) =>
-                  val newUser = User(email = registerReq.email, password = hashedPassword, role = registerReq.role,  orgId = registerReq.orgId)
+              existingOrg match
+                case Some(_: Organisation) =>
+                  val newUser = User(email = registerReq.email, password = hashedPassword, orgId = registerReq.orgId)
                   for
                     _ <- userRepo.save(newUser)
                     response = ResponseUser(

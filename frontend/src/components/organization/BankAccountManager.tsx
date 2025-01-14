@@ -5,7 +5,10 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { BankAccount } from '@/types/types';
-import axiosInstance from '@/app/organization/api/axiosInstance';
+import {
+  fetchBankAccounts,
+  postBankAccount,
+} from '@/app/organization/bank-accounts/bank-accounts';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -34,36 +37,15 @@ export default function BankAccountManager({
   const [successMessage, setSuccessMessage] = useState('');
 
   const addBankAccount = async () => {
-    if (!newAccountName || !newAccountAmount) return;
-
-    try {
-      await axiosInstance.post(`/organisation/${organizationId}/account`, {
-        name: newAccountName,
-        balance: {
-          amount: newAccountAmount,
-        },
-      });
-
-      // Optimistically update the UI
-      const newAccount: BankAccount = {
-        name: newAccountName,
-        balance: {
-          amount: newAccountAmount,
-        },
-      };
-      setAccounts([...accounts, newAccount]);
-      setNewAccountName('');
-      setNewAccountAmount('');
-      setSuccessMessage('Bank account created successfully!');
+    const result = await postBankAccount(
+      organizationId,
+      newAccountName,
+      newAccountAmount,
+    );
+    if (result.status === 200) {
+      setSuccessMessage('Bank account added successfully');
       setError('');
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : 'Failed to create bank account',
-      );
-      setSuccessMessage('');
+      fetchBankAccounts(organizationId).then(setAccounts);
     }
   };
 

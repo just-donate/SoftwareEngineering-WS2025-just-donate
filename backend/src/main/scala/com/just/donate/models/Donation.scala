@@ -15,7 +15,7 @@ case class Donation(
   donationDate: LocalDateTime,
   amountRemaining: Money,
   amountTotal: Money,
-  earmarking: Option[String] = None,
+  earmarking: Option[Earmarking] = None,
   id: String = UUID.randomUUID().toString,
   var statusUpdates: Seq[StatusUpdate] = Seq.empty
 ):
@@ -34,13 +34,13 @@ object Donation:
     val donation = Donation(donorId, donationDate, amount, amount)
     (donation, DonationPart(amount, donation.id, donationDate))
 
-  def apply(donorId: String, amount: Money, earmarking: String): (Donation, DonationPart) =
+  def apply(donorId: String, amount: Money, earmarking: Earmarking): (Donation, DonationPart) =
     apply(donorId, amount, earmarking, LocalDateTime.now)
 
   def apply(
     donorId: String,
     amount: Money,
-    earmarking: String,
+    earmarking: Earmarking,
     donationDate: LocalDateTime
   ): (Donation, DonationPart) =
     val donation = Donation(donorId, donationDate, amount, amount, Some(earmarking))

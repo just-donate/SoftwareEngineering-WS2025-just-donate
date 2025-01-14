@@ -6,7 +6,7 @@ import com.dimafeng.testcontainers.{DockerComposeContainer, ExposedService}
 import com.just.donate.api.PaypalRoute.paypalAccountName
 import com.just.donate.db.mongo.MongoOrganisationRepository
 import com.just.donate.helper.OrganisationHelper.createNewRoots
-import com.just.donate.models.{Donation, Donor, Organisation}
+import com.just.donate.models.{Donation, Donor, Earmarking, Organisation}
 import com.just.donate.utils.Money
 import munit.CatsEffectSuite
 import org.mongodb.scala.MongoClient
@@ -118,7 +118,8 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
       collection.drop()
 
       var org = createNewRoots()
-      org = org.addEarmarking("Education")
+      val educationEarmarking = Earmarking("Education", "Supporting education in Kenya")
+      org = org.addEarmarking(educationEarmarking)
 
       val test = for
         // Save organisation with accounts and earmarking
@@ -132,7 +133,7 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
         _ = assert(found.get.accounts.exists(_._2.name == "Better Place"), "Expected Better Place account")
         _ = assert(found.get.accounts.exists(_._2.name == "Bank"), "Expected Bank account")
         _ = assert(found.get.accounts.exists(_._2.name == "Kenya"), "Expected Kenya account")
-        _ = assert(found.get.getEarmarkings.contains("Education"), "Expected Education earmarking")
+        _ = assert(found.get.getEarmarkings.contains(educationEarmarking), "Expected Education earmarking")
       yield ()
 
       test.unsafeRunSync()
