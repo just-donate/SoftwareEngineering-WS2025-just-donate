@@ -135,7 +135,7 @@ object PaypalRoute:
       )
     }
 
-    def doRequest: IO[String] = IO.blocking {
+    def doRequest: IO[String] = IO {
       // Create URL and open connection
       val url = new URL(paypalValidationUrl)
       val connection = url.openConnection().asInstanceOf[HttpURLConnection]

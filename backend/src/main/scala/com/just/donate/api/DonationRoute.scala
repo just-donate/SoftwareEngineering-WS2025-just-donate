@@ -23,14 +23,14 @@ object DonationRoute:
     (repository, config, emailService) =>
       HttpRoutes.of[IO]:
 
-        case req @ POST -> Root / organisationId / "account" / accountName =>
+        case req@POST -> Root / organisationId / "account" / accountName =>
           (for
             requestDonation <- req.as[RequestDonation]
             trackingId <- loadAndSaveOrganisationOps(organisationId)(repository)(
               organisationMapper(requestDonation, accountName)
             )
             response <- trackingId match
-              case None                      => BadRequest("Organisation not found")
+              case None => BadRequest("Organisation not found")
               case Some(Left(donationError)) => BadRequest(donationError.message)
               case Some(Right(trackingId)) =>
                 val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId"
@@ -42,19 +42,13 @@ object DonationRoute:
             case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
           }
 
-        case GET -> Root / organisationId / "donor" / donorId =>
-          loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
-            DonationListResponse(
-              organisation.getDonations(donorId).map(toResponseDonation(organisationId))
-            )
-
         case GET -> Root / organisationId / "donations" =>
           loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
             DonationListResponse(
               organisation.getDonations.map(toResponseDonation(organisationId))
             )
 
-  private def toResponseDonation(organisationId: String)(donation: Donation): DonationResponse =
+  def toResponseDonation(organisationId: String)(donation: Donation): DonationResponse =
     DonationResponse(
       donation.id,
       donation.amountTotal,
@@ -86,36 +80,36 @@ object DonationRoute:
 
     val (donation, donationPart) = earmarking match
       case Some(earmarking) => Donation(donor.id, requestDonation.amount, earmarking)
-      case None             => Donation(donor.id, requestDonation.amount)
+      case None => Donation(donor.id, requestDonation.amount)
 
     org.donate(donor, donationPart, donation, accountName) match
-      case Left(error)   => (org, Left(error))
+      case Left(error) => (org, Left(error))
       case Right(newOrg) => (newOrg, Right(donor.id))
 
   private[api] case class RequestDonation(
-    donorName: String,
-    donorEmail: String,
-    amount: Money,
-    earmarking: Option[String]
-  )
+                                           donorName: String,
+                                           donorEmail: String,
+                                           amount: Money,
+                                           earmarking: Option[String]
+                                         )
 
   // Define the Status case class to represent each status update
   private[api] case class StatusResponse(
-    status: String,
-    date: LocalDateTime,
-    description: String
-  )
+                                          status: String,
+                                          date: LocalDateTime,
+                                          description: String
+                                        )
 
   // Define the Donation case class to represent each donation
   private[api] case class DonationResponse(
-    donationId: String,
-    amount: Money,
-    organisation: String,
-    date: LocalDateTime,
-    earmarking: Option[String],
-    status: Seq[StatusResponse]
-  )
+                                            donationId: String,
+                                            amount: Money,
+                                            organisation: String,
+                                            date: LocalDateTime,
+                                            earmarking: Option[String],
+                                            status: Seq[StatusResponse]
+                                          )
 
   private[api] case class DonationListResponse(
-    donations: Seq[DonationResponse]
-  )
+                                                donations: Seq[DonationResponse]
+                                              )

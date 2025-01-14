@@ -8,7 +8,7 @@ import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
-import com.just.donate.api.public.OrganizationPublicRoute
+import com.just.donate.api.public.{DonationPublicRoute, OrganizationPublicRoute}
 import com.just.donate.api.{CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute}
 import com.just.donate.config.{AppConfig, AppEnvironment, Config}
 import com.just.donate.db.mongo.{MongoErrorLogRepository, MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository}
@@ -65,14 +65,22 @@ object Server extends IOApp:
 
       val emailService: IEmailService = appConfig.environment match
         case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
-        case AppEnvironment.PRODUCTION  => new EmailService(appConfig)
+        case AppEnvironment.PRODUCTION => new EmailService(appConfig)
 
+      // <editor-fold desc="Organization Routes">
       val securedOrganisationApi: HttpRoutes[IO] = AuthMiddleware.apply(organisationApi(organisationRepository))
       val publicOrganisationApi: HttpRoutes[IO] = OrganizationPublicRoute.publicApi(organisationRepository)
+      // </editor-fold>
+
+      // <editor-fold desc="Authentication Routes">
       val securedLogoutRoute: HttpRoutes[IO] = AuthMiddleware.apply(LogoutRoute.logoutRoute(appConfig))
       val securedCheckAuthRoute: HttpRoutes[IO] = AuthMiddleware.apply(CheckAuthRoute.checkAuthRoute)
       val securedRegisterRoute: HttpRoutes[IO] =
         AuthMiddleware.apply(UserRoute.userApi(userRepository, organisationRepository))
+      // </editor-fold>
+
+      // <editor-fold desc="Donation, Transfer, Withdrawal, and Notification Routes">
+      val publicDonationRoute: HttpRoutes[IO] = DonationPublicRoute.donationRoute(organisationRepository, appConfig, emailService)
       val securedDonationRoute: HttpRoutes[IO] =
         AuthMiddleware.apply(donationRoute(organisationRepository, appConfig, emailService))
       val securedTransferRoute: HttpRoutes[IO] =
@@ -80,6 +88,7 @@ object Server extends IOApp:
       val securedWithdrawalRoute: HttpRoutes[IO] =
         AuthMiddleware.apply(withdrawalRoute(organisationRepository, appConfig, emailService))
       val securedNotificationRoute: HttpRoutes[IO] = AuthMiddleware.apply(notificationRoute(appConfig))
+      // </editor-fold>
 
       val httpApp: HttpApp[IO] = Router(
         "login" -> LoginRoute.loginRoute(appConfig, userRepository),
@@ -89,6 +98,7 @@ object Server extends IOApp:
         "organisation" -> securedOrganisationApi,
         "public/organisation" -> publicOrganisationApi,
         "donate" -> securedDonationRoute,
+        "public/donate" -> publicDonationRoute,
         "transfer" -> securedTransferRoute,
         "withdraw" -> securedWithdrawalRoute,
         "notify" -> securedNotificationRoute,
