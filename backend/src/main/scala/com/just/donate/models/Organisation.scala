@@ -151,7 +151,7 @@ case class Organisation(
    * @return an option of the account, depending on whether the account exists.
    */
   def getAccount(name: String): Option[Account] = accounts.get(name)
-  
+
   /**
    * Withdraw from the organisation. This function is the entry point for withdrawing from the organisation.
    * @param amount the amount to withdraw.
@@ -232,14 +232,14 @@ case class Organisation(
 
     val (parts, updatedFrom) = fromAccount.pull(amount)
     val updatedTo = parts.foldLeft(toAccount): (account, donationPart) =>
-        donationPart match
-          case (Some(earmarking), donationPart) => account.donate(donationPart, earmarking).toOption.get
-          case (None, donationPart)             => account.donate(donationPart).toOption.get
-    
+      donationPart match
+        case (Some(earmarking), donationPart) => account.donate(donationPart, earmarking).toOption.get
+        case (None, donationPart)             => account.donate(donationPart).toOption.get
+
     val updatedOrg = copy(
       accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
     )
-    
+
     Right((updatedOrg, Seq.empty[EmailMessage]))
 
   def totalBalance: Money =
@@ -281,7 +281,7 @@ case class Organisation(
           case None        => return Left(WithdrawError.INVALID_DONOR)
           case Some(donor) => donor
         val trackingId = donor.id
-        val trackingLink = f"${config.frontendUrl}/tracking?id=${trackingId}"
+        val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId}"
 
         emailMessages = emailMessages.appended(
           EmailMessage(

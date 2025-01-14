@@ -1,0 +1,336 @@
+{
+  "name": "Just-Donate",
+  "accounts": {
+    "Paypal": {
+      "name": "Paypal",
+      "boundDonations": [],
+      "unboundDonations": {
+        "context": "Paypal",
+        "donationQueue": {
+          "context": "Paypal",
+          "queue": [
+            {
+              "value": {
+                "amount": {
+                  "amount": "4.0"
+                },
+                "donationId": "8270b3f8-3f3b-49ce-8a10-622d99086edf",
+                "donationDate": "2025-01-14T11:36:58.279212"
+              },
+              "context": null
+            },
+            {
+              "value": {
+                "amount": {
+                  "amount": "11.0"
+                },
+                "donationId": "239c7833-512e-4627-b9c9-62b38c972553",
+                "donationDate": "2025-01-14T10:43:24.320041"
+              },
+              "context": null
+            },
+            {
+              "value": {
+                "amount": {
+                  "amount": "11.0"
+                },
+                "donationId": "44c770b5-5c61-430b-b48b-58836a415bf3",
+                "donationDate": "2025-01-14T10:43:32.823558"
+              },
+              "context": null
+            }
+          ]
+        },
+        "negativeBalance": {
+          "amount": "0.0"
+        }
+      }
+    },
+    "Bank": {
+      "name": "Bank",
+      "boundDonations": [],
+      "unboundDonations": {
+        "context": "Bank",
+        "donationQueue": {
+          "context": "Bank",
+          "queue": [
+            {
+              "value": {
+                "amount": {
+                  "amount": "2.0"
+                },
+                "donationId": "8270b3f8-3f3b-49ce-8a10-622d99086edf",
+                "donationDate": "2025-01-14T11:36:58.279212"
+              },
+              "context": null
+            }
+          ]
+        },
+        "negativeBalance": {
+          "amount": "0.0"
+        }
+      }
+    }
+  },
+  "donations": {
+    "e733f955-d0a3-4575-8185-6d7052ae7d37": {
+      "donorId": "c3204f2f-a568-480c-b676-cee876a0bdd6",
+      "donationDate": "2025-01-14T10:31:05.613273",
+      "amountRemaining": {
+        "amount": "3.0"
+      },
+      "amountTotal": {
+        "amount": "3.0"
+      },
+      "earmarking": "",
+      "id": "e733f955-d0a3-4575-8185-6d7052ae7d37",
+      "statusUpdates": [
+        {
+          "date": "2025-01-14T10:31:05.613459",
+          "status": {
+            "RECEIVED": {}
+          },
+          "description": "Donation has been made and has been added to the account: Paypal"
+        }
+      ]
+    },
+    "53d002dd-46f3-456c-ad0d-b38d58aaf2f3": {
+      "donorId": "c0260248-2e35-429f-88f8-5a77b355aaf3",
+      "donationDate": "2025-01-14T11:36:39.987877",
+      "amountRemaining": {
+        "amount": "4.0"
+      },
+      "amountTotal": {
+        "amount": "4.0"
+      },
+      "earmarking": "",
+      "id": "53d002dd-46f3-456c-ad0d-b38d58aaf2f3",
+      "statusUpdates": [
+        {
+          "date": "2025-01-14T11:36:39.997555",
+          "status": {
+            "RECEIVED": {}
+          },
+          "description": "Donation has been made and has been added to the account: Paypal"
+        }
+      ]
+    },
+    "44c770b5-5c61-430b-b48b-58836a415bf3": {
+      "donorId": "59df69de-8b94-44ab-a020-17e0603c08fd",
+      "donationDate": "2025-01-14T10:43:32.823558",
+      "amountRemaining": {
+        "amount": "11.0"
+      },
+      "amountTotal": {
+        "amount": "11.0"
+      },
+      "earmarking": null,
+      "id": "44c770b5-5c61-430b-b48b-58836a415bf3",
+      "statusUpdates": [
+        {
+          "date": "2025-01-14T10:43:32.823822",
+          "status": {
+            "RECEIVED": {}
+          },
+          "description": "Donation has been made and has been added to the account: Paypal"
+        }
+      ]
+    },
+    "dacff923-b670-4698-8607-2b58aa653738": {
+      "donorId": "d84cb738-7b56-44bd-8372-6a8985a72026",
+      "donationDate": "2025-01-14T10:33:51.599426",
+      "amountRemaining": {
+        "amount": "5.0"
+      },
+      "amountTotal": {
+        "amount": "5.0"
+      },
+      "earmarking": "",
+      "id": "dacff923-b670-4698-8607-2b58aa653738",
+      "statusUpdates": [
+        {
+          "date": "2025-01-14T10:33:51.599519",
+          "status": {
+            "RECEIVED": {}
+          },
+          "description": "Donation has been made and has been added to the account: Paypal"
+        }
+      ]
+    },
+    "a1adfd2c-9cf6-43a2-a52b-fa0893512e40": {
+      "donorId": "d84cb738-7b56-44bd-8372-6a8985a72026",
+      "donationDate": "2025-01-14T10:33:21.461809",
+      "amountRemaining": {
+        "amount": "5.0"
+      },
+      "amountTotal": {
+        "amount": "5.0"
+      },
+      "earmarking": "",
+      "id": "a1adfd2c-9cf6-43a2-a52b-fa0893512e40",
+      "statusUpdates": [
+        {
+          "date": "2025-01-14T10:33:21.461844",
+          "status": {
+            "RECEIVED": {}
+          },
+          "description": "Donation has been made and has been added to the account: Paypal"
+        }
+      ]
+    },
+    "ad65453e-e522-49ca-98bb-8b592a219857": {
+      "donorId": "d84cb738-7b56-44bd-8372-6a8985a72026",
+      "donationDate": "2025-01-14T10:33:41.916009",
+      "amountRemaining": {
+        "amount": "5.0"
+      },
+      "amountTotal": {
+        "amount": "5.0"
+      },
+      "earmarking": "",
+      "id": "ad65453e-e522-49ca-98bb-8b592a219857",
+      "statusUpdates": [
+        {
+          "date": "2025-01-14T10:33:41.916123",
+          "status": {
+            "RECEIVED": {}
+          },
+          "description": "Donation has been made and has been added to the account: Paypal"
+        }
+      ]
+    },
+    "4e0dd039-6443-461a-a481-bdae9f95d552": {
+      "donorId": "c3204f2f-a568-480c-b676-cee876a0bdd6",
+      "donationDate": "2025-01-14T10:30:04.576973",
+      "amountRemaining": {
+        "amount": "3.0"
+      },
+      "amountTotal": {
+        "amount": "3.0"
+      },
+      "earmarking": "",
+      "id": "4e0dd039-6443-461a-a481-bdae9f95d552",
+      "statusUpdates": [
+        {
+          "date": "2025-01-14T10:30:04.579513",
+          "status": {
+            "RECEIVED": {}
+          },
+          "description": "Donation has been made and has been added to the account: Paypal"
+        }
+      ]
+    },
+    "8270b3f8-3f3b-49ce-8a10-622d99086edf": {
+      "donorId": "c44ccb5a-fc39-4740-9564-fde0eea8eb75",
+      "donationDate": "2025-01-14T11:36:58.279212",
+      "amountRemaining": {
+        "amount": "6.0"
+      },
+      "amountTotal": {
+        "amount": "8.0"
+      },
+      "earmarking": null,
+      "id": "8270b3f8-3f3b-49ce-8a10-622d99086edf",
+      "statusUpdates": [
+        {
+          "date": "2025-01-14T11:36:58.279376",
+          "status": {
+            "RECEIVED": {}
+          },
+          "description": "Donation has been made and has been added to the account: Paypal"
+        }
+      ]
+    },
+    "239c7833-512e-4627-b9c9-62b38c972553": {
+      "donorId": "59df69de-8b94-44ab-a020-17e0603c08fd",
+      "donationDate": "2025-01-14T10:43:24.320041",
+      "amountRemaining": {
+        "amount": "11.0"
+      },
+      "amountTotal": {
+        "amount": "11.0"
+      },
+      "earmarking": null,
+      "id": "239c7833-512e-4627-b9c9-62b38c972553",
+      "statusUpdates": [
+        {
+          "date": "2025-01-14T10:43:24.320132",
+          "status": {
+            "RECEIVED": {}
+          },
+          "description": "Donation has been made and has been added to the account: Paypal"
+        }
+      ]
+    }
+  },
+  "expenses": [
+    {
+      "description": "Spending",
+      "amount": {
+        "amount": "2.0"
+      },
+      "earMarking": null,
+      "paidBy": [
+        {
+          "amount": {
+            "amount": "2.0"
+          },
+          "donationId": "8270b3f8-3f3b-49ce-8a10-622d99086edf",
+          "donationDate": "2025-01-14T11:36:58.279212"
+        }
+      ]
+    }
+  ],
+  "donors": {
+    "c0260248-2e35-429f-88f8-5a77b355aaf3": {
+      "id": "c0260248-2e35-429f-88f8-5a77b355aaf3",
+      "name": "Tim",
+      "email": "tim@gmail.com"
+    },
+    "c44ccb5a-fc39-4740-9564-fde0eea8eb75": {
+      "id": "c44ccb5a-fc39-4740-9564-fde0eea8eb75",
+      "name": "Hinz",
+      "email": "hinz@gmail.com"
+    },
+    "c3204f2f-a568-480c-b676-cee876a0bdd6": {
+      "id": "c3204f2f-a568-480c-b676-cee876a0bdd6",
+      "name": "Tom",
+      "email": "tom@example.org"
+    },
+    "59df69de-8b94-44ab-a020-17e0603c08fd": {
+      "id": "59df69de-8b94-44ab-a020-17e0603c08fd",
+      "name": "Tom",
+      "email": "tom@gmail.com"
+    },
+    "d84cb738-7b56-44bd-8372-6a8985a72026": {
+      "id": "d84cb738-7b56-44bd-8372-6a8985a72026",
+      "name": "Someone",
+      "email": "someone@example.org"
+    }
+  },
+  "theme": {
+    "primary": "bg-yellow-400 text-white",
+    "secondary": "bg-pink-500 text-white",
+    "accent": "bg-yellow-400 text-gray-900",
+    "background": "bg-gray-100",
+    "card": "bg-white",
+    "text": "text-gray-800",
+    "textLight": "text-gray-600",
+    "font": "font-sans",
+    "icon": "🎗️",
+    "ngoName": "Global Giving",
+    "ngoUrl": "https://www.globalgiving.org",
+    "helpUrl": "/help",
+    "statusColors": {
+      "announced": "bg-green-500",
+      "pending_confirmation": "bg-yellow-500",
+      "confirmed": "bg-blue-500",
+      "received": "bg-purple-500",
+      "in_transfer": "bg-yellow-500",
+      "processing": "bg-blue-500",
+      "allocated": "bg-purple-500",
+      "awaiting_utilization": "bg-yellow-500",
+      "used": "bg-green-500"
+    }
+  }
+}

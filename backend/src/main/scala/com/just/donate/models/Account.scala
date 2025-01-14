@@ -6,7 +6,6 @@ import com.just.donate.utils.CollectionUtils.{updated, updatedReturn}
 import com.just.donate.utils.Money
 import com.just.donate.utils.structs.ReservableQueue
 
-import scala.annotation.tailrec
 import scala.math.Ordered.orderingToOrdered
 
 case class Account private (
@@ -30,14 +29,14 @@ case class Account private (
           case Money.ZERO => copy(boundDonations = boundDonations.filterNot(_._1 == earmarking))
           case _          => throw new IllegalArgumentException("Earmarking has budget")
 
+  private def getBoundQueue(earmarking: Earmarking): Option[DonationQueue] =
+    boundDonations.filter(_._1 == earmarking).map(_._2).headOption
+
   def addEarmarking(earmarking: Earmarking): Account =
     copy(boundDonations = boundDonations :+ ((earmarking, DonationQueue(name, ReservableQueue(name)))))
 
   def totalEarmarkedBalance(earmarking: Earmarking): Money =
     getBoundQueue(earmarking).map(_.totalBalance).getOrElse(Money.ZERO)
-
-  private def getBoundQueue(earmarking: Earmarking): Option[DonationQueue] =
-    boundDonations.filter(_._1 == earmarking).map(_._2).headOption
 
   def withdrawal(amount: Money, earmarking: Option[Earmarking]): Either[WithdrawError, (Seq[DonationPart], Account)] =
     if totalBalance < amount then Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
@@ -77,7 +76,7 @@ case class Account private (
       )
 
     returned match
-      case None => return Left(WithdrawError.INVALID_EARMARKING)
+      case None => Left(WithdrawError.INVALID_EARMARKING)
       case Some((remaining, donationParts)) =>
         remaining match
           case Some(d) => Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
@@ -109,7 +108,7 @@ case class Account private (
 
   private[models] def pull(amount: Money)(using
     donationGetter: DonationGetter
-  ): (Seq[(Option[String], DonationPart)], Account) =
+  ): (Seq[(Option[Earmarking], DonationPart)], Account) =
     // TODO: change to actual error handling
     if totalBalance < amount then throw new IllegalArgumentException(s"Account $name has insufficient funds")
 
