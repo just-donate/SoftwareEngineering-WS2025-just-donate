@@ -81,4 +81,4 @@ class CollectionUtilsSuite extends FunSuite:
     
     assertEquals(updatedItems, Seq((1, "one"), (20, "two"), (3, "three")))
     assertEquals(result, Some((2, "TWO")))
-  } 
+  }
