@@ -69,9 +69,11 @@ describe('DonationItem Component', () => {
     });
 
     // Check if the thank you message is displayed
-    expect(
-      screen.getByText(/Thank you for your donation!/i),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Thank you for your donation!/i),
+      ).toBeInTheDocument();
+    });
 
     // Wait for the thank you message to exit
     await waitFor(
