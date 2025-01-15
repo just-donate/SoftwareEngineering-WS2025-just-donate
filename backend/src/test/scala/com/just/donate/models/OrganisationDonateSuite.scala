@@ -2,13 +2,14 @@ package com.just.donate.models
 
 import com.just.donate.api.PaypalRoute.paypalAccountName
 import com.just.donate.helper.OrganisationHelper.createNewRoots
+import com.just.donate.mocks.config.AppConfigMock
 import com.just.donate.utils.Money
 import munit.FunSuite
 
 import java.util.UUID
 
 class OrganisationDonateSuite extends FunSuite:
-  
+
   val donor1Email = "donor1@example.org"
   val amountHundred = "100.00"
   val accountNotFoundError = "Paypal account not found"
@@ -25,7 +26,7 @@ class OrganisationDonateSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName, AppConfigMock()).toOption.get
 
     val paypalOption = newRoots.getAccount(paypalAccountName)
     val paypal = paypalOption.getOrElse(fail(accountNotFoundError))
@@ -41,7 +42,7 @@ class OrganisationDonateSuite extends FunSuite:
     newRoots = newRoots.addEarmarking(educationEarmarking)
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountTwoHundred), educationEarmarking)
-    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName, AppConfigMock()).toOption.get
 
     val paypalOption = newRoots.getAccount(paypalAccountName)
     val paypal = paypalOption.getOrElse(fail(accountNotFoundError))
@@ -63,10 +64,10 @@ class OrganisationDonateSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName, AppConfigMock()).toOption.get
     val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
     val (donation2, donationPart2) = Donation(donor2.id, Money(amountOneFifty))
-    newRoots = newRoots.donate(donor2, donationPart2, donation2, "Bank").toOption.get
+    newRoots = newRoots.donate(donor2, donationPart2, donation2, "Bank", AppConfigMock()).toOption.get
 
     val paypalOption = newRoots.getAccount(paypalAccountName)
     val paypal = paypalOption.getOrElse(fail(accountNotFoundError))
@@ -84,10 +85,10 @@ class OrganisationDonateSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName, AppConfigMock()).toOption.get
     val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
     val (donation2, donationPart2) = Donation(donor2.id, Money(amountOneFifty))
-    newRoots = newRoots.donate(donor2, donationPart2, donation2, "Bank").toOption.get
+    newRoots = newRoots.donate(donor2, donationPart2, donation2, "Bank", AppConfigMock()).toOption.get
 
     val paypalOption = newRoots.getAccount(paypalAccountName)
     val paypal = paypalOption.getOrElse(fail(accountNotFoundError))
@@ -102,7 +103,7 @@ class OrganisationDonateSuite extends FunSuite:
     // Adding donation to an account with incoming flows
     val donor3 = Donor(newRoots.getNewDonorId, "Donor3", "donor3@example.org")
     val (donation3, donationPart3) = Donation(donor3.id, Money(amountTwoHundred))
-    newRoots = newRoots.donate(donor3, donationPart3, donation3, "Kenya").toOption.get
+    newRoots = newRoots.donate(donor3, donationPart3, donation3, "Kenya", AppConfigMock()).toOption.get
 
     val kenyaOption = newRoots.getAccount("Kenya")
     val kenya = kenyaOption.getOrElse(fail("Kenya account not found"))

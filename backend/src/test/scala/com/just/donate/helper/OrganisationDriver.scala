@@ -2,7 +2,8 @@ package com.just.donate.helper
 
 import cats.effect.IO
 import com.just.donate.db.Repository
-import com.just.donate.models.{Account, Donation, Donor, Organisation}
+import com.just.donate.mocks.config.AppConfigMock
+import com.just.donate.models.{ Account, Donation, Donor, Organisation }
 import com.just.donate.utils.Money
 
 /**
@@ -61,7 +62,7 @@ object OrganisationDriver:
       // Donation can return donation and donation part
       (donation, donationPart) = Donation(donor.id, amount)
       updatedOrg = org
-        .donate(donor, donationPart, donation, accountName)
+        .donate(donor, donationPart, donation, accountName, AppConfigMock())
         .toOption
         .getOrElse(sys.error("Donation failed"))
       _ <- repo.save(updatedOrg)

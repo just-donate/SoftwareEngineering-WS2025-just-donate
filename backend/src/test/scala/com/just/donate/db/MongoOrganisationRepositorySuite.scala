@@ -2,11 +2,12 @@ package com.just.donate.db
 
 import cats.effect.IO
 import com.dimafeng.testcontainers.munit.TestContainerForAll
-import com.dimafeng.testcontainers.{DockerComposeContainer, ExposedService}
+import com.dimafeng.testcontainers.{ DockerComposeContainer, ExposedService }
 import com.just.donate.api.PaypalRoute.paypalAccountName
 import com.just.donate.db.mongo.MongoOrganisationRepository
+import com.just.donate.mocks.config.AppConfigMock
 import com.just.donate.helper.OrganisationHelper.createNewRoots
-import com.just.donate.models.{Donation, Donor, Earmarking, Organisation}
+import com.just.donate.models.{ Donation, Donor, Earmarking, Organisation }
 import com.just.donate.utils.Money
 import munit.CatsEffectSuite
 import org.mongodb.scala.MongoClient
@@ -82,7 +83,7 @@ class MongoOrganisationRepositorySuite extends CatsEffectSuite with TestContaine
         updatedOrg2 = org2
           .addAccount("Bank")
           .addAccount(paypalAccountName)
-          .donate(donor, donationPart, donation, paypalAccountName)
+          .donate(donor, donationPart, donation, paypalAccountName, AppConfigMock())
           .toOption
           .get
         updatedOk <- repo.update(updatedOrg2)
