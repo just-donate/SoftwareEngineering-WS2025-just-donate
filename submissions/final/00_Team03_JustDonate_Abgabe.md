@@ -89,9 +89,9 @@ Das [Miro Board](https://miro.com/app/board/uXjVLRFTGG0=/) enthält zusätzliche
 
 ## 4 Domänenmodell 
 
-[Domänenmodell](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/04_Domänenmodell.png)
+[Domänenmodell](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/04_Domaenenmodell.png)
 
-![](04_Domänenmodell.png)
+![](04_Domaenenmodell.png)
 
 \newpage
 
