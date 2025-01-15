@@ -27,7 +27,7 @@ describe('Donations API', () => {
               date: '2024-01-01',
               status: [
                 {
-                  status: 'Completed',
+                  status: 'received',
                   date: '2024-01-01',
                   description: 'Donation completed successfully',
                 },
