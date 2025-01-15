@@ -48,6 +48,7 @@ export const NavBar: React.FC = () => {
   async function logout() {
     try {
       await axiosInstance.post('/logout');
+      sessionStorage.removeItem('token');
       setIsAuthenticated(false);
       router.push('/organization/login');
     } catch (error) {

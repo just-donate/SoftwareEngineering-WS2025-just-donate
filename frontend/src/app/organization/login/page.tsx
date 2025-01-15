@@ -22,7 +22,7 @@ export default function LoginPage() {
 
     try {
       // Perform the login request
-      await axiosInstance.post(
+      const response = await axiosInstance.post(
         '/login', // Replace with your login endpoint
         {
           username: email,
@@ -30,19 +30,30 @@ export default function LoginPage() {
           orgId: orgId,
         },
         {
-          // Ensure cookies are sent and stored
-          withCredentials: true,
+          withCredentials: true, // Ensure cookies are sent and stored
           headers: {
             'Content-Type': 'application/json', // Specify JSON content type
           },
         },
       );
 
-      // On success, display a success notification (optional) and redirect to dashboard
-      toast.success('Login successful!', {
-        position: 'top-center',
-      });
-      router.push('/organization/dashboard');
+      // Retrieve the token from the response
+      const token = response.data;
+
+      if (token) {
+        // Store the token in localStorage
+        sessionStorage.setItem('token', token);
+
+        // Display a success notification (optional)
+        toast.success('Login successful!', {
+          position: 'top-center',
+        });
+
+        // Redirect to the dashboard
+        router.push('/organization/dashboard');
+      } else {
+        throw new Error('No token received from the server.');
+      }
     } catch (err) {
       console.error('Login error:', err);
 
