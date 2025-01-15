@@ -17,6 +17,7 @@ describe('DonationDetails Component', () => {
   const mockDonation = {
     donationId: '1',
     organisation: 'Test Organisation',
+    organisationId: '12345',
     earmarking: 'General Purpose',
     donorEmail: 'donor@example.com',
     project: 'Test Project',
