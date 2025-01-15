@@ -3,6 +3,7 @@ package com.just.donate.api
 import cats.effect.IO
 import com.just.donate.api.OrganisationRoute.{RequestOrganisation, ResponseAccount, ResponseOrganisation}
 import com.just.donate.api.helper.{ApiAction, ApiRun}
+import com.just.donate.api.public.OrganizationPublicRoute
 import com.just.donate.db.memory.MemoryOrganisationRepository
 import com.just.donate.helper.OrganisationHelper.*
 import com.just.donate.mocks.config.AppConfigMock
@@ -11,7 +12,8 @@ import com.just.donate.utils.Money
 import munit.CatsEffectSuite
 import org.http4s.*
 import org.http4s.implicits.*
-import com.just.donate.models.{ThemeConfig, StatusColors}
+import com.just.donate.models.ThemeConfig
+import com.just.donate.models.ThemeConfig.{EmailTemplates, StatusColors}
 
 class OrganisationApiSuite extends CatsEffectSuite:
   private val DummyTheme = ThemeConfig(
@@ -37,6 +39,11 @@ class OrganisationApiSuite extends CatsEffectSuite:
       allocated = "#F1F8E9",
       awaiting_utilization = "#FFF8E1",
       used = "#EFEBE9"
+    ),
+    emailTemplates = EmailTemplates(
+      donationTemplate = "Donation",
+      withdrawalTemplate = "Withdrawal",
+      manualTemplate = "Manual"
     )
   )
 
@@ -62,6 +69,7 @@ class OrganisationApiSuite extends CatsEffectSuite:
   private val repo = MemoryOrganisationRepository()
 
   private val routes = OrganisationRoute.organisationApi(repo).orNotFound
+  private val publicRoute = OrganizationPublicRoute.publicApi(repo).orNotFound
   private val donationRoute = DonationRoute.donationRoute(repo, AppConfigMock(), EmailServiceMock()).orNotFound
 
   override def beforeEach(context: BeforeEach): Unit = repo.clear().unsafeRunSync()
@@ -221,7 +229,9 @@ class OrganisationApiSuite extends CatsEffectSuite:
       ApiAction.AddEarmarking(OrgId1, EarmarkEducation, EarmarkEducationDesc)
     )
     val retrieve = ApiAction.ListEarmarkings(OrgId1)
-    for res <- ApiRun.apiRun(routes, actions, retrieve)
+    for
+      _ <- ApiRun.apiRun(routes, actions, retrieve)
+      res <- ApiRun.apiRun(publicRoute, Seq.empty, retrieve)
     yield
       assertEquals(res._1, Status.Ok)
       assertEquals(res._2.get.size, 1)
@@ -237,7 +247,9 @@ class OrganisationApiSuite extends CatsEffectSuite:
       ApiAction.AddEarmarkingImage(OrgId1, EarmarkEducation, imageUrl)
     )
     val retrieve = ApiAction.ListEarmarkings(OrgId1)
-    for res <- ApiRun.apiRun(routes, actions, retrieve)
+    for
+      _ <- ApiRun.apiRun(routes, actions, retrieve)
+      res <- ApiRun.apiRun(publicRoute, Seq.empty, retrieve)
     yield assertEquals(res._1, Status.Ok)
   }
 
@@ -248,7 +260,9 @@ class OrganisationApiSuite extends CatsEffectSuite:
       ApiAction.DeleteEarmarking(OrgId1, EarmarkEducation)
     )
     val retrieve = ApiAction.ListEarmarkings(OrgId1)
-    for res <- ApiRun.apiRun(routes, actions, retrieve)
+    for
+      _ <- ApiRun.apiRun(routes, actions, retrieve)
+      res <- ApiRun.apiRun(publicRoute, Seq.empty, retrieve)
     yield
       assertEquals(res._1, Status.Ok)
       assertEquals(res._2.get.size, 0)
