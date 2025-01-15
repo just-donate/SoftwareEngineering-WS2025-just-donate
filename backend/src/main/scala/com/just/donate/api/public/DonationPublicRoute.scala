@@ -1,19 +1,20 @@
 package com.just.donate.api.public
 
 import cats.effect.IO
-import com.just.donate.api.DonationRoute.{ DonationListResponse, DonationResponse, toResponseDonation }
+import com.just.donate.api.DonationRoute.StatusResponse
 import com.just.donate.config.Config
 import com.just.donate.db.Repository
 import com.just.donate.models.Organisation
 import com.just.donate.notify.IEmailService
-import com.just.donate.utils.RouteUtils.loadOrganisationOps
+import com.just.donate.utils.RouteUtils.loadOrganisation
+import com.just.donate.utils.Money
 import io.circe.*
 import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.*
-import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
-import org.http4s.circe.CirceEntityEncoder.circeEntityEncoder
 import org.http4s.dsl.io.*
+import com.just.donate.models.Donation
+import java.time.LocalDateTime
 
 object DonationPublicRoute:
 
@@ -22,20 +23,31 @@ object DonationPublicRoute:
       HttpRoutes.of[IO]:
 
         case GET -> Root / organisationId / "donor" / donorId =>
-          for
-            donationResult <- loadOrganisationOps(organisationId)(repository): organisation =>
-              organisation.getDonations.foldLeft[Option[Seq[DonationResponse]]](Some(Seq[DonationResponse]())) {
-                (optDonations, donation) =>
-                  optDonations match
-                    case None => None
-                    case Some(responseDonations) =>
-                      organisation.donors.get(donation.donorId) match
-                        case None => None
-                        case Some(donor) =>
-                          Some(responseDonations :+ toResponseDonation(organisationId, donation, donor))
-              }
-            reponse <- donationResult match
-              case None                  => NotFound("Organisation not found")
-              case Some(None)            => InternalServerError("Found donation with invalid donor")
-              case Some(Some(donations)) => Ok(DonationListResponse(donations))
-          yield reponse
+          loadOrganisation[PublicDonationListResponse](organisationId)(repository): organisation =>
+            PublicDonationListResponse(
+              organisation.getDonations(donorId).map(toPublicDonationResponse(organisationId))
+            )
+
+  def toPublicDonationResponse(organisationId: String)(donation: Donation): PublicDonationResponse =
+    PublicDonationResponse(
+      donation.id,
+      donation.amountTotal,
+      organisationId,
+      donation.donationDate,
+      donation.earmarking.map(_.name),
+      donation.statusUpdates.map: status =>
+        StatusResponse(status.status.toString.toLowerCase, status.date, status.description)
+    )
+
+  private[api] case class PublicDonationResponse(
+    donationId: String,
+    amount: Money,
+    organisation: String,
+    date: LocalDateTime,
+    earmarking: Option[String],
+    status: Seq[StatusResponse]
+  )
+
+  private[api] case class PublicDonationListResponse(
+    donations: Seq[PublicDonationResponse]
+  )
