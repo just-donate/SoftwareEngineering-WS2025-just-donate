@@ -38,7 +38,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
 
   const getCachedTheme = useCallback((): Theme | null => {
     if (typeof window === 'undefined') return null;
-    
+
     const storedData = localStorage.getItem(THEME_STORAGE_KEY);
     if (!storedData) return null;
 
@@ -86,26 +86,29 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [setCachedTheme]);
 
-  const updateTheme = useCallback(async (newTheme: Theme) => {
-    setIsLoading(true);
-    try {
-      const result = await saveTheme(organizationId, newTheme);
+  const updateTheme = useCallback(
+    async (newTheme: Theme) => {
+      setIsLoading(true);
+      try {
+        const result = await saveTheme(organizationId, newTheme);
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to save theme');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to save theme');
+        }
+
+        setThemeState(newTheme);
+        setCachedTheme(newTheme);
+      } catch (error) {
+        console.error('Failed to update theme:', error);
+        throw error instanceof Error
+          ? error
+          : new Error('Failed to update theme');
+      } finally {
+        setIsLoading(false);
       }
-
-      setThemeState(newTheme);
-      setCachedTheme(newTheme);
-    } catch (error) {
-      console.error('Failed to update theme:', error);
-      throw error instanceof Error
-        ? error
-        : new Error('Failed to update theme');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [setCachedTheme]);
+    },
+    [setCachedTheme],
+  );
 
   useEffect(() => {
     const initializeTheme = async () => {
