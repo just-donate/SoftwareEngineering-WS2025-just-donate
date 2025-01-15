@@ -50,4 +50,3 @@ describe('StatusTimeline Component', () => {
     });
   });
 });
-

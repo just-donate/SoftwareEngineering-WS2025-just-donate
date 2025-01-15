@@ -73,13 +73,13 @@ describe('GalleryManager', () => {
     });
 
     const file = new File(['dummy content'], 'example.png', {
-        type: 'image/png',
-      });
+      type: 'image/png',
+    });
 
     // Simulate file selection
     await waitFor(() => {
-        const fileInput = screen.getByTestId('photo-upload');
-        fireEvent.change(fileInput, { target: { files: [file] } });
+      const fileInput = screen.getByTestId('photo-upload');
+      fireEvent.change(fileInput, { target: { files: [file] } });
 
       // Simulate selecting an earmarking by clicking the first select earmarking and then the option
       const select = screen.getByTestId('select-earmarking-upload');
@@ -118,7 +118,7 @@ describe('GalleryManager', () => {
     });
 
     const file = new File(['dummy content'], 'example.png', {
-        type: 'image/png',
+      type: 'image/png',
     });
 
     // Simulate file selection
