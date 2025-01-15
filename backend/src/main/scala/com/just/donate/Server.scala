@@ -61,10 +61,6 @@ object Server extends IOApp:
        */
       val errorLogger = new ErrorLogger(errorLogRepository)
 
-      //      val defaultOrg = Organisation("Just-Donate")
-      //      val org = organisationRepository.findById(defaultOrg.id).unsafeRunSync()
-      //      if org.isEmpty then organisationRepository.save(Organisation("Just-Donate")).unsafeRunSync()
-
       val emailService: IEmailService = appConfig.environment match
         case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
         case AppEnvironment.PRODUCTION  => new EmailService(appConfig)

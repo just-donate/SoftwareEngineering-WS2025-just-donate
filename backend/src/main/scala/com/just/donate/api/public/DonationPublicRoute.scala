@@ -23,5 +23,5 @@ object DonationPublicRoute:
         =>
           loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
             DonationListResponse(
-              organisation.getDonations(donorId).map(toResponseDonation(organisationId))
+              organisation.getDonations(donorId).map(toResponseDonation(organisationId, organisation.name))
             )

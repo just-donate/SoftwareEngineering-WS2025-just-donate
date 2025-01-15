@@ -53,14 +53,15 @@ object DonationRoute:
         case GET -> Root / organisationId / "donations" =>
           loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
             DonationListResponse(
-              organisation.getDonations.map(toResponseDonation(organisationId))
+              organisation.getDonations.map(toResponseDonation(organisationId, organisation.name))
             )
 
-  def toResponseDonation(organisationId: String)(donation: Donation): DonationResponse =
+  def toResponseDonation(organisationId: String, organisationName: String)(donation: Donation): DonationResponse =
     DonationResponse(
       donation.id,
       donation.amountTotal,
       organisationId,
+      organisationName,
       donation.donationDate,
       donation.earmarking.map(_.name),
       donation.statusUpdates.map: status =>
@@ -109,6 +110,7 @@ object DonationRoute:
   private[api] case class DonationResponse(
     donationId: String,
     amount: Money,
+    organisationId: String,
     organisation: String,
     date: LocalDateTime,
     earmarking: Option[String],
