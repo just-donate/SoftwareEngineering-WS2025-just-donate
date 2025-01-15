@@ -173,8 +173,8 @@ class OrganisationTransferSuite extends FunSuite:
   test("transfer multiple donation parts") {
     var newRoots = createNewRoots()
 
-    val educationEarmarking = Earmarking("Health", "Supporting education in Kenya")
-    val healthEarmarking = Earmarking("Health", "Supporting health in Kenya")
+    val educationEarmarking = Earmarking("Education", "Supporting education in Kenya")
+    newRoots = newRoots.addEarmarking(educationEarmarking)
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred), educationEarmarking)
