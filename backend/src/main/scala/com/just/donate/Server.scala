@@ -8,7 +8,12 @@ import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
-import com.just.donate.api.public.{ DonationPublicRoute, OrganizationPublicRoute, SwaggerUiRoute }
+import com.just.donate.api.public.{
+  DonationPublicRoute,
+  ForgotTrackingIdPublicRoute,
+  OrganizationPublicRoute,
+  SwaggerUiRoute
+}
 import com.just.donate.api.{ CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute }
 import com.just.donate.config.{ AppConfig, AppEnvironment, Config }
 import com.just.donate.db.mongo.{
@@ -84,6 +89,8 @@ object Server extends IOApp:
       // <editor-fold desc="Donation, Transfer, Withdrawal, and Notification Routes">
       val publicDonationRoute: HttpRoutes[IO] =
         DonationPublicRoute.donationRoute(organisationRepository, appConfig, emailService)
+      val publicForgotTrackingIdRoute: HttpRoutes[IO] =
+        ForgotTrackingIdPublicRoute.publicApi(organisationRepository, appConfig, emailService)
       val securedDonationRoute: HttpRoutes[IO] =
         AuthMiddleware.apply(donationRoute(organisationRepository, appConfig, emailService))
       val securedTransferRoute: HttpRoutes[IO] =
@@ -103,6 +110,7 @@ object Server extends IOApp:
         "public/organisation" -> publicOrganisationApi,
         "donate" -> securedDonationRoute,
         "public/donate" -> publicDonationRoute,
+        "public/forgot-tracking-id" -> publicForgotTrackingIdRoute,
         "transfer" -> securedTransferRoute,
         "withdraw" -> securedWithdrawalRoute,
         "notify" -> securedNotificationRoute,

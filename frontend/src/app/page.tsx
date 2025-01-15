@@ -4,13 +4,16 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Navigation } from '@/components/tracking/Navigation';
+import axiosInstance from './organization/api/axiosInstance';
+import { config } from '@/lib/config';
+import { toast, ToastContainer } from 'react-toastify';
+import axios from 'axios';
 
 export default function SearchPage() {
   const { theme } = useTheme();
   const router = useRouter();
   const [searchInput, setSearchInput] = useState('');
   const [email, setEmail] = useState('');
-  const [isEmailSubmitted, setIsEmailSubmitted] = useState(false);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -26,13 +29,37 @@ export default function SearchPage() {
   };
 
   const handleForgotTrackingLink = () => {
-    setDropdownVisible(!dropdownVisible);
+    setDropdownVisible((prev) => !prev);
   };
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(`Email submitted: ${email}`);
-    setIsEmailSubmitted(true);
+    try {
+      await axiosInstance.post(
+        `/public/forgot-tracking-id/${config.organizationId}`,
+        {
+          email: email,
+        },
+      );
+
+      toast.success('Thank you! A link has been sent to your email.', {
+        position: 'bottom-right',
+      });
+    } catch (error) {
+      let errorMessage = 'Failed to resend tracking id.';
+
+      if (axios.isAxiosError(error)) {
+        errorMessage =
+          error.response?.data?.error || error.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      console.error(errorMessage);
+      toast.error('An error occured while sending the tracking id.', {
+        position: 'bottom-right',
+      });
+    }
   };
 
   return (
@@ -128,13 +155,9 @@ export default function SearchPage() {
               </div>
             )}
           </div>
-          {isEmailSubmitted && (
-            <p className={`${theme.textLight} mt-4`}>
-              Thank you! A link has been sent to your email.
-            </p>
-          )}
         </div>
       </main>
+      <ToastContainer />
     </div>
   );
 }

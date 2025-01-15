@@ -1,7 +1,7 @@
 package com.just.donate.api.public
 
 import cats.effect.IO
-import com.just.donate.api.DonationRoute.{DonationListResponse, toResponseDonation}
+import com.just.donate.api.DonationRoute.{ DonationListResponse, toResponseDonation }
 import com.just.donate.config.Config
 import com.just.donate.db.Repository
 import com.just.donate.models.Organisation
@@ -19,8 +19,7 @@ object DonationPublicRoute:
     (repository, config, emailService) =>
       HttpRoutes.of[IO]:
 
-        case GET -> Root / organisationId / "donor" / donorId
-        =>
+        case GET -> Root / organisationId / "donor" / donorId =>
           loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
             DonationListResponse(
               organisation.getDonations(donorId).map(toResponseDonation(organisationId))
