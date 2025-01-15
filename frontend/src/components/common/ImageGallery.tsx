@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { customStyles } from '@/styles/custom';
 
 interface ImageGalleryProps {
   images: string[];
