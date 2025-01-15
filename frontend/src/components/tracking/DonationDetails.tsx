@@ -24,10 +24,10 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({
   );
 
   useEffect(() => {
-    fetchEarmarkingImages(donation.organisation, donation.earmarking).then(
+    fetchEarmarkingImages(donation.organisationId, donation.earmarking).then(
       (images) => setImages(images.map((image) => image.image.fileUrl)),
     );
-  }, [donation.organisation, donation.earmarking]);
+  }, [donation.organisationId, donation.earmarking]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">

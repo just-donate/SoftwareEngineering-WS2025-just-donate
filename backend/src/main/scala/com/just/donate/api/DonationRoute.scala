@@ -65,13 +65,13 @@ object DonationRoute:
                         case Some(donor) =>
                           Some(responseDonations :+ toResponseDonation(organisationId, donation, donor))
               }
-            reponse <- donationResult match
+            response <- donationResult match
               case None                  => NotFound("Organisation not found")
               case Some(None)            => InternalServerError("Found donation with invalid donor")
               case Some(Some(donations)) => Ok(DonationListResponse(donations))
-          yield reponse
+          yield response
 
-  def toResponseDonation(organisationId: String, donation: Donation, donor: Donor): DonationResponse =
+  private def toResponseDonation(organisationId: String, donation: Donation, donor: Donor): DonationResponse =
     DonationResponse(
       donation.id,
       DonorResponse(donor.id, donor.name, donor.email),
