@@ -8,14 +8,19 @@ import com.just.donate.api.OrganisationRoute.organisationApi
 import com.just.donate.api.PaypalRoute.paypalRoute
 import com.just.donate.api.TransferRoute.transferRoute
 import com.just.donate.api.WithdrawalRoute.withdrawalRoute
-import com.just.donate.api.public.{DonationPublicRoute, OrganizationPublicRoute, SwaggerUiRoute}
-import com.just.donate.api.{CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute}
-import com.just.donate.config.{AppConfig, AppEnvironment, Config}
-import com.just.donate.db.mongo.{MongoErrorLogRepository, MongoOrganisationRepository, MongoPaypalRepository, MongoUserRepository}
-import com.just.donate.notify.{DevEmailService, EmailService, IEmailService}
+import com.just.donate.api.public.{ DonationPublicRoute, OrganizationPublicRoute, SwaggerUiRoute }
+import com.just.donate.api.{ CheckAuthRoute, LoginRoute, LogoutRoute, UserRoute }
+import com.just.donate.config.{ AppConfig, AppEnvironment, Config }
+import com.just.donate.db.mongo.{
+  MongoErrorLogRepository,
+  MongoOrganisationRepository,
+  MongoPaypalRepository,
+  MongoUserRepository
+}
+import com.just.donate.notify.{ DevEmailService, EmailService, IEmailService }
 import com.just.donate.security.AuthMiddleware
 import com.just.donate.utils.ErrorLogger
-import com.mongodb.{ServerApi, ServerApiVersion}
+import com.mongodb.{ ServerApi, ServerApiVersion }
 import org.http4s.*
 import org.http4s.ember.server.*
 import org.http4s.headers.Origin
@@ -37,7 +42,7 @@ object Server extends IOApp:
 
   def run(args: List[String]): IO[ExitCode] =
     // Create a new client and connect to the server
-    mongoResource(appConfig.mongoUri)use { mongoClient =>
+    mongoResource(appConfig.mongoUri).use { mongoClient =>
       val database = mongoClient.getDatabase("just-donate")
 
       val organisationCollection = database.getCollection("organisations")
@@ -62,7 +67,7 @@ object Server extends IOApp:
 
       val emailService: IEmailService = appConfig.environment match
         case AppEnvironment.DEVELOPMENT => new DevEmailService(appConfig)
-        case AppEnvironment.PRODUCTION => new EmailService(appConfig)
+        case AppEnvironment.PRODUCTION  => new EmailService(appConfig)
 
       // <editor-fold desc="Organization Routes">
       val securedOrganisationApi: HttpRoutes[IO] = AuthMiddleware.apply(organisationApi(organisationRepository))
@@ -77,7 +82,8 @@ object Server extends IOApp:
       // </editor-fold>
 
       // <editor-fold desc="Donation, Transfer, Withdrawal, and Notification Routes">
-      val publicDonationRoute: HttpRoutes[IO] = DonationPublicRoute.donationRoute(organisationRepository, appConfig, emailService)
+      val publicDonationRoute: HttpRoutes[IO] =
+        DonationPublicRoute.donationRoute(organisationRepository, appConfig, emailService)
       val securedDonationRoute: HttpRoutes[IO] =
         AuthMiddleware.apply(donationRoute(organisationRepository, appConfig, emailService))
       val securedTransferRoute: HttpRoutes[IO] =
@@ -100,7 +106,7 @@ object Server extends IOApp:
         "withdraw" -> securedWithdrawalRoute,
         "notify" -> securedNotificationRoute,
         "paypal-ipn" -> paypalRoute(paypalRepository, organisationRepository, appConfig, emailService, errorLogger),
-        "api-docs" -> SwaggerUiRoute.routes,
+        "api-docs" -> SwaggerUiRoute.routes
       ).orNotFound
 
       val corsService = CORS.policy

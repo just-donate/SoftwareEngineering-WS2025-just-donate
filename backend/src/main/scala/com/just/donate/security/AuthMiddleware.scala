@@ -1,15 +1,15 @@
 package com.just.donate.security
 
-import cats.data.{Kleisli, OptionT}
+import cats.data.{ Kleisli, OptionT }
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.http4s.*
-import org.http4s.dsl.io.{/, *}
+import org.http4s.dsl.io.{ /, * }
 import org.typelevel.vault.Key
-import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
+import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim }
 
 import java.time.Instant
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 object AuthMiddleware:
 
@@ -44,9 +44,8 @@ object AuthMiddleware:
 
   private def isExpired(claim: JwtClaim): Boolean =
     claim.expiration match
-      case Some(exp) => {
+      case Some(exp) =>
         exp < Instant.now().getEpochSecond
-      }
       case None => true
 
 private object AuthAttributes:

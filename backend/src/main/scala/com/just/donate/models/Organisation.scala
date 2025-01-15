@@ -3,12 +3,13 @@ package com.just.donate.models
 import com.just.donate.config.Config
 import com.just.donate.models.Types.DonationGetter
 import com.just.donate.models.EarmarkingImage
-import com.just.donate.models.errors.{DonationError, TransferError, WithdrawError}
+import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
 import com.just.donate.notify.EmailMessage
+import com.just.donate.notify.messages.{ TransferMessage, WithdrawalMessage }
 import com.just.donate.utils.Money
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.{ Optional, UUID }
 import scala.math.Ordered.orderingToOrdered
 
 case class Organisation(
@@ -27,7 +28,7 @@ case class Organisation(
   def getEarmarkings: Set[Earmarking] = earmarkings.toSet
 
   def getEarmarking(name: String): Option[Earmarking] = earmarkings.find(e => e.name == name || e.id == name)
-  
+
   def getTheme: Option[ThemeConfig] = theme
 
   /**
@@ -37,7 +38,9 @@ case class Organisation(
    * @return a new organisation with the earmarking image added.
    */
   def addEarmarkingImage(earmarking: String, image: EarmarkingImage): Organisation =
-    copy(earmarkingImages = earmarkingImages.updated(earmarking, earmarkingImages.getOrElse(earmarking, Seq.empty).appended(image)))
+    copy(earmarkingImages =
+      earmarkingImages.updated(earmarking, earmarkingImages.getOrElse(earmarking, Seq.empty).appended(image))
+    )
 
   def getEarmarkingImages(earmarking: String): Option[Seq[EarmarkingImage]] = earmarkingImages.get(earmarking)
 
@@ -45,6 +48,7 @@ case class Organisation(
 
   /**
    * Add a new account to the organisation.
+   *
    * @param name the name of the account.
    * @return a new organisation with the account added.
    */
@@ -56,6 +60,7 @@ case class Organisation(
 
   /**
    * Remove an account from the organisation.
+   *
    * @param name the name of the account.
    * @return a new organisation with the account removed.
    */
@@ -65,6 +70,7 @@ case class Organisation(
 
   /**
    * Add a new earmarking to all accounts in the organisation.
+   *
    * @param earmarking the name of the earmarking.
    * @return a new organisation with the earmarking added to all accounts.
    */
@@ -76,6 +82,7 @@ case class Organisation(
 
   /**
    * Remove an earmarking from all accounts in the organisation.
+   *
    * @param earmarking the name of the earmarking.
    * @return a new organisation with the earmarking removed from all accounts.
    */
@@ -88,6 +95,7 @@ case class Organisation(
 
   /**
    * Loads an existing donor from the organisation.
+   *
    * @param email the email of the donor.
    * @return an option of the donor, depending on whether the donor exists.
    */
@@ -95,6 +103,7 @@ case class Organisation(
 
   /**
    * Get a new donor id which is not already in use.
+   *
    * @return a new donor id.
    */
   def getNewDonorId: String =
@@ -108,6 +117,7 @@ case class Organisation(
    *
    * Example:
    * `def someFunction(...)(using donationGetter: DonationGetter): Unit = { ... }`
+   *
    * @return A function which gets a donation by id from the organisation.
    */
   given DonationGetter = getDonation
@@ -116,17 +126,19 @@ case class Organisation(
 
   /**
    * Donate to the organisation. This function is the entry point for donating to the organisation.
-   * @param donor the donor who is donating.
+   *
+   * @param donor        the donor who is donating.
    * @param donationPart the donation part which is being donated.
-   * @param donation the donation which is being donated.
-   * @param account the account to which the donation is being made.
+   * @param donation     the donation which is being donated.
+   * @param account      the account to which the donation is being made.
    * @return either an error or the updated organisation.
    */
   def donate(
     donor: Donor,
     donationPart: DonationPart,
     donation: Donation,
-    account: String
+    account: String,
+    config: Config
   ): Either[DonationError, Organisation] =
     // We first insert the donation into the donations, then we donate to the account, this is
     // done to ensure that the donation is available in the organisation during the process.
@@ -135,7 +147,10 @@ case class Organisation(
         LocalDateTime.now(),
         StatusUpdate.Status.RECEIVED,
         "Donation has been made and has been added to the account: " + account
-      )
+      ),
+      donor,
+      this,
+      config
     )
     copy(donations = donations.updated(donation.id, donation)).donate(donor, donationPart, account)
 
@@ -162,6 +177,7 @@ case class Organisation(
 
   /**
    * Get an account by name.
+   *
    * @param name the name of the account.
    * @return an option of the account, depending on whether the account exists.
    */
@@ -169,11 +185,12 @@ case class Organisation(
 
   /**
    * Withdraw from the organisation. This function is the entry point for withdrawing from the organisation.
-   * @param amount the amount to withdraw.
+   *
+   * @param amount      the amount to withdraw.
    * @param accountName the name of the account to withdraw from.
    * @param description the description of the withdrawal.
-   * @param earmarking the earmarking of the withdrawal.
-   * @param config the configuration of the organisation.
+   * @param earmarking  the earmarking of the withdrawal.
+   * @param config      the configuration of the organisation.
    * @return either an error or the updated organisation and email messages.
    */
   def withdrawal(
@@ -205,14 +222,17 @@ case class Organisation(
 
         val updatedOrg = copy(accounts = newAccounts, donations = newDonations, expenses = expenses.appended(expense))
 
-        updatedOrg.getNotificationsForUtilizedDonations(donationParts, config).map(messages => (updatedOrg, messages))
+        updatedOrg
+          .getNotificationsForUtilizedDonations(donationParts, description, config)
+          .map(messages => (updatedOrg, messages))
 
   /**
    * Transfer between accounts in the organisation. This function is the entry point for transferring between accounts.
-   * @param amount the amount to transfer.
+   *
+   * @param amount      the amount to transfer.
    * @param fromAccount the name of the account to transfer from.
-   * @param toAccount the name of the account to transfer to.
-   * @param config the configuration of the organisation.
+   * @param toAccount   the name of the account to transfer to.
+   * @param config      the configuration of the organisation.
    * @return either an error or the updated organisation and email messages.
    */
   def transfer(
@@ -220,17 +240,18 @@ case class Organisation(
     fromAccount: String,
     toAccount: String,
     config: Config
-  ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
+  ): Either[TransferError, Organisation] =
     (getAccount(fromAccount), getAccount(toAccount)) match
       case (Some(from), Some(to)) => transfer(amount, from, to, config)
       case _                      => Left(TransferError.INVALID_ACCOUNT)
 
   /**
    * Transfer between accounts in the organisation. This function is the entry point for transferring between accounts.
-   * @param amount the amount to transfer.
+   *
+   * @param amount      the amount to transfer.
    * @param fromAccount the account to transfer from.
-   * @param toAccount the account to transfer to.
-   * @param config the configuration of the organisation.
+   * @param toAccount   the account to transfer to.
+   * @param config      the configuration of the organisation.
    * @return either an error or the updated organisation and email messages.
    */
   def transfer(
@@ -238,7 +259,7 @@ case class Organisation(
     fromAccount: Account,
     toAccount: Account,
     config: Config
-  ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
+  ): Either[TransferError, Organisation] =
     if fromAccount.totalBalance < amount then return Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
 
     if amount <= Money.ZERO then return Left(TransferError.NON_POSITIVE_AMOUNT)
@@ -255,7 +276,30 @@ case class Organisation(
       accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
     )
 
-    Right((updatedOrg, Seq.empty[EmailMessage]))
+    val notificationError = parts.foldLeft[Option[TransferError]](None) {
+      case (acc, (_, donationPart)) =>
+        acc match
+          case Some(error) => Some(error)
+          case None =>
+            donors.get(donationPart.donation.get.donorId) match
+              case None => Some(TransferError.INVALID_DONOR)
+              case Some(donor) =>
+                donationPart.donation.get.addStatusUpdate(
+                  StatusUpdate(
+                    LocalDateTime.now(),
+                    StatusUpdate.Status.IN_TRANSFER,
+                    f"Transferring ${donationPart.amount} from ${fromAccount.name} to ${toAccount.name}"
+                  ),
+                  donor,
+                  this,
+                  config
+                )
+                None
+    }
+
+    notificationError match
+      case Some(error) => Left(error)
+      case None        => Right(updatedOrg)
 
   def totalBalance: Money =
     accounts.map(_._2.totalBalance).sum
@@ -281,6 +325,7 @@ case class Organisation(
 
   private def getNotificationsForUtilizedDonations(
     usedDonationParts: Seq[DonationPart],
+    description: String,
     config: Config
   ): Either[WithdrawError, Seq[EmailMessage]] =
     var remainingSeq = usedDonationParts
@@ -290,26 +335,22 @@ case class Organisation(
       val donationPart = remainingSeq.head
       remainingSeq = remainingSeq.tail
 
-      val donationIsFullyUsed = donationPart.donation.get.amountRemaining == Money.ZERO
-      if donationIsFullyUsed then
-        val donor = donors.get(donationPart.donation.get.donorId) match
-          case None        => return Left(WithdrawError.INVALID_DONOR)
-          case Some(donor) => donor
-        val trackingId = donor.id
-        val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId}"
+      val donor = donors.get(donationPart.donation.get.donorId) match
+        case None        => return Left(WithdrawError.INVALID_DONOR)
+        case Some(donor) => donor
 
-        emailMessages = emailMessages.appended(
-          EmailMessage(
-            donor.email,
-            f"""Your recent donation to ${name} has been fully utilized.
-               |To see more details about the status of your donation, visit the following link
-               |${trackingLink}
-               |or enter your tracking id
-               |${trackingId}
-               |on our tracking page
-               |${config.frontendUrl}""".stripMargin,
-            "Just Donate: Your donation has been utilized"
-          )
-        )
+      donationPart.donation.get.addStatusUpdate(
+        StatusUpdate(
+          LocalDateTime.now(),
+          StatusUpdate.Status.USED,
+          f"Using ${donationPart.amount} for ${description}"
+        ),
+        donor,
+        this,
+        config
+      ) match
+        case Some(emailMessage) =>
+          emailMessages = emailMessages :+ emailMessage
+        case None =>
 
     Right(emailMessages)
