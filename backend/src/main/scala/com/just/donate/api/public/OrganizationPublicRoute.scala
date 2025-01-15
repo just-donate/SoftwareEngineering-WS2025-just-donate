@@ -1,6 +1,7 @@
 package com.just.donate.api.public
 
 import cats.effect.*
+import com.just.donate.api.OrganisationRoute.ResponseEarmarkingImage
 import com.just.donate.db.Repository
 import com.just.donate.models.{Organisation, ThemeConfig}
 import com.just.donate.utils.Money
@@ -34,6 +35,13 @@ object OrganizationPublicRoute:
             case None => NotFound()
         yield response
 
+      case GET -> Root / organisationId / "earmarking" / earmarking / "image" / "list" =>
+        // This returns an array of arrays of EarmarkingImage objects
+        // We need to flatten the array to get a single array of EarmarkingImage objects
+        loadOrganisation(organisationId)(repository)(
+          _.getEarmarkingImages(earmarking).map(images => images.map(ResponseEarmarkingImage(_))).toSeq.flatten
+        )
+
   case class RequestOrganisation(name: String)
 
   private[api] case class ResponseOrganisation(organisationId: String, name: String)
@@ -47,4 +55,3 @@ object OrganizationPublicRoute:
   private[api] case class ResponseAccount(name: String, balance: Money)
 
   private[api] case class RequestDonation(donor: String, amount: Money, earmarking: Option[String])
-
