@@ -2,9 +2,9 @@ package com.just.donate.api
 
 import cats.effect.*
 import com.just.donate.db.Repository
-import com.just.donate.models.{Organisation, ThemeConfig, EarmarkingImage, Earmarking}
+import com.just.donate.models.{ Earmarking, EarmarkingImage, Organisation, ThemeConfig }
 import com.just.donate.utils.Money
-import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisation, loadOrganisation}
+import com.just.donate.utils.RouteUtils.{ loadAndSaveOrganisation, loadOrganisation }
 import io.circe.*
 import io.circe.generic.auto.*
 import org.http4s.*
@@ -46,9 +46,11 @@ object OrganisationRoute:
       case req @ POST -> Root / organisationId / "earmarking" / earmarking / "image" =>
         for
           image <- req.as[RequestEarmarkingImage]
-          response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarkingImage(earmarking, EarmarkingImage(image.fileUrl)))
+          response <- loadAndSaveOrganisation(organisationId)(repository)(
+            _.addEarmarkingImage(earmarking, EarmarkingImage(image.fileUrl))
+          )
         yield response
-        
+
       case DELETE -> Root / organisationId / "earmarking" / earmarking =>
         loadAndSaveOrganisation(organisationId)(repository)(_.removeEarmarking(earmarking))
 

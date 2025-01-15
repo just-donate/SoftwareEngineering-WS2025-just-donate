@@ -2,7 +2,7 @@ package com.just.donate.api
 
 import cats.data.Chain
 import cats.effect.*
-import com.just.donate.api.DonationRoute.{RequestDonation, emailTemplate, organisationMapper}
+import com.just.donate.api.DonationRoute.{RequestDonation, organisationMapper}
 import com.just.donate.config.Config
 import com.just.donate.db.Repository
 import com.just.donate.models.Organisation
@@ -10,6 +10,9 @@ import com.just.donate.models.paypal.{PayPalIPN, PayPalIPNMapper}
 import com.just.donate.notify.IEmailService
 import com.just.donate.utils.ErrorLogger
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
+import com.just.donate.notify.IEmailService
+import com.just.donate.notify.EmailMessage
+import com.just.donate.notify.messages.DonationMessage
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
@@ -137,24 +140,27 @@ object PaypalRoute:
           /**
            * Map the IPN data to an organisation and save it
            */
-          trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
-            organisationMapper(requestDonation, paypalAccountName)
+          donationResult <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
+            organisationMapper(requestDonation, paypalAccountName, conf)
           )
 
-          _ <- IO.println(s"Tracking ID: $trackingId")
-
-          _ <- trackingId match {
+          _ <- donationResult match {
             case None =>
               errorLogger.logError("IPN", "No Tracking ID generated", rawBody) >>
                 IO.println("No Tracking ID generated")
             case Some(Left(donationError)) =>
               errorLogger.logError("IPN", donationError.message, rawBody) >>
                 IO.println(donationError.message)
-            case Some(Right(trackingId)) =>
-              val trackingLink = s"${conf.frontendUrl}/tracking?id=$trackingId"
+            case Some(Right((org, donor))) =>
               emailService.sendEmail(
                 requestDonation.donorEmail,
-                emailTemplate(trackingLink, trackingId, conf.frontendUrl)
+                EmailMessage.prepareString(
+                  org.theme.map(_.emailTemplates.donationTemplate),
+                  DonationMessage(
+                    donor,
+                    conf,
+                  )
+                )
               )
           }
 

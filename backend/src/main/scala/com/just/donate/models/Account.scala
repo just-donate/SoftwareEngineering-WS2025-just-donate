@@ -1,8 +1,8 @@
 package com.just.donate.models
 
 import com.just.donate.models.Types.DonationGetter
-import com.just.donate.models.errors.{DonationError, WithdrawError}
-import com.just.donate.utils.CollectionUtils.{updated, updatedReturn}
+import com.just.donate.models.errors.{ DonationError, WithdrawError }
+import com.just.donate.utils.CollectionUtils.{ updated, updatedReturn }
 import com.just.donate.utils.Money
 import com.just.donate.utils.structs.ReservableQueue
 
@@ -79,8 +79,9 @@ case class Account private (
       case None => Left(WithdrawError.INVALID_EARMARKING)
       case Some((remaining, donationParts)) =>
         remaining match
-          case Some(d) => Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
-          case None    => Right((donationParts, copy(boundDonations = updatedFrom)))
+          case Some(d) =>
+            Left(WithdrawError.INSUFFICIENT_ACCOUNT_FUNDS)
+          case None => Right((donationParts, copy(boundDonations = updatedFrom)))
 
   def totalBalance: Money = totalBalanceUnbound + totalBalanceBound
 

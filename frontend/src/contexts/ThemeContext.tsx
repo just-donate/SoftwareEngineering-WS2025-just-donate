@@ -144,7 +144,11 @@ export function isValidTheme(theme: Partial<Theme>): theme is Theme {
       typeof theme.statusColors.processing === 'string' &&
       typeof theme.statusColors.allocated === 'string' &&
       typeof theme.statusColors.awaiting_utilization === 'string' &&
-      typeof theme.statusColors.used === 'string'
+      typeof theme.statusColors.used === 'string' &&
+      typeof theme.emailTemplates === 'object' &&
+      typeof theme.emailTemplates.donationTemplate === 'string' &&
+      typeof theme.emailTemplates.transferTemplate === 'string' &&
+      typeof theme.emailTemplates.withdrawalTemplate === 'string'
     );
   } catch {
     return false;
