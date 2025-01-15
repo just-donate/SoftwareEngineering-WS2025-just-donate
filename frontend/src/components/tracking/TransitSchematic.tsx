@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { DonationStatus } from '@/types/types';
+import { formatStatus } from '@/lib/status';
 
 interface TransitSchematicProps {
   status: DonationStatus[];
@@ -40,7 +41,7 @@ export const TransitSchematic: React.FC<TransitSchematicProps> = ({
                 className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs ${theme.card} ${theme.text} rounded shadow-lg whitespace-nowrap z-10`}
               >
                 {step.status
-                  ? `${step.status}: ${step.description}`
+                  ? `${formatStatus(step.status)}: ${step.description}`
                   : 'Not started'}
               </div>
             )}

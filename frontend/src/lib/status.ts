@@ -15,8 +15,6 @@ export const statusTexts: Record<string, string> = {
 export const statusIds: string[] = Object.keys(statusTexts);
 
 export const getStatusColor = (status: string, theme: Theme) => {
-  console.log('STATUS', status);
-  console.log(theme.statusColors);
   switch (status.toLowerCase()) {
     case 'announced':
       return theme.statusColors.announced;
@@ -40,3 +38,28 @@ export const getStatusColor = (status: string, theme: Theme) => {
       return theme.statusColors.announced;
   }
 };
+
+export function formatStatus(status: string): string {
+  switch (status.toLowerCase()) {
+    case 'announced':
+      return 'Announced';
+    case 'pending_confirmation':
+      return 'Pending Confirmation';
+    case 'confirmed':
+      return 'Confirmed';
+    case 'received':
+      return 'Received';
+    case 'in_transfer':
+      return 'In Transfer';
+    case 'processing':
+      return 'Processing';
+    case 'allocated':
+      return 'Allocated';
+    case 'awaiting_utilization':
+      return 'Awaiting Utilization';
+    case 'used':
+      return 'Used';
+    default:
+      return 'Announced';
+  }
+}

@@ -19,7 +19,7 @@ const mockDonation = {
   date: '2023-01-01',
   status: [
     {
-      status: 'Completed',
+      status: 'received',
       date: '2023-01-02',
       description: 'Donation completed successfully',
     },
@@ -65,7 +65,7 @@ describe('DonationItem Component', () => {
 
     // Check if the status is rendered
     await waitFor(() => {
-      expect(screen.getByText(/Completed/i)).toBeInTheDocument();
+      expect(screen.getByText(/Received/i)).toBeInTheDocument();
     });
   });
 

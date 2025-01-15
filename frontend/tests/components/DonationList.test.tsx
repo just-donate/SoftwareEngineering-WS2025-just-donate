@@ -15,7 +15,7 @@ const mockDonations = [
     date: '2023-01-01',
     status: [
       {
-        status: 'Completed',
+        status: 'received',
         date: '2023-01-01',
         description: 'Donation completed successfully',
       },
@@ -30,7 +30,7 @@ const mockDonations = [
     date: '2023-01-02',
     status: [
       {
-        status: 'Pending',
+        status: 'in_transfer',
         date: '2023-01-02',
         description: 'Donation is pending',
       },
@@ -53,12 +53,12 @@ describe('DonationList Component', () => {
       expect(screen.getByText(/Test NGO 1/i)).toBeInTheDocument();
       expect(screen.getByText(/General Purpose 1/i)).toBeInTheDocument();
       expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
-      expect(screen.getByText(/Completed/i)).toBeInTheDocument();
+      expect(screen.getByText(/Received/i)).toBeInTheDocument();
 
       expect(screen.getByText(/Test NGO 2/i)).toBeInTheDocument();
       expect(screen.getByText(/General Purpose 2/i)).toBeInTheDocument();
       expect(screen.getByText(/200.0 Euro/i)).toBeInTheDocument();
-      expect(screen.getByText(/Pending/i)).toBeInTheDocument();
+      expect(screen.getByText(/In Transfer/i)).toBeInTheDocument();
     });
   });
 
