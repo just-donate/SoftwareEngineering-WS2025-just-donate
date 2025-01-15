@@ -37,9 +37,9 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const getCachedTheme = useCallback((): Theme | null => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return null;
 
-    const storedData = localStorage.getItem(THEME_STORAGE_KEY);
+    const storedData = window.localStorage.getItem(THEME_STORAGE_KEY);
     if (!storedData) return null;
 
     try {
@@ -48,13 +48,12 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
       const isValidOrg = cached.organizationId === organizationId;
 
       if (isExpired || !isValidOrg || !isValidTheme(cached.theme)) {
-        localStorage.removeItem(THEME_STORAGE_KEY);
+        window.localStorage.removeItem(THEME_STORAGE_KEY);
         return null;
       }
 
       return cached.theme;
     } catch {
-      localStorage.removeItem(THEME_STORAGE_KEY);
       return null;
     }
   }, []);
@@ -65,7 +64,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
       timestamp: Date.now(),
       organizationId,
     };
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(cacheData));
+    window.localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(cacheData));
   }, []);
 
   const fetchTheme = useCallback(async () => {
@@ -76,11 +75,10 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
         setCachedTheme(savedTheme);
       } else {
         setThemeState(themes.default);
-        localStorage.removeItem(THEME_STORAGE_KEY);
+        window.localStorage.removeItem(THEME_STORAGE_KEY);
       }
     } catch {
       setThemeState(themes.default);
-      localStorage.removeItem(THEME_STORAGE_KEY);
     } finally {
       setIsLoading(false);
     }
