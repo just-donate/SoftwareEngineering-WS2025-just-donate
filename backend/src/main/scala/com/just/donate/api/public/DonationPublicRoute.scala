@@ -4,7 +4,7 @@ import cats.effect.IO
 import com.just.donate.api.DonationRoute.StatusResponse
 import com.just.donate.config.Config
 import com.just.donate.db.Repository
-import com.just.donate.models.{Donation, Organisation}
+import com.just.donate.models.{ Donation, Organisation }
 import com.just.donate.notify.IEmailService
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.loadOrganisation
