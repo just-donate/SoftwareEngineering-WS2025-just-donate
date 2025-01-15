@@ -8,7 +8,7 @@ Lukas Brennauer, Gerrit Holzbaur, Anton Kluge, Jakob Limmer, Sarp Sahinalp
 <div style="page-break-after: always;"></div>
 
 ## 2 Architekturmodell 
-![](uml/architekturmodell.png)
+![image](https://github.com/user-attachments/assets/70289897-4cda-445e-ae10-21caecd3d4c3)
 
 <div style="page-break-after: always;"></div>
 
