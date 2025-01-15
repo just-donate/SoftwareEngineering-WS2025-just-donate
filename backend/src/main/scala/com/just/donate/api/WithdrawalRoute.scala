@@ -45,7 +45,7 @@ object WithdrawalRoute:
                   .map(message => emailService.sendEmail(message.targetAddress, message.message, message.subject))
                   .sequence >> Ok()
           yield response).handleErrorWith {
-            case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
+            case e: (InvalidMessageBodyFailure | MalformedMessageBodyFailure) => BadRequest(e.getMessage)
           }
 
         case GET -> Root / organisationId / "withdrawal" / "list" =>

@@ -5,6 +5,7 @@ import cats.effect.IO
 import com.just.donate.api.DonationRoute.{DonationListResponse, RequestDonation}
 import com.just.donate.api.OrganisationRoute.*
 import com.just.donate.api.TransferRoute.RequestTransfer
+import com.just.donate.api.WithdrawalRoute.RequestWithdrawal
 import com.just.donate.models.ThemeConfig
 import com.just.donate.utils.Money
 import io.circe.generic.auto.*
@@ -158,6 +159,13 @@ object ApiAction:
   case class Transfer(organisationId: String, fromAccount: String, toAccount: String, amount: Money)
       extends ApiAction[RequestTransfer, Unit](
         Method.POST,
-        Seq(organisationId),
+        Seq("transfer", organisationId),
         RequestTransfer(fromAccount, toAccount, amount)
+      )
+
+  case class Withdraw(organisationId: String, accountName: String, amount: Money, description: String, earmarking: Option[String])
+      extends ApiAction[RequestWithdrawal, Unit](
+        Method.POST,
+        Seq(organisationId),
+        RequestWithdrawal(accountName, amount, description, earmarking)
       )
