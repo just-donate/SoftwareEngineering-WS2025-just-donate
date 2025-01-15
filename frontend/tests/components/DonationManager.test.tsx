@@ -24,7 +24,6 @@ jest.mock('../../src/app/organization/earmarkings/earmarkings', () => ({
   fetchEarmarkings: jest.fn(),
 }));
 
-
 const mockInitialDonations: Donation[] = [
   {
     donationId: '1',
@@ -106,11 +105,7 @@ describe('DonationManager Component', () => {
 
     const updateTheme = jest.fn();
 
-    return render(
-      <ThemeProvider>
-        {component}
-      </ThemeProvider>
-    );
+    return render(<ThemeProvider>{component}</ThemeProvider>);
   };
 
   it('renders initial donations', async () => {
@@ -123,11 +118,14 @@ describe('DonationManager Component', () => {
       );
     });
 
-    await waitFor(() => {
-      expect(screen.getByText(/Donations/i)).toBeInTheDocument();
-      expect(screen.getByText(/Organization 1/i)).toBeInTheDocument();
-      expect(screen.getByText(/100.0/i)).toBeInTheDocument();
-    }, { timeout: 10000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Donations/i)).toBeInTheDocument();
+        expect(screen.getByText(/Organization 1/i)).toBeInTheDocument();
+        expect(screen.getByText(/100.0/i)).toBeInTheDocument();
+      },
+      { timeout: 10000 },
+    );
   });
 
   it('creates a new donation', async () => {
@@ -142,37 +140,45 @@ describe('DonationManager Component', () => {
       );
     });
 
-    await waitFor(() => {
-      fireEvent.change(screen.getByTestId('donor-name-input'), {
-        target: { value: 'Jane Doe' },
-      });
-      fireEvent.change(screen.getByTestId('donor-email-input'), {
-        target: { value: 'jane@example.com' },
-      });
-      fireEvent.change(screen.getByTestId('amount-input'), {
-        target: { value: '50.0' },
-      });
-    }, { timeout: 10000 });
+    await waitFor(
+      () => {
+        fireEvent.change(screen.getByTestId('donor-name-input'), {
+          target: { value: 'Jane Doe' },
+        });
+        fireEvent.change(screen.getByTestId('donor-email-input'), {
+          target: { value: 'jane@example.com' },
+        });
+        fireEvent.change(screen.getByTestId('amount-input'), {
+          target: { value: '50.0' },
+        });
+      },
+      { timeout: 10000 },
+    );
 
     await act(async () => {
-        fireEvent.click(screen.getByText(/Select Earmarking/i));
+      fireEvent.click(screen.getByText(/Select Earmarking/i));
     });
 
-    await waitFor(() => {
-
+    await waitFor(
+      () => {
         fireEvent.click(screen.getByText(/Special Purpose/i)); // Select the option
 
         // Open the Select for account
         fireEvent.click(screen.getByText(/Select Account/i));
         fireEvent.click(screen.getByText(/Bank Account 1/i)); // Select the option
-  
+
         fireEvent.click(screen.getByText(/Create Donation/i));
-    }, { timeout: 10000 });
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Donation created successfully/i),
-      ).toBeInTheDocument();
-    }, { timeout: 10000 });
+      },
+      { timeout: 10000 },
+    );
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/Donation created successfully/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 10000 },
+    );
   }, 20000);
 
   it('creates a new donation with empty fields', async () => {
@@ -194,11 +200,14 @@ describe('DonationManager Component', () => {
       fireEvent.click(screen.getByText(/Create Donation/i));
     });
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Please fill in all fields/i),
-      ).toBeInTheDocument();
-    }, { timeout: 10000 });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/Please fill in all fields/i),
+        ).toBeInTheDocument();
+      },
+      { timeout: 10000 },
+    );
   }, 10000);
 
   it('creates a new donation with error', async () => {
@@ -216,20 +225,23 @@ describe('DonationManager Component', () => {
       );
     });
 
-    await waitFor(() => {
-      fireEvent.change(screen.getByTestId('donor-name-input'), {
-        target: { value: 'Jane Doe' },
-      });
-      fireEvent.change(screen.getByTestId('donor-email-input'), {
-        target: { value: 'jane@example.com' },
-      });
-      fireEvent.change(screen.getByTestId('amount-input'), {
-        target: { value: '50.0' },
-      });
+    await waitFor(
+      () => {
+        fireEvent.change(screen.getByTestId('donor-name-input'), {
+          target: { value: 'Jane Doe' },
+        });
+        fireEvent.change(screen.getByTestId('donor-email-input'), {
+          target: { value: 'jane@example.com' },
+        });
+        fireEvent.change(screen.getByTestId('amount-input'), {
+          target: { value: '50.0' },
+        });
+      },
+      { timeout: 10000 },
+    );
 
-    }, { timeout: 10000 });
-
-    await waitFor(() => {
+    await waitFor(
+      () => {
         fireEvent.click(screen.getByText(/Select Earmarking/i));
         fireEvent.click(screen.getByText(/Special Purpose/i)); // Select the option
 
@@ -238,10 +250,15 @@ describe('DonationManager Component', () => {
         fireEvent.click(screen.getByText(/Bank Account 1/i)); // Select the option
 
         fireEvent.click(screen.getByText(/Create Donation/i));
-    }, { timeout: 10000 });
+      },
+      { timeout: 10000 },
+    );
 
-    await waitFor(() => {
-      expect(screen.getByText(/Error/i)).toBeInTheDocument();
-    }, { timeout: 10000 });
-  }, 20000); 
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Error/i)).toBeInTheDocument();
+      },
+      { timeout: 10000 },
+    );
+  }, 20000);
 });
