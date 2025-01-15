@@ -6,6 +6,7 @@ import React, {
   useContext,
   ReactNode,
   useEffect,
+  useCallback,
 } from 'react';
 import { Theme, themes } from '@/styles/themes';
 import axios from 'axios';
@@ -15,51 +16,125 @@ import { config } from '@/lib/config';
 interface ThemeContextType {
   theme: Theme;
   updateTheme: (newTheme: Theme) => Promise<void>;
+  isLoading: boolean;
+}
+
+interface CachedTheme {
+  theme: Theme;
+  timestamp: number;
+  organizationId: string;
 }
 
 const organizationId = config.organizationId;
+const THEME_STORAGE_KEY = `theme_${organizationId}`;
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [theme, setThemeState] = useState<Theme>(themes.default);
+  const [theme, setThemeState] = useState<Theme | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchTheme = async () => {
+  const getCachedTheme = useCallback((): Theme | null => {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.localStorage === 'undefined'
+    )
+      return null;
+
+    const storedData = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (!storedData) return null;
+
+    try {
+      const cached: CachedTheme = JSON.parse(storedData);
+      const isExpired = Date.now() - cached.timestamp > CACHE_DURATION;
+      const isValidOrg = cached.organizationId === organizationId;
+
+      if (isExpired || !isValidOrg || !isValidTheme(cached.theme)) {
+        window.localStorage.removeItem(THEME_STORAGE_KEY);
+        return null;
+      }
+
+      return cached.theme;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const setCachedTheme = useCallback((newTheme: Theme) => {
+    const cacheData: CachedTheme = {
+      theme: newTheme,
+      timestamp: Date.now(),
+      organizationId,
+    };
+    window.localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(cacheData));
+  }, []);
+
+  const fetchTheme = useCallback(async () => {
     try {
       const savedTheme = await getTheme(organizationId);
       if (savedTheme) {
         setThemeState(savedTheme);
+        setCachedTheme(savedTheme);
+      } else {
+        setThemeState(themes.default);
+        window.localStorage.removeItem(THEME_STORAGE_KEY);
       }
-    } catch (error) {
-      console.error('Failed to fetch theme:', error);
+    } catch {
+      setThemeState(themes.default);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [setCachedTheme]);
 
-  const updateTheme = async (newTheme: Theme) => {
-    try {
-      const result = await saveTheme(organizationId, newTheme);
+  const updateTheme = useCallback(
+    async (newTheme: Theme) => {
+      setIsLoading(true);
+      try {
+        const result = await saveTheme(organizationId, newTheme);
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to save theme');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to save theme');
+        }
+
+        setThemeState(newTheme);
+        setCachedTheme(newTheme);
+      } catch (error) {
+        console.error('Failed to update theme:', error);
+        throw error instanceof Error
+          ? error
+          : new Error('Failed to update theme');
+      } finally {
+        setIsLoading(false);
       }
-
-      setThemeState(newTheme);
-    } catch (error) {
-      console.error('Failed to update theme:', error);
-      throw error instanceof Error
-        ? error
-        : new Error('Failed to update theme');
-    }
-  };
+    },
+    [setCachedTheme],
+  );
 
   useEffect(() => {
-    fetchTheme();
-  }, []);
+    const initializeTheme = async () => {
+      const cachedTheme = getCachedTheme();
+      if (cachedTheme) {
+        setThemeState(cachedTheme);
+        setIsLoading(false);
+        // Fetch in background to update cache
+        fetchTheme();
+      } else {
+        await fetchTheme();
+      }
+    };
+
+    initializeTheme();
+  }, [fetchTheme, getCachedTheme]);
+
+  if (isLoading || !theme) {
+    return null;
+  }
 
   return (
-    <ThemeContext.Provider value={{ theme, updateTheme }}>
+    <ThemeContext.Provider value={{ theme, updateTheme, isLoading }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -78,19 +153,12 @@ export async function getTheme(organizationId: string): Promise<Theme | null> {
     const response = await axiosInstance.get<Theme>(
       `public/organisation/${organizationId}/theme`,
     );
-    if (response.data) {
-      return response.data;
-    } else {
+    return response.data || null;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
       return null;
     }
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        return null;
-      }
-      throw new Error(`Failed to fetch theme: ${error.response?.statusText}`);
-    }
-    console.error('Failed to fetch theme:', error);
+    // For any other error, return null to use default theme
     return null;
   }
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { act } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DonationList } from '../../src/components/tracking/DonationList';
 import { ThemeProvider } from '../../src/contexts/ThemeContext';
@@ -39,34 +39,43 @@ const mockDonations = [
 ];
 
 describe('DonationList Component', () => {
-  it('renders donation items correctly', () => {
-    render(
-      <ThemeProvider>
-        <DonationList donations={mockDonations} />
-      </ThemeProvider>,
-    );
+  it('renders donation items correctly', async () => {
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <DonationList donations={mockDonations} />
+        </ThemeProvider>,
+      );
+    });
 
-    // Check if the donation items are rendered
-    expect(screen.getByText(/Test NGO 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/General Purpose 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
-    expect(screen.getByText(/Completed/i)).toBeInTheDocument();
+    await waitFor(async () => {
+      // Check if the donation items are rendered
+      expect(screen.getByText(/Test NGO 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/General Purpose 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
+      expect(screen.getByText(/Completed/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/Test NGO 2/i)).toBeInTheDocument();
-    expect(screen.getByText(/General Purpose 2/i)).toBeInTheDocument();
-    expect(screen.getByText(/200.0 Euro/i)).toBeInTheDocument();
-    expect(screen.getByText(/Pending/i)).toBeInTheDocument();
+      expect(screen.getByText(/Test NGO 2/i)).toBeInTheDocument();
+      expect(screen.getByText(/General Purpose 2/i)).toBeInTheDocument();
+      expect(screen.getByText(/200.0 Euro/i)).toBeInTheDocument();
+      expect(screen.getByText(/Pending/i)).toBeInTheDocument();
+    });
   });
 
   it('opens and closes donation details when an item is clicked', async () => {
-    render(
-      <ThemeProvider>
-        <DonationList donations={mockDonations} />
-      </ThemeProvider>,
-    );
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <DonationList donations={mockDonations} />
+        </ThemeProvider>,
+      );
+    });
 
-    // Simulate a click on the first donation item
-    fireEvent.click(screen.getByText(/Test NGO 1/i));
+
+    await waitFor(async () => {
+      // Simulate a click on the first donation item
+      fireEvent.click(screen.getByText(/Test NGO 1/i));
+    });
 
     // Wait for the donation details to be displayed
     await waitFor(() => {
@@ -74,7 +83,9 @@ describe('DonationList Component', () => {
     });
 
     // Simulate closing the donation details using the close button
-    fireEvent.click(screen.getByTestId('close-button')); // Use the data-testid to select the button
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('close-button')); // Use the data-testid to select the button
+    });
 
     // Wait for the donation details to be removed
     await waitFor(() => {
