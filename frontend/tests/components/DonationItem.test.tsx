@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { act } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { DonationItem } from '../../src/components/tracking/DonationItem';
 import { ThemeProvider } from '../../src/contexts/ThemeContext';
@@ -34,12 +34,14 @@ describe('DonationItem Component', () => {
     Cookies.remove('shownDonations');
   });
 
-  it('renders donation details correctly', () => {
-    render(
-      <ThemeProvider>
-        <DonationItem donation={mockDonation} onClick={mockOnClick} />
-      </ThemeProvider>,
-    );
+  it('renders donation details correctly', async () => {
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <DonationItem donation={mockDonation} onClick={mockOnClick} />
+        </ThemeProvider>,
+      );
+    });
 
     // Check if the NGO name is rendered
     expect(screen.getByText(/Test Organisation/i)).toBeInTheDocument();
@@ -58,11 +60,13 @@ describe('DonationItem Component', () => {
   });
 
   it('shows thank you message when the item is rendered', async () => {
-    render(
-      <ThemeProvider>
-        <DonationItem donation={mockDonation} onClick={mockOnClick} />
-      </ThemeProvider>,
-    );
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <DonationItem donation={mockDonation} onClick={mockOnClick} />
+        </ThemeProvider>,
+      );
+    });
 
     // Check if the thank you message is displayed
     expect(
@@ -80,12 +84,14 @@ describe('DonationItem Component', () => {
     ); // Increase timeout if necessary
   });
 
-  it('calls onClick when the item is clicked', () => {
-    render(
-      <ThemeProvider>
-        <DonationItem donation={mockDonation} onClick={mockOnClick} />
-      </ThemeProvider>,
-    );
+  it('calls onClick when the item is clicked', async () => {
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <DonationItem donation={mockDonation} onClick={mockOnClick} />
+        </ThemeProvider>,
+      );
+    });
 
     // Simulate a click on the donation item
     screen.getByText(/Test Organisation/i).click();

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { act } from 'react';
 import { render, screen } from '@testing-library/react';
 import { StatusTimeline } from '../../src/components/tracking/StatusTimeline';
 import { ThemeProvider } from '../../src/contexts/ThemeContext';
@@ -21,12 +21,14 @@ const mockStatus = [
 ];
 
 describe('StatusTimeline Component', () => {
-  it('renders status items correctly', () => {
-    render(
-      <ThemeProvider>
-        <StatusTimeline status={mockStatus} />
-      </ThemeProvider>,
-    );
+  it('renders status items correctly', async () => {
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <StatusTimeline status={mockStatus} />
+        </ThemeProvider>,
+      );
+    });
 
     // Check if the status items are rendered
     expect(screen.getByText(/Donated/i)).toBeInTheDocument();
