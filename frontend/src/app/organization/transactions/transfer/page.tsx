@@ -5,13 +5,14 @@ import { fetchBankAccounts } from '../../bank-accounts/bank-accounts';
 import { useEffect, useState } from 'react';
 import { BankAccount } from '@/types/types';
 import withAuth from '../../api/RequiresAuth';
+import { config } from '@/lib/config';
 
 function TransferPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // TODO: Get the organization ID from the session/context
-  const organizationId = '591671920';
+  const organizationId = config.organizationId;
 
   useEffect(() => {
     const fetchData = async () => {
