@@ -10,13 +10,14 @@ import React, {
 import { Theme, themes } from '@/styles/themes';
 import axios from 'axios';
 import axiosInstance from '@/app/organization/api/axiosInstance';
+import { config } from '@/lib/config';
 
 interface ThemeContextType {
   theme: Theme;
   updateTheme: (newTheme: Theme) => Promise<void>;
 }
 
-const organizationId = '591671920';
+const organizationId = config.organizationId;
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, FormEvent } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import withAuth from '../api/RequiresAuth';
+import config from '../../../../tailwind.config';
 
 interface User {
   email: string;
@@ -156,7 +157,7 @@ function UsersPage() {
       const payload = {
         email: newUserEmail,
         password: newUserPassword,
-        orgId: '591671920',
+        orgId: config.organizationId,
         role: newUserRole,
       };
       await axiosInstance.post('/user/register', payload);

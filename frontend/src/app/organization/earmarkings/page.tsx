@@ -5,10 +5,11 @@ import EarmarkingManager from '@/components/organization/EarmarkingManager';
 import { Earmarking } from '@/types/types';
 import { fetchEarmarkings } from './earmarkings';
 import withAuth from '../api/RequiresAuth';
+import { config } from '@/lib/config';
 
 function EarmarkingsPage() {
   const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);
-  const organizationId = '591671920';
+  const organizationId = config.organizationId;
 
   useEffect(() => {
     fetchEarmarkings(organizationId).then(setEarmarkings);

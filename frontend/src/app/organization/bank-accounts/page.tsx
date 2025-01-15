@@ -5,11 +5,12 @@ import BankAccountManager from '@/components/organization/BankAccountManager';
 import { BankAccount } from '@/types/types';
 import { fetchBankAccounts } from './bank-accounts';
 import withAuth from '../api/RequiresAuth';
+import { config } from '@/lib/config';
 
 function BankAccountsPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   // TODO: Get the organization ID from the session/context
-  const organizationId = '591671920';
+  const organizationId = config.organizationId;
 
   useEffect(() => {
     fetchBankAccounts(organizationId).then(setAccounts);

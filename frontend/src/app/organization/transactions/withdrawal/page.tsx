@@ -8,6 +8,7 @@ import { fetchWithdrawals } from '../transactions';
 import { useEffect, useState } from 'react';
 import { BankAccount, Earmarking, Withdrawal } from '@/types/types';
 import withAuth from '../../api/RequiresAuth';
+import { config } from '@/lib/config';
 
 function WithdrawalPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
@@ -15,8 +16,7 @@ function WithdrawalPage() {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // TODO: Get the organization ID from the session/context
-  const organizationId = '591671920';
+  const organizationId = config.organizationId;
 
   useEffect(() => {
     const fetchData = async () => {

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { useTheme } from '@/contexts/ThemeContext';
+import axiosInstance from '../api/axiosInstance';
+import { config } from '@/lib/config';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,12 +14,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { theme } = useTheme();
-  const orgId = '591671920';
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-  if (!API_URL) {
-    throw new Error('NEXT_PUBLIC_API_URL is not set');
-  }
+  const orgId = config.organizationId;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -25,8 +22,8 @@ export default function LoginPage() {
 
     try {
       // Perform the login request
-      await axios.post(
-        `${API_URL}/login`, // Replace with your login endpoint
+      await axiosInstance.post(
+        '/login', // Replace with your login endpoint
         {
           username: email,
           password: password,

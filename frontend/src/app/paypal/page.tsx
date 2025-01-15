@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/organization/ui/select';
+import { config } from '@/lib/config';
 
 interface Purpose {
   name: string;
@@ -32,7 +33,7 @@ const DonationPage: React.FC = () => {
 
   // Organization Info
   const orgName = 'Just-Donate';
-  const organizationId = '591671920';
+  const organizationId = config.organizationId;
 
   // Fetch purpose options on mount
   useEffect(() => {
