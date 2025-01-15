@@ -44,19 +44,29 @@ describe('DonationItem Component', () => {
     });
 
     // Check if the NGO name is rendered
-    expect(screen.getByText(/Test Organisation/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Test Organisation/i)).toBeInTheDocument();
+    });
 
     // Check if the project name is rendered
-    expect(screen.getByText(/General Purpose/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/General Purpose/i)).toBeInTheDocument();
+    });
 
     // Check if the amount and currency are rendered
-    expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
+    });
 
     // Check if the donation date is rendered
-    expect(screen.getByText(/January 1, 2023/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/January 1, 2023/i)).toBeInTheDocument();
+    });
 
     // Check if the status is rendered
-    expect(screen.getByText(/Completed/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Completed/i)).toBeInTheDocument();
+    });
   });
 
   it('shows thank you message when the item is rendered', async () => {
@@ -96,7 +106,9 @@ describe('DonationItem Component', () => {
     });
 
     // Simulate a click on the donation item
-    screen.getByText(/Test Organisation/i).click();
+    await waitFor(() => {
+      screen.getByText(/Test Organisation/i).click();
+    });
 
     // Check if the onClick function was called
     expect(mockOnClick).toHaveBeenCalledTimes(1);

@@ -78,7 +78,9 @@ describe('DonationList Component', () => {
     });
 
     // Simulate closing the donation details using the close button
-    fireEvent.click(screen.getByTestId('close-button')); // Use the data-testid to select the button
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('close-button')); // Use the data-testid to select the button
+    });
 
     // Wait for the donation details to be removed
     await waitFor(() => {
