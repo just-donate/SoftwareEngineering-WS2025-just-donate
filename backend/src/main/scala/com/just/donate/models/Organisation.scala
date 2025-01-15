@@ -88,7 +88,10 @@ case class Organisation(
    */
   def removeEarmarking(earmarking: String): Organisation =
     getEarmarking(earmarking) match
-      case Some(earmark) => copy(accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmark))))
+      case Some(earmark) => copy(
+        accounts = accounts.map(t => (t._1, t._2.removeEarmarking(earmark))),
+        earmarkings = earmarkings.filterNot(_.name == earmarking)
+      )
       case None          => this
 
   def getDonations: Seq[Donation] = donations.values.toSeq

@@ -4,14 +4,15 @@ import scala.annotation.tailrec
 
 object CollectionUtils:
 
-  @tailrec
   private def updatedReturnHelper[T, R](seq: Seq[T], at: T => Boolean)(f: T => (R, T)): (Seq[T], Option[R]) =
     seq match
       case Seq() => (seq, None)
       case head +: tail if at(head) =>
         val (result, newHead) = f(head)
         (newHead +: tail, Some(result))
-      case head +: tail => updatedReturnHelper(tail, at)(f)
+      case head +: tail =>
+        val res = updatedReturnHelper(tail, at)(f)
+        (head +: res._1, res._2)
 
   extension [T](seq: Seq[T])
 

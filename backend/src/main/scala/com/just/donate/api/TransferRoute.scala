@@ -36,7 +36,7 @@ object TransferRoute:
               case Some(Some(transferError)) => BadRequest(transferError.message)
               case Some(None)                => Ok()
           yield response).handleErrorWith {
-            case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
+            case e: (InvalidMessageBodyFailure | MalformedMessageBodyFailure) => BadRequest(e.getMessage)
           }
 
   private[api] case class RequestTransfer(

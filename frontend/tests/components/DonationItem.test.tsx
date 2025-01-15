@@ -11,6 +11,7 @@ import '@testing-library/jest-dom'; // Import jest-dom
 const mockDonation = {
   donationId: '1', // Add this line
   organisation: 'Test Organisation', // Add this line
+  organisationId: '1234',
   earmarking: 'General Purpose', // Add this line
   donorEmail: 'donor@example.com',
   ngo: 'Test NGO',

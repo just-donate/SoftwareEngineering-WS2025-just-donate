@@ -25,9 +25,6 @@ class PaypalApiSuite extends CatsEffectSuite:
 
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
-  // Use Dispatcher to run IO effects from non-IO code if needed.
-  val disp: Resource[IO, Dispatcher[IO]] = Dispatcher[IO]
-
   private val orgRepo = MemoryOrganisationRepository()
 
   // Start a dummy validation server that always returns "INVALID"
@@ -146,7 +143,7 @@ class PaypalApiSuite extends CatsEffectSuite:
           IO.sleep(2.seconds) *> // allow time for asynchronous processing
             IO.delay {
               System.setOut(originalOut)
-//              captureOut.toString("UTF-8")
+              captureOut.toString("UTF-8")
             }.map { captured =>
               val allDb = mockRepo.findAll().map(_.toList)
               assertEquals(response.status, Status.Ok)
@@ -154,7 +151,7 @@ class PaypalApiSuite extends CatsEffectSuite:
               val updatedOrg = orgRepo.findById(organisationId(NEW_ROOTS)).unsafeRunSync().get
               println(">>>> ORG: " + updatedOrg)
               assert(updatedOrg.totalBalance == Money("100"))
-//              assert(clue(captured).contains("IPN verified by PayPal"), "Expected log output 'IPN verified by PayPal'")
+              assert(clue(captured).contains("IPN verified by PayPal"), "Expected log output 'IPN verified by PayPal'")
             }
         }
     }
