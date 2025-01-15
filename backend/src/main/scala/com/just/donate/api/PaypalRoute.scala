@@ -1,5 +1,6 @@
 package com.just.donate.api
 
+import cats.data.Chain
 import cats.effect.*
 import com.just.donate.api.DonationRoute.{RequestDonation, emailTemplate, organisationMapper}
 import com.just.donate.config.Config
@@ -25,103 +26,154 @@ object PaypalRoute:
   def paypalRoute(paypalRepo: Repository[String, PayPalIPN], orgRepo: Repository[String, Organisation], conf: Config, emailService: IEmailService, errorLogger: ErrorLogger): HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req@POST -> Root =>
       for
-        // Parse the request body
+
+        /**
+         * Parse the URL form data and the raw body
+         */
         urlForm <- req.as[UrlForm].map(_.values)
         rawBody <- req.bodyText.compile.string
 
         _ <- IO.println(s"Received IPN: $rawBody")
 
-        // Immediately respond to PayPal to avoid IPN timeouts
+        /**
+         * Respond to PayPal immediately to avoid retries
+         */
         response <- Ok("").handleErrorWith { error =>
           IO.println(s"Failed to send immediate response to PayPal: $error") >> InternalServerError(
             "Error processing IPN"
           )
         }
 
-        // Inside your route:
-        _ <- validateWithRetry(rawBody, maxRetries = 3, delay = 5.seconds).flatMap {
-          case "VERIFIED" =>
-            for
-              _ <- IO.println("IPN verified by PayPal")
-
-              // Map the incoming IPN data to a domain model
-              newIpn <- PayPalIPNMapper.mapToPayPalIPN(urlForm).handleErrorWith { error =>
-                val errMsg = s"Failed to map IPN: $error"
-                IO.println(errMsg) >>
-                  errorLogger.logError("IPN", errMsg, rawBody) >>
-                  IO.raiseError(error)
-              }
-
-              // Check if payment status is completed
-              _ <- if (newIpn.paymentStatus.equals("Completed")) {
-                IO.unit
-              } else {
-                val errMsg = s"Invalid payment status: ${newIpn.paymentStatus}. Expected: Completed"
-                IO.println(errMsg) >>
-                  errorLogger.logError("IPN", errMsg, rawBody) >>
-                  IO.raiseError(new IllegalArgumentException("Invalid payment status"))
-              }
-
-              // Check for duplicate IPN
-              existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
-              _ <- existingIpn match {
-                case Some(_) =>
-                  val errMsg = s"Duplicate IPN detected for IPN track ID: ${newIpn.ipnTrackId}"
-                  IO.println(errMsg) >>
-                    errorLogger.logError("IPN", errMsg, rawBody) >>
-                    IO.raiseError(new IllegalStateException("Duplicate IPN detected"))
-                case None => IO.unit
-              }
-
-              // Save the IPN if all checks pass
-              _ <- paypalRepo.save(newIpn).handleErrorWith { error =>
-                val errMsg = s"Failed to save IPN: $error"
-                IO.println(errMsg) >>
-                  errorLogger.logError("IPN", errMsg, rawBody) >>
-                  IO.raiseError(error)
-              }
-
-              // Prepare the donation request
-              requestDonation <- IO.pure(
-                RequestDonation(
-                  newIpn.firstName + " " + newIpn.lastName,
-                  newIpn.notificationEmail,
-                  newIpn.mcGross,
-                  if (newIpn.itemName.isEmpty || newIpn.itemName == "__empty__") None else Some(newIpn.itemName)
-                )
-              )
-
-              trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
-                organisationMapper(requestDonation, paypalAccountName)
-              )
-
-              _ <- IO.println(s"Tracking ID: $trackingId")
-
-              _ <- trackingId match {
-                case None =>
-                  errorLogger.logError("IPN", "No Tracking ID generated", rawBody) >>
-                  IO.println("No Tracking ID generated")
-                case Some(Left(donationError)) =>
-                  errorLogger.logError("IPN", donationError.message, rawBody) >>
-                  IO.println(donationError.message)
-                case Some(Right(trackingId)) =>
-                  val trackingLink = s"${conf.frontendUrl}/tracking?id=$trackingId"
-                  emailService.sendEmail(
-                    requestDonation.donorEmail,
-                    emailTemplate(trackingLink, trackingId, conf.frontendUrl)
-                  )
-              }
-
-            yield ()
-          case "INVALID" =>
-            IO.println("IPN invalid")
-          case other =>
-            IO.println(s"Unexpected validation response: $other")
-        }.start
+        /**
+         * Process the IPN
+         */
+        _ <- processIpn(rawBody, urlForm, paypalRepo, orgRepo, conf, emailService, errorLogger).start
       yield response
   }
 
-  // Function to validate IPN with PayPal, adding retry logic
+  /**
+   * Process an IPN from PayPal
+   *
+   * @param rawBody      The raw IPN body
+   * @param urlForm      The parsed URL form data
+   * @param paypalRepo   The PayPal IPN repository
+   * @param orgRepo      The organisation repository
+   * @param conf         The application configuration
+   * @param emailService The email service
+   * @param errorLogger  The error logger
+   * @return An IO action that processes the IPN
+   */
+  private def processIpn(
+                          rawBody: String,
+                          urlForm: Map[String, Chain[String]],
+                          paypalRepo: Repository[String, PayPalIPN],
+                          orgRepo: Repository[String, Organisation],
+                          conf: Config,
+                          emailService: IEmailService,
+                          errorLogger: ErrorLogger
+                        ): IO[Unit] = {
+    validateWithRetry(rawBody, maxRetries = 3, delay = 5.seconds).flatMap {
+      case "VERIFIED" =>
+        for
+          _ <- IO.println("IPN verified by PayPal")
+
+          /**
+           * Map the IPN data to a PayPal IPN
+           */
+          newIpn <- PayPalIPNMapper.mapToPayPalIPN(urlForm).handleErrorWith { error =>
+            val errMsg = s"Failed to map IPN: $error"
+            IO.println(errMsg) >>
+              errorLogger.logError("IPN", errMsg, rawBody) >>
+              IO.raiseError(error)
+          }
+
+          /**
+           * Check if the payment status is "Completed"
+           */
+          _ <- if (newIpn.paymentStatus.equals("Completed")) {
+            IO.unit
+          } else {
+            val errMsg = s"Invalid payment status: ${newIpn.paymentStatus}. Expected: Completed"
+            IO.println(errMsg) >>
+              errorLogger.logError("IPN", errMsg, rawBody) >>
+              IO.raiseError(new IllegalArgumentException("Invalid payment status"))
+          }
+
+          /**
+           * Check if the IPN is a duplicate
+           */
+          existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
+          _ <- existingIpn match {
+            case Some(_) =>
+              val errMsg = s"Duplicate IPN detected for IPN track ID: ${newIpn.ipnTrackId}"
+              IO.println(errMsg) >>
+                errorLogger.logError("IPN", errMsg, rawBody) >>
+                IO.raiseError(new IllegalStateException("Duplicate IPN detected"))
+            case None => IO.unit
+          }
+
+          /**
+           * Save the IPN to the database
+           */
+          _ <- paypalRepo.save(newIpn).handleErrorWith { error =>
+            val errMsg = s"Failed to save IPN: $error"
+            IO.println(errMsg) >>
+              errorLogger.logError("IPN", errMsg, rawBody) >>
+              IO.raiseError(error)
+          }
+
+          /**
+           * Map the IPN data to a request donation
+           */
+          requestDonation <- IO.pure(
+            RequestDonation(
+              newIpn.firstName + " " + newIpn.lastName,
+              newIpn.notificationEmail,
+              newIpn.mcGross,
+              if (newIpn.itemName.isEmpty || newIpn.itemName == "__empty__") None else Some(newIpn.itemName)
+            )
+          )
+
+          /**
+           * Map the IPN data to an organisation and save it
+           */
+          trackingId <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
+            organisationMapper(requestDonation, paypalAccountName)
+          )
+
+          _ <- IO.println(s"Tracking ID: $trackingId")
+
+          _ <- trackingId match {
+            case None =>
+              errorLogger.logError("IPN", "No Tracking ID generated", rawBody) >>
+                IO.println("No Tracking ID generated")
+            case Some(Left(donationError)) =>
+              errorLogger.logError("IPN", donationError.message, rawBody) >>
+                IO.println(donationError.message)
+            case Some(Right(trackingId)) =>
+              val trackingLink = s"${conf.frontendUrl}/tracking?id=$trackingId"
+              emailService.sendEmail(
+                requestDonation.donorEmail,
+                emailTemplate(trackingLink, trackingId, conf.frontendUrl)
+              )
+          }
+
+        yield ()
+      case "INVALID" =>
+        IO.println("IPN invalid")
+      case other =>
+        IO.println(s"Unexpected validation response: $other")
+    }
+  }
+
+  /**
+   * Validate an IPN with PayPal, retrying up to `maxRetries` times with a delay of `delay` between each attempt
+   *
+   * @param rawBody    The raw IPN body
+   * @param maxRetries The maximum number of retries
+   * @param delay      The delay between retries
+   * @return An IO action that validates the IPN
+   */
   private def validateWithRetry(rawBody: String, maxRetries: Int, delay: FiniteDuration): IO[String] =
     val validationPayload = s"cmd=_notify-validate&$rawBody"
 
@@ -134,6 +186,9 @@ object PaypalRoute:
       )
     }
 
+    /**
+     * Perform the HTTP request to validate the IPN with PayPal
+     */
     def doRequest: IO[String] = IO {
       // Create URL and open connection
       val url = new URL(paypalValidationUrl)
@@ -163,13 +218,19 @@ object PaypalRoute:
           val response = new StringBuilder
           var line: String = null
           while {
-            line = reader.readLine(); line != null
+            line = reader.readLine();
+            line != null
           } do response.append(line)
           response.toString
         finally reader.close()
       finally connection.disconnect()
     }
 
+    /**
+     * Attempt to validate the IPN with PayPal, retrying up to `maxRetries` times
+     *
+     * @param attemptNumber The current attempt number
+     */
     def attempt(attemptNumber: Int): IO[String] =
       doRequest.attempt.flatMap {
         case Right(response) =>
