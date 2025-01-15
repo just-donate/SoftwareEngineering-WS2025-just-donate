@@ -1,6 +1,6 @@
 'use client';
 
-import { Donation } from '@/types/types';
+import { DonationWithDonor } from '@/types/types';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -11,12 +11,12 @@ import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
 
 type NotificationModalState = {
-  donation: Donation;
+  donation: DonationWithDonor;
   message: string;
 };
 
 interface DonationDetailsProps {
-  donation: Donation;
+  donation: DonationWithDonor;
 }
 
 export default function DonationDetails({ donation }: DonationDetailsProps) {
@@ -60,6 +60,8 @@ export default function DonationDetails({ donation }: DonationDetailsProps) {
     }
   };
 
+  console.log(donation);
+
   return (
     <>
       <Card className="mb-4">
@@ -83,6 +85,14 @@ export default function DonationDetails({ donation }: DonationDetailsProps) {
                 <p className="font-medium">
                   {new Date(donation.date).toLocaleDateString()}
                 </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Donor Name</p>
+                <p className="font-medium">{donation.donor.name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Donor Email</p>
+                <p className="font-medium">{donation.donor.email}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Earmarking</p>

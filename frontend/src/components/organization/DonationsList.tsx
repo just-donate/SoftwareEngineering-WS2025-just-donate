@@ -10,18 +10,19 @@ import {
   SelectValue,
 } from './ui/select';
 import DonationDetails from './DonationDetails';
-import { Donation } from '@/types/types';
+import { DonationWithDonor } from '@/types/types';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface DonationsListProps {
-  initialDonations: Donation[];
+  initialDonations: DonationWithDonor[];
 }
 
 export default function DonationsList({
   initialDonations,
 }: DonationsListProps) {
   const { theme } = useTheme();
-  const [donations, setDonations] = useState<Donation[]>(initialDonations);
+  const [donations, setDonations] =
+    useState<DonationWithDonor[]>(initialDonations);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -41,7 +42,10 @@ export default function DonationsList({
       ) ||
       (donation.date?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       donation.amount?.amount?.toString().includes(searchTerm) ||
-      (donation.donorEmail?.toLowerCase() || '').includes(
+      (donation.donor.name?.toLowerCase() || '').includes(
+        searchTerm.toLowerCase(),
+      ) ||
+      (donation.donor.email?.toLowerCase() || '').includes(
         searchTerm.toLowerCase(),
       ) ||
       (donation.organisation?.toLowerCase() || '').includes(
