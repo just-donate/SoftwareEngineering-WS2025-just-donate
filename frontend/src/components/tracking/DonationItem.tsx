@@ -87,7 +87,7 @@ export const DonationItem: React.FC<DonationItemProps> = ({
         <div className="mt-3 sm:mt-0 sm:ml-4">
           <TransitSchematic status={donation.status} />
           <p className={`text-sm ${theme.textLight} mt-1`}>
-            Last Updated: {latestStatus.date}
+            Last Updated: {dateFormatter.format(new Date(latestStatus.date))}
           </p>
         </div>
       </div>
