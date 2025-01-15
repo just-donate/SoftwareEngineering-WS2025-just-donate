@@ -153,9 +153,9 @@ describe('DonationManager Component', () => {
       });
     }, { timeout: 10000 });
 
-    await act(async () => {
-      fireEvent.click(screen.getByText(/Select Earmarking/i));
-    });
+    await waitFor(() => {
+        fireEvent.click(screen.getByText(/Select Earmarking/i));
+    }, { timeout: 10000 });
 
     await waitFor(() => {
         fireEvent.click(screen.getByText(/Special Purpose/i)); // Select the option
@@ -166,7 +166,6 @@ describe('DonationManager Component', () => {
   
         fireEvent.click(screen.getByText(/Create Donation/i));
     }, { timeout: 10000 });
-
     await waitFor(() => {
       expect(
         screen.getByText(/Donation created successfully/i),
@@ -234,12 +233,8 @@ describe('DonationManager Component', () => {
 
     }, { timeout: 10000 });
 
-    await act(async () => {
-        // Open the Select for earmarking
-        fireEvent.click(screen.getByText(/Select Earmarking/i));
-    });
-
     await waitFor(() => {
+        fireEvent.click(screen.getByText(/Select Earmarking/i));
         fireEvent.click(screen.getByText(/Special Purpose/i)); // Select the option
 
         // Open the Select for account
