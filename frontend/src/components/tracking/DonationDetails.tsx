@@ -5,6 +5,7 @@ import { dateFormatter } from '@/lib/utils';
 import { DonationMap } from './DonationMap';
 import { fetchEarmarkingImages } from '@/app/organization/gallery/gallery';
 import { useState, useEffect } from 'react';
+import { ImageGallery } from '../common/ImageGallery';
 
 interface DonationDetailsProps {
   donation: Donation;
@@ -18,12 +19,13 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({
   const position: [number, number] = [-3.315502, 40.016154];
 
   const [images, setImages] = useState<string[]>([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchEarmarkingImages(donation.organisation, donation.earmarking).then(
+    fetchEarmarkingImages(donation.organisationId, donation.earmarking).then(
       (images) => setImages(images.map((image) => image.image.fileUrl)),
     );
-  }, [donation.organisation, donation.earmarking]);
+  }, [donation.organisationId, donation.earmarking]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -96,7 +98,8 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({
                   key={i}
                   src={url}
                   alt={`Project photo ${i + 1}`}
-                  className="w-full h-auto rounded shadow"
+                  className="w-full h-auto rounded shadow cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => setSelectedImageIndex(i)}
                 />
               ))}
             </div>
@@ -106,6 +109,14 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({
         <div className="my-4">
           <DonationMap position={position} popupText="Watamu, Kenya" />
         </div>
+
+        {selectedImageIndex !== null && (
+          <ImageGallery
+            images={images}
+            initialIndex={selectedImageIndex}
+            onClose={() => setSelectedImageIndex(null)}
+          />
+        )}
       </div>
     </div>
   );

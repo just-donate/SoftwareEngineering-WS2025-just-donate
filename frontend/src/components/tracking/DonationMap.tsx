@@ -30,7 +30,7 @@ export const DonationMap: React.FC<DonationMapProps> = ({
   popupText,
 }) => {
   return (
-    <div className="w-full h-[400px]">
+    <div className="relative h-64 z-10">
       <MapContainer
         center={position}
         zoom={3}

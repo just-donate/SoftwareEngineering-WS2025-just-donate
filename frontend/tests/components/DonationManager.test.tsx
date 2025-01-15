@@ -1,7 +1,11 @@
 import React, { act } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import DonationManager from '../../src/components/organization/DonationManager';
-import { BankAccount, Donation, Earmarking } from '../../src/types/types';
+import {
+  BankAccount,
+  DonationWithDonor,
+  Earmarking,
+} from '../../src/types/types';
 import {
   createDonation,
   fetchDonations,
@@ -24,10 +28,14 @@ jest.mock('../../src/app/organization/earmarkings/earmarkings', () => ({
   fetchEarmarkings: jest.fn(),
 }));
 
-const mockInitialDonations: Donation[] = [
+const mockInitialDonations: DonationWithDonor[] = [
   {
     donationId: '1',
-    donorEmail: 'john@example.com',
+    donor: {
+      id: 'john@example.com',
+      name: 'john',
+      email: 'john@example.com',
+    },
     amount: { amount: '100.0' },
     earmarking: 'General Purpose',
     organisation: 'Organization 1',
@@ -77,34 +85,6 @@ describe('DonationManager Component', () => {
   });
 
   const renderWithThemeProvider = (component: React.ReactNode) => {
-    const mockTheme = {
-      primary: '#ffffff',
-      secondary: '#000000',
-      accent: '#ff0000',
-      background: '#f0f0f0',
-      card: '#ffffff',
-      text: '#000000',
-      textLight: '#ffffff',
-      font: 'Arial',
-      icon: 'icon-url',
-      ngoName: 'Mock NGO',
-      ngoUrl: 'http://mockngo.com',
-      helpUrl: 'http://mockngo.com/help',
-      statusColors: {
-        announced: '#ffcc00',
-        pending_confirmation: '#ff9900',
-        confirmed: '#00cc00',
-        received: '#0000cc',
-        in_transfer: '#cc00cc',
-        processing: '#cccc00',
-        allocated: '#00cccc',
-        awaiting_utilization: '#cc0000',
-        used: '#cccccc',
-      },
-    };
-
-    const updateTheme = jest.fn();
-
     return render(<ThemeProvider>{component}</ThemeProvider>);
   };
 

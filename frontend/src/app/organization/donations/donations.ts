@@ -1,10 +1,12 @@
 'use client';
 
-import { Donation, Money } from '@/types/types';
+import { DonationWithDonor, Money } from '@/types/types';
 import axiosInstance from '../api/axiosInstance';
 import axios from 'axios';
 
-export async function fetchDonations(orgId: string): Promise<Donation[]> {
+export async function fetchDonations(
+  orgId: string,
+): Promise<DonationWithDonor[]> {
   try {
     const response = await axiosInstance.get(`/donate/${orgId}/donations`);
     return response.data.donations;

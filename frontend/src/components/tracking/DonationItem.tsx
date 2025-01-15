@@ -7,6 +7,7 @@ import { TransitSchematic } from './TransitSchematic';
 import { Heart } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { dateFormatter } from '@/lib/utils';
+import { formatStatus } from '@/lib/status';
 
 interface DonationItemProps {
   donation: Donation;
@@ -80,14 +81,14 @@ export const DonationItem: React.FC<DonationItemProps> = ({
             <span
               className={`text-sm ${theme.statusColors[latestStatus.status.toLowerCase() as keyof typeof theme.statusColors]} px-2 py-1 rounded-full text-white`}
             >
-              {latestStatus.status}
+              {formatStatus(latestStatus.status)}
             </span>
           </div>
         </div>
         <div className="mt-3 sm:mt-0 sm:ml-4">
           <TransitSchematic status={donation.status} />
           <p className={`text-sm ${theme.textLight} mt-1`}>
-            Last Updated: {latestStatus.date}
+            Last Updated: {dateFormatter.format(new Date(latestStatus.date))}
           </p>
         </div>
       </div>

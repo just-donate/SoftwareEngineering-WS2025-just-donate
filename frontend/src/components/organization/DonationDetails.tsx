@@ -1,6 +1,6 @@
 'use client';
 
-import { Donation } from '@/types/types';
+import { DonationWithDonor } from '@/types/types';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -9,14 +9,15 @@ import axiosInstance from '@/app/organization/api/axiosInstance';
 import { Textarea } from './ui/textarea';
 import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
+import { formatStatus } from '@/lib/status';
 
 type NotificationModalState = {
-  donation: Donation;
+  donation: DonationWithDonor;
   message: string;
 };
 
 interface DonationDetailsProps {
-  donation: Donation;
+  donation: DonationWithDonor;
 }
 
 export default function DonationDetails({ donation }: DonationDetailsProps) {
@@ -60,6 +61,8 @@ export default function DonationDetails({ donation }: DonationDetailsProps) {
     }
   };
 
+  console.log(donation);
+
   return (
     <>
       <Card className="mb-4">
@@ -85,14 +88,23 @@ export default function DonationDetails({ donation }: DonationDetailsProps) {
                 </p>
               </div>
               <div>
+                <p className="text-sm text-muted-foreground">Donor Name</p>
+                <p className="font-medium">{donation.donor.name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Donor Email</p>
+                <p className="font-medium">{donation.donor.email}</p>
+              </div>
+              <div>
                 <p className="text-sm text-muted-foreground">Earmarking</p>
                 <p className="font-medium">{donation.earmarking}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Current Status</p>
                 <p className="font-medium">
-                  {donation.status[donation.status.length - 1]?.status ||
-                    'Unknown'}
+                  {formatStatus(
+                    donation.status[donation.status.length - 1]?.status,
+                  ) || 'Unknown'}
                 </p>
               </div>
             </div>
@@ -103,7 +115,9 @@ export default function DonationDetails({ donation }: DonationDetailsProps) {
                 {donation.status.map((status, index) => (
                   <div key={index} className="p-3 bg-secondary rounded-lg">
                     <div className="flex justify-between items-start mb-1">
-                      <span className="font-medium">{status.status}</span>
+                      <span className="font-medium">
+                        {formatStatus(status.status)}
+                      </span>
                       <span className="text-sm text-muted-foreground">
                         {new Date(status.date).toLocaleString()}
                       </span>

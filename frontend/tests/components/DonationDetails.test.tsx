@@ -24,7 +24,7 @@ describe('DonationDetails Component', () => {
     date: '2023-01-01',
     status: [
       {
-        status: 'Completed',
+        status: 'received',
         date: '2023-01-01',
         description: 'Donation completed successfully',
       },
