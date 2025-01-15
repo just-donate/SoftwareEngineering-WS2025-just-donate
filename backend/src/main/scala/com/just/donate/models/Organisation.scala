@@ -5,7 +5,7 @@ import com.just.donate.models.Types.DonationGetter
 import com.just.donate.models.EarmarkingImage
 import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
 import com.just.donate.notify.EmailMessage
-import com.just.donate.notify.messages.{ TransferMessage, WithdrawalMessage }
+import com.just.donate.notify.messages.WithdrawalMessage
 import com.just.donate.utils.Money
 
 import java.time.LocalDateTime

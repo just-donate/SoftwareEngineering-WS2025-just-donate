@@ -30,6 +30,15 @@ object RouteUtils:
       case None => NotFound()
   yield response
 
+  inline def loadOrganisationOps[R](
+    organisationId: String
+  )(repository: Repository[String, Organisation])(mapper: Organisation => R): IO[Option[R]] = for
+    organisation <- repository.findById(organisationId)
+    response <- organisation match
+      case Some(organisation) => IO.pure(Some(mapper(organisation)))
+      case None               => IO.pure(None)
+  yield response
+
   inline def loadAndSaveOrganisationOps[R](
     organisationId: String
   )(repository: Repository[String, Organisation])(mapper: Organisation => (Organisation, R)): IO[Option[R]] = for
