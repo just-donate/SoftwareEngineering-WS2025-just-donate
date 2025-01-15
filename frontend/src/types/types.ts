@@ -10,11 +10,26 @@ export interface Money {
 
 export interface Donation {
   donationId: string;
-  donorEmail: string;
   amount: Money;
   organisation: string;
   date: string;
   earmarking: string;
+  status: DonationStatus[];
+}
+
+export interface Donor {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface DonationWithDonor {
+  donationId: string;
+  donor: Donor;
+  amount: Money;
+  organisation: string;
+  date: string;
+  earmarking?: string;
   status: DonationStatus[];
 }
 

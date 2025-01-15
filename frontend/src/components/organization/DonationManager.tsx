@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Donation } from '@/types/types';
+import { DonationWithDonor } from '@/types/types';
 import {
   fetchDonations,
   createDonation,
@@ -28,7 +28,7 @@ import { fetchEarmarkings } from '@/app/organization/earmarkings/earmarkings';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface DonationManagerProps {
-  initialDonations: Donation[];
+  initialDonations: DonationWithDonor[];
   organizationId: string;
 }
 
@@ -37,7 +37,8 @@ export default function DonationManager({
   organizationId,
 }: DonationManagerProps) {
   const { theme } = useTheme();
-  const [donations, setDonations] = useState<Donation[]>(initialDonations);
+  const [donations, setDonations] =
+    useState<DonationWithDonor[]>(initialDonations);
   const [aviableAccounts, setAviableAccounts] = useState<BankAccount[]>([]);
   const [aviableEarmarkings, setAviableEarmarkings] = useState<Earmarking[]>(
     [],
