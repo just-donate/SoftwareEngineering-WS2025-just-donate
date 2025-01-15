@@ -48,12 +48,6 @@ object OrganisationRoute:
           image <- req.as[RequestEarmarkingImage]
           response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarkingImage(earmarking, EarmarkingImage(image.fileUrl)))
         yield response
-
-      case GET -> Root / organisationId / "earmarking" / earmarking / "image" / "list" =>
-        // This returns an array of arrays of EarmarkingImage objects
-        // We need to flatten the array to get a single array of EarmarkingImage objects
-        loadOrganisation(organisationId)(repository)(_.getEarmarkingImages(earmarking).map(images => images.map(ResponseEarmarkingImage(_))).toSeq.flatten)
-
         
       case DELETE -> Root / organisationId / "earmarking" / earmarking =>
         loadAndSaveOrganisation(organisationId)(repository)(_.removeEarmarking(earmarking))

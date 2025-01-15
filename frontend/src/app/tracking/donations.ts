@@ -1,6 +1,7 @@
 'use client';
 
 import { Donations } from '@/types/types';
+import axiosInstance from '../organization/api/axiosInstance';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -13,12 +14,13 @@ const organizationId = '591671920';
 
 export async function getDonations(id: string): Promise<Donations | null> {
   try {
-    const response = await fetch(
-      `${API_URL}/public/donate/591671920/${organizationId}/${id}`,
+    const response = await axiosInstance.get(
+      `/public/donate/${organizationId}/donor/${id}`,
     );
-    if (!response.ok) return null;
-    return response.json();
-  } catch {
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching donations:', error);
     return null;
   }
 }
