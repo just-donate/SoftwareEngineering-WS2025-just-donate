@@ -37,7 +37,11 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const getCachedTheme = useCallback((): Theme | null => {
-    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return null;
+    if (
+      typeof window === 'undefined' ||
+      typeof window.localStorage === 'undefined'
+    )
+      return null;
 
     const storedData = window.localStorage.getItem(THEME_STORAGE_KEY);
     if (!storedData) return null;
