@@ -155,14 +155,17 @@ describe('DonationManager Component', () => {
 
     await act(async () => {
       fireEvent.click(screen.getByText(/Select Earmarking/i));
-      fireEvent.click(screen.getByText(/Special Purpose/i)); // Select the option
-
-      // Open the Select for account
-      fireEvent.click(screen.getByText(/Select Account/i));
-      fireEvent.click(screen.getByText(/Bank Account 1/i)); // Select the option
-
-      fireEvent.click(screen.getByText(/Create Donation/i));
     });
+
+    await waitFor(() => {
+        fireEvent.click(screen.getByText(/Special Purpose/i)); // Select the option
+
+        // Open the Select for account
+        fireEvent.click(screen.getByText(/Select Account/i));
+        fireEvent.click(screen.getByText(/Bank Account 1/i)); // Select the option
+  
+        fireEvent.click(screen.getByText(/Create Donation/i));
+    }, { timeout: 10000 });
 
     await waitFor(() => {
       expect(
@@ -218,7 +221,7 @@ describe('DonationManager Component', () => {
       );
     });
 
-    await act(async () => {
+    await waitFor(() => {
       fireEvent.change(screen.getByTestId('donor-name-input'), {
         target: { value: 'Jane Doe' },
       });
@@ -229,15 +232,22 @@ describe('DonationManager Component', () => {
         target: { value: '50.0' },
       });
 
-      // Open the Select for earmarking
-      fireEvent.click(screen.getByText(/Select Earmarking/i));
-      fireEvent.click(screen.getByText(/Special Purpose/i)); // Select the option
+    }, { timeout: 10000 });
 
-      // Open the Select for account
-      fireEvent.click(screen.getByText(/Select Account/i));
-      fireEvent.click(screen.getByText(/Bank Account 1/i)); // Select the option
-      fireEvent.click(screen.getByText(/Create Donation/i));
+    await act(async () => {
+        // Open the Select for earmarking
+        fireEvent.click(screen.getByText(/Select Earmarking/i));
     });
+
+    await waitFor(() => {
+        fireEvent.click(screen.getByText(/Special Purpose/i)); // Select the option
+
+        // Open the Select for account
+        fireEvent.click(screen.getByText(/Select Account/i));
+        fireEvent.click(screen.getByText(/Bank Account 1/i)); // Select the option
+
+        fireEvent.click(screen.getByText(/Create Donation/i));
+    }, { timeout: 10000 });
 
     await waitFor(() => {
       expect(screen.getByText(/Error/i)).toBeInTheDocument();
