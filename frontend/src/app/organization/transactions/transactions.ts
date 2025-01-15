@@ -3,12 +3,6 @@
 import { Money, Transaction, WithdrawalList } from '@/types/types';
 import axiosInstance from '../api/axiosInstance';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not set');
-}
-
 export async function fetchTransactions(orgId: string): Promise<Transaction[]> {
   try {
     const response = await axiosInstance.get(

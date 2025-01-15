@@ -11,6 +11,7 @@ import React, {
 import { Theme, themes } from '@/styles/themes';
 import axios from 'axios';
 import axiosInstance from '@/app/organization/api/axiosInstance';
+import { config } from '@/lib/config';
 
 interface ThemeContextType {
   theme: Theme;
@@ -27,6 +28,7 @@ interface CachedTheme {
 const organizationId = '591671920';
 const THEME_STORAGE_KEY = `theme_${organizationId}`;
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const organizationId = config.organizationId;
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
