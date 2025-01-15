@@ -82,7 +82,7 @@ object PaypalRoute:
               // Item name is set by the donation-paypal.html as earmarking
               requestDonation <- IO.pure(RequestDonation(newIpn.firstName, newIpn.payerEmail, newIpn.mcGross, if newIpn.itemName.isEmpty then None else Option[String](newIpn.itemName)))
               donationResult <- loadAndSaveOrganisationOps(math.abs(newIpn.organisationName.hashCode).toString)(orgRepo)(
-                organisationMapper(requestDonation, "Paypal")
+                organisationMapper(requestDonation, "Paypal", conf)
               )
               _ <- donationResult match
                 case None                      => BadRequest("Organisation not found")

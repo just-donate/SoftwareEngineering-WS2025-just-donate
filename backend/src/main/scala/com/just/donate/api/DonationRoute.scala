@@ -29,7 +29,7 @@ object DonationRoute:
           (for
             requestDonation <- req.as[RequestDonation]
             donationResult <- loadAndSaveOrganisationOps(organisationId)(repository)(
-              organisationMapper(requestDonation, accountName)
+              organisationMapper(requestDonation, accountName, config)
             )
             response <- donationResult match
               case None                      => BadRequest("Organisation not found")
@@ -73,7 +73,7 @@ object DonationRoute:
         StatusResponse(status.status.toString.toLowerCase, status.date, status.description)
     )
 
-  def organisationMapper(requestDonation: RequestDonation, accountName: String)(
+  def organisationMapper(requestDonation: RequestDonation, accountName: String, config: Config)(
     org: Organisation
   ): (Organisation, Either[DonationError, (Organisation, Donor)]) =
     val donor = org
@@ -88,7 +88,7 @@ object DonationRoute:
       case Some(earmarking) => Donation(donor.id, requestDonation.amount, earmarking)
       case None             => Donation(donor.id, requestDonation.amount)
 
-    org.donate(donor, donationPart, donation, accountName) match
+    org.donate(donor, donationPart, donation, accountName, config) match
       case Left(error)   => (org, Left(error))
       case Right(newOrg) => (newOrg, Right((newOrg, donor)))
 

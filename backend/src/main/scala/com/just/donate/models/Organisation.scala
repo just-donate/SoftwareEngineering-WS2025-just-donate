@@ -120,7 +120,8 @@ case class Organisation(
     donor: Donor,
     donationPart: DonationPart,
     donation: Donation,
-    account: String
+    account: String,
+    config: Config
   ): Either[DonationError, Organisation] =
     // We first insert the donation into the donations, then we donate to the account, this is
     // done to ensure that the donation is available in the organisation during the process.
@@ -129,7 +130,10 @@ case class Organisation(
         LocalDateTime.now(),
         StatusUpdate.Status.RECEIVED,
         "Donation has been made and has been added to the account: " + account
-      )
+      ),
+      donor,
+      this,
+      config
     )
     copy(donations = donations.updated(donation.id, donation)).donate(donor, donationPart, account)
 
@@ -201,7 +205,9 @@ case class Organisation(
 
         val updatedOrg = copy(accounts = newAccounts, donations = newDonations, expenses = expenses.appended(expense))
 
-        updatedOrg.getNotificationsForUtilizedDonations(donationParts, config).map(messages => (updatedOrg, messages))
+        updatedOrg
+          .getNotificationsForUtilizedDonations(donationParts, description, config)
+          .map(messages => (updatedOrg, messages))
 
   /**
    * Transfer between accounts in the organisation. This function is the entry point for transferring between accounts.
@@ -217,7 +223,7 @@ case class Organisation(
     fromAccount: String,
     toAccount: String,
     config: Config
-  ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
+  ): Either[TransferError, Organisation] =
     (getAccount(fromAccount), getAccount(toAccount)) match
       case (Some(from), Some(to)) => transfer(amount, from, to, config)
       case _                      => Left(TransferError.INVALID_ACCOUNT)
@@ -236,7 +242,7 @@ case class Organisation(
     fromAccount: Account,
     toAccount: Account,
     config: Config
-  ): Either[TransferError, (Organisation, Seq[EmailMessage])] =
+  ): Either[TransferError, Organisation] =
     if fromAccount.totalBalance < amount then return Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
 
     if amount <= Money.ZERO then return Left(TransferError.NON_POSITIVE_AMOUNT)
@@ -253,38 +259,30 @@ case class Organisation(
       accounts = accounts.updated(fromAccount.name, updatedFrom).updated(toAccount.name, updatedTo)
     )
 
-    val queues = Seq(updatedFrom.unboundDonations) :++ updatedFrom.boundDonations.map(_._2).toSeq
-    var emailMessages = Seq.empty[EmailMessage]
-    val donationSet = parts.map(_._2.donation.get).toSet
-    var remainingDonations = donationSet.toSeq
-
-    while remainingDonations.nonEmpty do
-      val donation = remainingDonations.head
-      remainingDonations = remainingDonations.tail
-
-      val fromQueueHasRemainingPart = queues.exists(queue =>
-        queue.donationQueue.queue.exists(reservable => reservable.value.donation.get.id == donation.id)
-      )
-
-      if !fromQueueHasRemainingPart then
-        donors.get(donation.donorId) match
-          case None => return Left(TransferError.INVALID_DONOR)
-          case Some(donor) =>
-            emailMessages = emailMessages :+ EmailMessage(
-              donor.email,
-              EmailMessage.prepareString(
-                theme.map(_.emailTemplates.transferTemplate),
-                TransferMessage(
+    val notificationError = parts.foldLeft[Option[TransferError]](None) {
+      case (acc, (_, donationPart)) =>
+        acc match
+          case Some(error) => Some(error)
+          case None =>
+            donors.get(donationPart.donation.get.donorId) match
+              case None => Some(TransferError.INVALID_DONOR)
+              case Some(donor) =>
+                donationPart.donation.get.addStatusUpdate(
+                  StatusUpdate(
+                    LocalDateTime.now(),
+                    StatusUpdate.Status.IN_TRANSFER,
+                    f"Transferring ${donationPart.amount} from ${fromAccount.name} to ${toAccount.name}"
+                  ),
                   donor,
-                  config,
                   this,
-                  fromAccount
+                  config
                 )
-              ),
-              "Just Donate: News about your donation"
-            )
+                None
+    }
 
-    Right(updatedOrg, emailMessages)
+    notificationError match
+      case Some(error) => Left(error)
+      case None        => Right(updatedOrg)
 
   def totalBalance: Money =
     accounts.map(_._2.totalBalance).sum
@@ -310,6 +308,7 @@ case class Organisation(
 
   private def getNotificationsForUtilizedDonations(
     usedDonationParts: Seq[DonationPart],
+    description: String,
     config: Config
   ): Either[WithdrawError, Seq[EmailMessage]] =
     var remainingSeq = usedDonationParts
@@ -319,28 +318,23 @@ case class Organisation(
       val donationPart = remainingSeq.head
       remainingSeq = remainingSeq.tail
 
-      val donationIsFullyUsed = donationPart.donation.get.amountRemaining == Money.ZERO
-      if donationIsFullyUsed then
-        val donor = donors.get(donationPart.donation.get.donorId) match
-          case None        => return Left(WithdrawError.INVALID_DONOR)
-          case Some(donor) => donor
-        val trackingId = donor.id
-        val trackingLink = f"${config.frontendUrl}/tracking?id=$trackingId}"
+      val donor = donors.get(donationPart.donation.get.donorId) match
+        case None        => return Left(WithdrawError.INVALID_DONOR)
+        case Some(donor) => donor
 
-        emailMessages = emailMessages.appended(
-          EmailMessage(
-            donor.email,
-            EmailMessage.prepareString(
-              theme.map(_.emailTemplates.withdrawalTemplate),
-              WithdrawalMessage(
-                donor,
-                config,
-                this
-              )
-            ),
-            "Just Donate: Your donation has been utilized"
-          )
-        )
+      donationPart.donation.get.addStatusUpdate(
+        StatusUpdate(
+          LocalDateTime.now(),
+          StatusUpdate.Status.USED,
+          f"Using ${donationPart.amount} for ${description}"
+        ),
+        donor,
+        this,
+        config
+      ) match
+        case Some(emailMessage) =>
+          emailMessages = emailMessages :+ emailMessage
+        case None =>
 
     Right(emailMessages)
 
