@@ -13,17 +13,22 @@ const axiosInstance = axios.create({
   withCredentials: true, // Allow cookies to be included in cross-origin requests
 });
 
-// Pass in the JWTToken in every request
-// axiosInstance.interceptors.request.use(
-//   (config) => {
-//     const jwtToken = localStorage.getItem('jwtToken');
+// Attach an interceptor to include the Bearer token if it exists
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const jwtToken = sessionStorage.getItem('token');
 
-//     if (jwtToken) {
-//       config.headers.Authorization = `Bearer ${jwtToken}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error),
-// );
+    if (jwtToken) {
+      config.headers.Authorization = `Bearer ${jwtToken}`;
+    }
+
+    // Return the config unchanged if there is no token
+    return config;
+  },
+  (error) => {
+    // Pass errors in request configuration to the next error handler
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;
