@@ -46,4 +46,4 @@ export const WithdrawalItem: React.FC<WithdrawalItemProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

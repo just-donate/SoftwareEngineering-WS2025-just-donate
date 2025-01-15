@@ -21,11 +21,12 @@ function WithdrawalPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [accountsData, earmarkingsData, withdrawalsData] = await Promise.all([
-          fetchBankAccounts(organizationId),
-          fetchEarmarkings(organizationId),
-          fetchWithdrawals(organizationId),
-        ]);
+        const [accountsData, earmarkingsData, withdrawalsData] =
+          await Promise.all([
+            fetchBankAccounts(organizationId),
+            fetchEarmarkings(organizationId),
+            fetchWithdrawals(organizationId),
+          ]);
 
         setAccounts(accountsData);
         setEarmarkings(earmarkingsData);
@@ -54,7 +55,7 @@ function WithdrawalPage() {
           organizationId={organizationId}
         />
       </div>
-      
+
       <div>
         <WithdrawalList withdrawals={withdrawals} />
       </div>

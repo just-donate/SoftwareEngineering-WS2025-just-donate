@@ -10,15 +10,16 @@ interface WithdrawalListProps {
   withdrawals: Withdrawal[];
 }
 
-export const WithdrawalList: React.FC<WithdrawalListProps> = ({ withdrawals }) => {
-  const [selectedWithdrawal, setSelectedWithdrawal] = useState<Withdrawal | null>(null);
+export const WithdrawalList: React.FC<WithdrawalListProps> = ({
+  withdrawals,
+}) => {
+  const [selectedWithdrawal, setSelectedWithdrawal] =
+    useState<Withdrawal | null>(null);
   const { theme } = useTheme();
 
   return (
     <div className={theme.font}>
-      <h2 className={`text-2xl font-bold mb-4 ${theme.text}`}>
-        Withdrawals
-      </h2>
+      <h2 className={`text-2xl font-bold mb-4 ${theme.text}`}>Withdrawals</h2>
       <div className="space-y-4">
         {withdrawals.map((withdrawal) => (
           <WithdrawalItem
@@ -36,4 +37,4 @@ export const WithdrawalList: React.FC<WithdrawalListProps> = ({ withdrawals }) =
       )}
     </div>
   );
-}; 
+};

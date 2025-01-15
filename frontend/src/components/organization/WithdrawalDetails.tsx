@@ -1,12 +1,7 @@
 'use client';
 
 import { Withdrawal } from '@/types/types';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface WithdrawalDetailsProps {
@@ -54,4 +49,4 @@ export const WithdrawalDetails: React.FC<WithdrawalDetailsProps> = ({
       </DialogContent>
     </Dialog>
   );
-}; 
+};

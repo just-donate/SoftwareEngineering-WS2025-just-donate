@@ -1,6 +1,6 @@
 'use client';
 
-import { Money, Transaction, Withdrawal, WithdrawalList } from '@/types/types';
+import { Money, Transaction, WithdrawalList } from '@/types/types';
 import axiosInstance from '../api/axiosInstance';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -79,9 +79,7 @@ export async function createWithdrawal(
   }
 }
 
-export async function fetchWithdrawals(
-  orgId: string,
-): Promise<WithdrawalList> {
+export async function fetchWithdrawals(orgId: string): Promise<WithdrawalList> {
   try {
     const response = await axiosInstance.get(
       `/withdraw/${orgId}/withdrawal/list`,
