@@ -4,16 +4,18 @@ import cats.effect.*
 import cats.implicits.*
 import com.just.donate.config.Config
 import com.just.donate.db.Repository
-import com.just.donate.models.Organisation
+import com.just.donate.models.{Expense, Organisation}
 import com.just.donate.notify.IEmailService
 import com.just.donate.utils.Money
-import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
+import com.just.donate.utils.RouteUtils.{loadAndSaveOrganisationOps, loadOrganisation}
 import io.circe.*
 import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
 import org.http4s.dsl.io.*
+
+import java.time.LocalDateTime
 
 object WithdrawalRoute:
 
@@ -46,9 +48,38 @@ object WithdrawalRoute:
             case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
           }
 
+        case GET -> Root / organisationId / "withdrawal" / "list" =>
+          loadOrganisation(organisationId)(repository): organisation =>
+            WithdrawalListResponse(
+              organisation.expenses.map(toResponseWithdrawal)
+            )
+
+  private def toResponseWithdrawal(expense: Expense): WithdrawalResponse =
+    WithdrawalResponse(
+      expense.id,
+      expense.amount,
+      expense.time,
+      expense.fromAccount,
+      expense.description,
+      expense.earMarking.map(_.name)
+    )
+
   private[api] case class RequestWithdrawal(
     fromAccount: String,
     amount: Money,
     description: String,
     earmarking: Option[String]
+  )
+
+  private[api] case class WithdrawalResponse(
+    id: String,
+    amount: Money,
+    time: LocalDateTime,
+    fromAccount: String,
+    description: String,
+    earmarking: Option[String]
+  )
+
+  private[api] case class WithdrawalListResponse(
+    expenses: Seq[WithdrawalResponse]
   )
