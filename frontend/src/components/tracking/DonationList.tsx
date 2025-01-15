@@ -30,22 +30,25 @@ export const DonationList: React.FC<DonationListProps> = ({ donations }) => {
     const sortedDonations = [...donations];
     switch (sortBy) {
       case 'amount':
-        return sortedDonations.sort((a, b) => 
-          parseFloat(b.amount.amount) - parseFloat(a.amount.amount)
+        return sortedDonations.sort(
+          (a, b) => parseFloat(b.amount.amount) - parseFloat(a.amount.amount),
         );
       case 'newest':
-        return sortedDonations.sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
+        return sortedDonations.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
         );
       case 'oldest':
-        return sortedDonations.sort((a, b) => 
-          new Date(a.date).getTime() - new Date(b.date).getTime()
+        return sortedDonations.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         );
       case 'lastUpdated':
         return sortedDonations.sort((a, b) => {
           const lastStatusA = a.status[a.status.length - 1];
           const lastStatusB = b.status[b.status.length - 1];
-          return new Date(lastStatusB.date).getTime() - new Date(lastStatusA.date).getTime();
+          return (
+            new Date(lastStatusB.date).getTime() -
+            new Date(lastStatusA.date).getTime()
+          );
         });
       default:
         return sortedDonations;
@@ -57,10 +60,11 @@ export const DonationList: React.FC<DonationListProps> = ({ donations }) => {
   return (
     <div className={theme.font}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className={`text-2xl font-bold ${theme.text}`}>
-          Your Donations
-        </h2>
-        <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+        <h2 className={`text-2xl font-bold ${theme.text}`}>Your Donations</h2>
+        <Select
+          value={sortBy}
+          onValueChange={(value) => setSortBy(value as SortOption)}
+        >
           <SelectTrigger className="w-[180px] bg-white shadow-md rounded-lg border border-gray-200">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
