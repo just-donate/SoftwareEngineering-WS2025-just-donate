@@ -48,8 +48,10 @@ describe('GalleryManager', () => {
       render(<GalleryManager organisationId={organisationId} />);
     });
 
-    fireEvent.click(screen.getByTestId('select-earmarking-view'));
-    fireEvent.click(screen.getByText(/Test Earmarking/i));
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('select-earmarking-view'));
+      fireEvent.click(screen.getByText(/Test Earmarking/i));
+    });
 
     // Wait for the images to be fetched and rendered
     await waitFor(() => {
@@ -70,22 +72,27 @@ describe('GalleryManager', () => {
       render(<GalleryManager organisationId={organisationId} />);
     });
 
-    // Simulate file selection
-    const fileInput = screen.getByTestId('photo-upload');
     const file = new File(['dummy content'], 'example.png', {
-      type: 'image/png',
-    });
-    fireEvent.change(fileInput, { target: { files: [file] } });
+        type: 'image/png',
+      });
 
-    // Simulate selecting an earmarking by clicking the first select earmarking and then the option
-    const select = screen.getByTestId('select-earmarking-upload');
-    fireEvent.click(select);
-    const option = screen.getByText(/Test Earmarking/i);
-    fireEvent.click(option);
+    // Simulate file selection
+    await waitFor(() => {
+        const fileInput = screen.getByTestId('photo-upload');
+        fireEvent.change(fileInput, { target: { files: [file] } });
+
+      // Simulate selecting an earmarking by clicking the first select earmarking and then the option
+      const select = screen.getByTestId('select-earmarking-upload');
+      fireEvent.click(select);
+      const option = screen.getByText(/Test Earmarking/i);
+      fireEvent.click(option);
+    });
 
     // Simulate clicking the upload button
-    const uploadButton = screen.getByTestId('upload-button');
-    fireEvent.click(uploadButton);
+    await waitFor(() => {
+      const uploadButton = screen.getByTestId('upload-button');
+      fireEvent.click(uploadButton);
+    });
 
     // Wait for the upload to complete
     await waitFor(() => {
@@ -110,20 +117,27 @@ describe('GalleryManager', () => {
       render(<GalleryManager organisationId={organisationId} />);
     });
 
-    // Simulate file selection
-    const fileInput = screen.getByTestId('photo-upload');
     const file = new File(['dummy content'], 'example.png', {
-      type: 'image/png',
+        type: 'image/png',
     });
-    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Simulate file selection
+    await waitFor(() => {
+      const fileInput = screen.getByTestId('photo-upload');
+      fireEvent.change(fileInput, { target: { files: [file] } });
+    });
 
     // Simulate selecting an earmarking by clicking the select and then the option
-    fireEvent.click(screen.getByTestId('select-earmarking-upload'));
-    fireEvent.click(screen.getByText(/Test Earmarking/i));
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('select-earmarking-upload'));
+      fireEvent.click(screen.getByText(/Test Earmarking/i));
+    });
 
     // Simulate clicking the upload button
-    const uploadButton = screen.getByTestId('upload-button');
-    fireEvent.click(uploadButton);
+    await waitFor(() => {
+      const uploadButton = screen.getByTestId('upload-button');
+      fireEvent.click(uploadButton);
+    });
 
     // Wait for the error message to be displayed
     await waitFor(() => {
