@@ -159,7 +159,7 @@ object ApiAction:
   case class Transfer(organisationId: String, fromAccount: String, toAccount: String, amount: Money)
       extends ApiAction[RequestTransfer, Unit](
         Method.POST,
-        Seq("transfer", organisationId),
+        Seq(organisationId),
         RequestTransfer(fromAccount, toAccount, amount)
       )
 
