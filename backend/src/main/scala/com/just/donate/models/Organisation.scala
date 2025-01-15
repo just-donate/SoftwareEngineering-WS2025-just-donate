@@ -196,7 +196,7 @@ case class Organisation(
       case Left(value) => Left(value)
       case Right((donationParts, updatedAccount)) =>
         val newAccounts = accounts.updated(account.name, updatedAccount)
-        val expense = Expense(description, amount, earmarking, donationParts)
+        val expense = Expense(description, amount, earmarking, donationParts, account.name)
         val newDonations = getDonationsAfterWithdrawal(donationParts) match
           case Left(error)  => return Left(error)
           case Right(value) => value
