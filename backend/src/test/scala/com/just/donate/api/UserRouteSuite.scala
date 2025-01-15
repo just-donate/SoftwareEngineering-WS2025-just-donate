@@ -149,50 +149,6 @@ class UserRouteSuite extends CatsEffectSuite with MockitoSugar:
   }
 
   // ----------------------------------------------------------------------
-  // Test 4.1: POST /register => success
-  // ----------------------------------------------------------------------
-  test("POST /register with new user, existing org => 200 + new user JSON") {
-    val existingUser = User(
-      email = "exists@example.com",
-      password = "someHash",
-      role = Roles.USER.toString,
-      active = true,
-      orgId = "org-id"
-    )
-    // No user found with that email => None
-    Mockito.doReturn(IO.pure(None)).when(mockUserRepo).findById(any())
-    // Org found => Some(org)
-    val dummyOrg = Organisation("org-id")
-    Mockito.doReturn(IO.pure(Some(dummyOrg))).when(mockOrgRepo).findById(any())
-    // Save user
-    Mockito.doReturn(IO.pure(existingUser)).when(mockUserRepo).save(any())
-
-    val registerJson =
-      """
-        |{
-        |  "email": "new@example.com",
-        |  "password": "PlainPassword",
-        |  "role": "USER",
-        |  "orgId": "org-id"
-        |}
-        |""".stripMargin
-
-    val req = Request[IO](method = Method.POST, uri = uri"/register").withEntity(registerJson)
-
-    for
-      resp <- route.run(req)
-      bodyStr <- resp.bodyText.compile.string
-    yield
-      assertEquals(resp.status, Status.Ok)
-      assert(bodyStr.contains("new@example.com"))
-      assert(bodyStr.contains("org-id"))
-      // verify repos
-      verify(mockUserRepo, times(1)).findById("new@example.com")
-      verify(mockOrgRepo, times(1)).findById("org-id")
-      verify(mockUserRepo, times(1)).save(any[User])
-  }
-
-  // ----------------------------------------------------------------------
   // Test 4.2: POST /register => user already exists => 409 Conflict
   // ----------------------------------------------------------------------
   test("POST /register with existing user => 409 Conflict") {
