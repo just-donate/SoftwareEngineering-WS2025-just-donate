@@ -4,6 +4,7 @@ import cats.data.Kleisli
 import cats.effect.IO
 import com.just.donate.api.OrganisationRoute.*
 import com.just.donate.api.DonationRoute.{RequestDonation, DonationListResponse}
+import com.just.donate.models.ThemeConfig
 import com.just.donate.utils.Money
 import io.circe.generic.auto.*
 import io.circe.{Decoder, Encoder}
@@ -116,5 +117,33 @@ object ApiAction:
       extends ApiAction[Unit, DonationListResponse](
         Method.GET,
         Seq(organisationId, "donations"),
+        ()
+      )
+
+  case class AddEarmarkingImage(organisationId: String, earmarkingName: String, fileUrl: String)
+      extends ApiAction[RequestEarmarkingImage, Unit](
+        Method.POST,
+        Seq(organisationId, "earmarking", earmarkingName, "image"),
+        RequestEarmarkingImage(fileUrl)
+      )
+
+  case class DeleteEarmarking(organisationId: String, earmarkingName: String)
+      extends ApiAction[Unit, Unit](
+        Method.DELETE,
+        Seq(organisationId, "earmarking", earmarkingName),
+        ()
+      )
+
+  case class UpdateTheme(organisationId: String, theme: ThemeConfig)
+      extends ApiAction[ThemeConfig, Unit](
+        Method.POST,
+        Seq(organisationId, "theme"),
+        theme
+      )
+
+  case class ListTransactions(organisationId: String)
+      extends ApiAction[Unit, Seq[Unit]](
+        Method.GET,
+        Seq(organisationId, "transaction", "list"),
         ()
       )
