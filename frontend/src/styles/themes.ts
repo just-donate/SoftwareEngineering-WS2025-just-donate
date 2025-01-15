@@ -67,7 +67,7 @@ To see more details about the status of your donation, visit the following link
 or enter your tracking id
 {{tracking-id}}
 on our tracking page
-{{tracking-url}}`,
+{{tracking-link}}`,
       manualTemplate: `Your donation to {{organisation-name}} has not been forgotten.
 To track your progress visit
 {{tracking-link-with-id}}
