@@ -3,7 +3,7 @@ package com.just.donate.api
 import cats.effect.IO
 import com.just.donate.db.Repository
 import com.just.donate.models.Organisation
-import com.just.donate.models.user.User
+import com.just.donate.models.user.{Roles, User}
 import com.just.donate.utils.CryptoUtils
 import io.circe.generic.auto.*
 import io.circe.syntax.*
@@ -18,6 +18,27 @@ object UserRoute:
   // Define the user API, given a repository instance for User.
   def userApi(userRepo: Repository[String, User], orgRepo: Repository[String, Organisation]): HttpRoutes[IO] =
     HttpRoutes.of[IO] {
+
+      case DELETE -> Root / email =>
+        userRepo.delete(email) >> Ok(s"User with email $email deleted")
+
+      case GET -> Root / "list" =>
+        for
+          users <- userRepo.findAll()
+          response <- Ok(users.asJson)
+        yield response
+
+      case req @ PUT -> Root / email =>
+        for
+          update <- req.as[UpdateUser]
+          maybeUser <- userRepo.findById(email)
+          response <- maybeUser match
+            case Some(user) =>
+              val newRole = update.role.getOrElse(user.role)
+              val newUser = user.copy(role = newRole, active = update.active.getOrElse(user.active))
+              userRepo.update(newUser) >> Ok(newUser.asJson)
+            case None => NotFound(s"User with email $email not found")
+        yield response
 
       // Register a new user: POST /user/register
       case req @ POST -> Root / "register" =>
@@ -75,8 +96,13 @@ object UserRoute:
         yield resp
     }
 
+  private case class UpdateUser(
+    role: Option[String], // e.g. "ADMIN", "USER", "GUEST"
+    active: Option[Boolean]
+  )
+
   // For user registration (e.g., POST /user/register)
-  private final case class RegisterUser(email: String, password: String, orgId: String)
+  private final case class RegisterUser(email: String, password: String, role: String, orgId: String)
 
   // For changing the password (e.g., POST /user/change-password)
   private final case class ChangePassword(email: String, newPassword: String)

@@ -104,13 +104,13 @@ describe('DonationManager Component', () => {
       );
     });
 
-    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), {
+    fireEvent.change(screen.getByTestId('donor-name-input'), {
       target: { value: 'Jane Doe' },
     });
-    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), {
+    fireEvent.change(screen.getByTestId('donor-email-input'), {
       target: { value: 'jane@example.com' },
     });
-    fireEvent.change(screen.getByPlaceholderText(/Amount/i), {
+    fireEvent.change(screen.getByTestId('amount-input'), {
       target: { value: '50.0' },
     });
 
@@ -176,22 +176,13 @@ describe('DonationManager Component', () => {
       );
     });
 
-    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), {
+    fireEvent.change(screen.getByTestId('donor-name-input'), {
       target: { value: 'Jane Doe' },
     });
-    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), {
+    fireEvent.change(screen.getByTestId('donor-email-input'), {
       target: { value: 'jane@example.com' },
     });
-    fireEvent.change(screen.getByPlaceholderText(/Amount/i), {
-      target: { value: '50.0' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), {
-      target: { value: 'Jane Doe' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), {
-      target: { value: 'jane@example.com' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Amount/i), {
+    fireEvent.change(screen.getByTestId('amount-input'), {
       target: { value: '50.0' },
     });
 

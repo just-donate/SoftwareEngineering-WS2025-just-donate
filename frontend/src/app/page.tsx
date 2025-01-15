@@ -46,7 +46,10 @@ export default function SearchPage() {
       }}
     >
       <Navigation
-        links={[{ link: '/organization/', name: 'Organization Login' }]}
+        links={[
+          { link: '/organization/', name: 'Organization Login' },
+          { link: '/help', name: 'Help' },
+        ]}
       />
       <main
         className={`${theme.text} max-w-4xl mx-auto px-4 flex flex-col items-center justify-center h-[calc(100%-4rem)]`}
