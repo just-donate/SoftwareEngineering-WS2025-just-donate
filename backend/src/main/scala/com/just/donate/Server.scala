@@ -90,7 +90,8 @@ object Server extends IOApp:
         AuthMiddleware.apply(transferRoute(organisationRepository, appConfig, emailService))
       val securedWithdrawalRoute: HttpRoutes[IO] =
         AuthMiddleware.apply(withdrawalRoute(organisationRepository, appConfig, emailService))
-      val securedNotificationRoute: HttpRoutes[IO] = AuthMiddleware.apply(notificationRoute(appConfig))
+      val securedNotificationRoute: HttpRoutes[IO] =
+        AuthMiddleware.apply(notificationRoute(organisationRepository, appConfig, emailService))
       // </editor-fold>
 
       val httpApp: HttpApp[IO] = Router(

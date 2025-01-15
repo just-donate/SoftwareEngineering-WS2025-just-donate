@@ -14,8 +14,8 @@ case class StatusColors(
 
 case class EmailTemplates(
   donationTemplate: String,
-  transferTemplate: String,
-  withdrawalTemplate: String
+  withdrawalTemplate: String,
+  manualTemplate: String
 )
 
 // Define the main ThemeConfig case class
