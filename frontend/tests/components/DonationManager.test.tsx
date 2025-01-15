@@ -141,7 +141,7 @@ describe('DonationManager Component', () => {
       );
     });
 
-    await act(async () => {
+    await waitFor(() => {
       fireEvent.change(screen.getByTestId('donor-name-input'), {
         target: { value: 'Jane Doe' },
       });
@@ -151,8 +151,9 @@ describe('DonationManager Component', () => {
       fireEvent.change(screen.getByTestId('amount-input'), {
         target: { value: '50.0' },
       });
+    });
 
-      // Open the Select for earmarking
+    await act(async () => {
       fireEvent.click(screen.getByText(/Select Earmarking/i));
       fireEvent.click(screen.getByText(/Special Purpose/i)); // Select the option
 
