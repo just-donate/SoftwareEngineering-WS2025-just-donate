@@ -97,7 +97,7 @@ Das [Miro Board](https://miro.com/app/board/uXjVLRFTGG0=/) enthält zusätzliche
 
 ## 5 Architekturmodell 
 
-[Domänenmodell](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/05_Architekturmodell.png)
+[Architekturmodell](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/blob/main/submissions/final/05_Architekturmodell.png)
 
 ![](05_Architekturmodell.png)
 
@@ -107,6 +107,7 @@ Das [Miro Board](https://miro.com/app/board/uXjVLRFTGG0=/) enthält zusätzliche
 
 - Erster Projektplan vor Repository Umzug: [https://github.com/users/AntonKluge/projects/1](https://github.com/users/AntonKluge/projects/1)
 - Zweiter Projektplan nach Repository Umzug: [https://github.com/orgs/just-donate/projects/2](https://github.com/orgs/just-donate/projects/2)
+- Quick Fixes (z.T. nicht im Projektplan enthalten): [https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/issues?q=is%3Aissue+is%3Aclosed](https://github.com/just-donate/SoftwareEngineering-WS2025-just-donate/issues?q=is%3Aissue+is%3Aclosed)
 
 ## 7 Gesamter Quellcode 
 
