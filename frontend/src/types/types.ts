@@ -12,6 +12,7 @@ export interface Donation {
   donationId: string;
   amount: Money;
   organisation: string;
+  organisationId: string;
   date: string;
   earmarking: string;
   status: DonationStatus[];
