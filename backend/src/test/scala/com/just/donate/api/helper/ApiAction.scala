@@ -2,8 +2,9 @@ package com.just.donate.api.helper
 
 import cats.data.Kleisli
 import cats.effect.IO
+import com.just.donate.api.DonationRoute.{DonationListResponse, RequestDonation}
 import com.just.donate.api.OrganisationRoute.*
-import com.just.donate.api.DonationRoute.{RequestDonation, DonationListResponse}
+import com.just.donate.api.TransferRoute.RequestTransfer
 import com.just.donate.models.ThemeConfig
 import com.just.donate.utils.Money
 import io.circe.generic.auto.*
@@ -106,8 +107,14 @@ object ApiAction:
         ()
       )
 
-  case class AddDonation(organisationId: String, accountName: String, donorName: String, donorEmail: String, amount: Money, earmarking: Option[String])
-      extends ApiAction[RequestDonation, Unit](
+  case class AddDonation(
+    organisationId: String,
+    accountName: String,
+    donorName: String,
+    donorEmail: String,
+    amount: Money,
+    earmarking: Option[String]
+  ) extends ApiAction[RequestDonation, Unit](
         Method.POST,
         Seq(organisationId, "account", accountName),
         RequestDonation(donorName, donorEmail, amount, earmarking)
@@ -146,4 +153,11 @@ object ApiAction:
         Method.GET,
         Seq(organisationId, "transaction", "list"),
         ()
+      )
+
+  case class Transfer(organisationId: String, fromAccount: String, toAccount: String, amount: Money)
+      extends ApiAction[RequestTransfer, Unit](
+        Method.POST,
+        Seq(organisationId),
+        RequestTransfer(fromAccount, toAccount, amount)
       )
