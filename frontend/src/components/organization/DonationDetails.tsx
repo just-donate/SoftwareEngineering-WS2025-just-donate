@@ -9,6 +9,7 @@ import axiosInstance from '@/app/organization/api/axiosInstance';
 import { Textarea } from './ui/textarea';
 import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
+import { formatStatus } from '@/lib/status';
 
 type NotificationModalState = {
   donation: Donation;
@@ -91,8 +92,9 @@ export default function DonationDetails({ donation }: DonationDetailsProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Current Status</p>
                 <p className="font-medium">
-                  {donation.status[donation.status.length - 1]?.status ||
-                    'Unknown'}
+                  {formatStatus(
+                    donation.status[donation.status.length - 1]?.status,
+                  ) || 'Unknown'}
                 </p>
               </div>
             </div>
@@ -103,7 +105,9 @@ export default function DonationDetails({ donation }: DonationDetailsProps) {
                 {donation.status.map((status, index) => (
                   <div key={index} className="p-3 bg-secondary rounded-lg">
                     <div className="flex justify-between items-start mb-1">
-                      <span className="font-medium">{status.status}</span>
+                      <span className="font-medium">
+                        {formatStatus(status.status)}
+                      </span>
                       <span className="text-sm text-muted-foreground">
                         {new Date(status.date).toLocaleString()}
                       </span>

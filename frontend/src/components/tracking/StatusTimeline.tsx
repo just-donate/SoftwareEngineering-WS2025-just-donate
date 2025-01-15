@@ -1,7 +1,7 @@
 import { DonationStatus } from '../../types/types';
 import { useTheme } from '../../contexts/ThemeContext';
-import { capitalize, dateFormatter } from '@/lib/utils';
-import { getStatusColor } from '@/lib/status';
+import { dateFormatter } from '@/lib/utils';
+import { formatStatus, getStatusColor } from '@/lib/status';
 
 interface StatusTimelineProps {
   status: DonationStatus[];
@@ -27,7 +27,7 @@ export const StatusTimeline: React.FC<StatusTimelineProps> = ({ status }) => {
               {dateFormatter.format(new Date(item.date))}
             </time>
             <h4 className={`text-lg font-semibold ${theme.text}`}>
-              {capitalize(item.status)}
+              {formatStatus(item.status)}
             </h4>
             <p className={`mb-4 text-base font-normal ${theme.textLight}`}>
               {item.description}

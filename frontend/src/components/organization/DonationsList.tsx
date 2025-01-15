@@ -12,6 +12,7 @@ import {
 import DonationDetails from './DonationDetails';
 import { Donation } from '@/types/types';
 import { useTheme } from '@/contexts/ThemeContext';
+import { formatStatus } from '@/lib/status';
 
 interface DonationsListProps {
   initialDonations: Donation[];
@@ -77,7 +78,7 @@ export default function DonationsList({
             <SelectItem value="all">All Statuses</SelectItem>
             {uniqueStatuses.map((status) => (
               <SelectItem key={status} value={status}>
-                {status}
+                {formatStatus(status)}
               </SelectItem>
             ))}
           </SelectContent>
