@@ -1,19 +1,14 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import com.just.donate.db.Repository
 import com.just.donate.db.mongo.{MongoOrganisationRepository, MongoUserRepository}
 import com.just.donate.models.Organisation
 import com.just.donate.models.user.{Roles, User}
-import io.circe.parser.decode
-import io.circe.syntax.*
 import munit.CatsEffectSuite
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
 import org.http4s.implicits.*
 import org.mockito.ArgumentMatchers.*
-import org.mockito.ArgumentMatchersSugar.eqTo
-import org.mockito.Mockito.*
 import org.mockito.{Mockito, MockitoSugar}
 
 class UserRouteSuite extends CatsEffectSuite with MockitoSugar:
