@@ -25,10 +25,9 @@ interface CachedTheme {
   organizationId: string;
 }
 
-const organizationId = '591671920';
+const organizationId = config.organizationId;
 const THEME_STORAGE_KEY = `theme_${organizationId}`;
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-const organizationId = config.organizationId;
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
