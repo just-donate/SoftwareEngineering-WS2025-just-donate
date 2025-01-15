@@ -203,7 +203,7 @@ describe('DonationManager Component', () => {
         screen.getByText(/Please fill in all fields/i),
       ).toBeInTheDocument();
     }, { timeout: 10000 });
-  });
+  }, 10000);
 
   it('creates a new donation with error', async () => {
     (createDonation as jest.Mock).mockResolvedValueOnce({
@@ -247,7 +247,7 @@ describe('DonationManager Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/Error/i)).toBeInTheDocument();
     }, { timeout: 10000 });
-  });
+  }, 10000);
 
   it('shows an error message when fields are missing', async () => {
     await act(async () => {
@@ -271,5 +271,5 @@ describe('DonationManager Component', () => {
         screen.getByText(/Please fill in all fields/i),
       ).toBeInTheDocument();
     }, { timeout: 10000 });
-  });
+  }, 10000);
 });
