@@ -25,9 +25,6 @@ class PaypalApiSuite extends CatsEffectSuite:
 
   private implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
-  // Use Dispatcher to run IO effects from non-IO code if needed.
-  val disp: Resource[IO, Dispatcher[IO]] = Dispatcher[IO]
-
   private val orgRepo = MemoryOrganisationRepository()
 
   // Start a dummy validation server that always returns "INVALID"
