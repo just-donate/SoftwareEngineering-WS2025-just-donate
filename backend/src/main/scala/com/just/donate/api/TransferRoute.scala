@@ -6,6 +6,7 @@ import com.just.donate.config.Config
 import com.just.donate.db.Repository
 import com.just.donate.models.Organisation
 import com.just.donate.models.errors.WithdrawError
+import com.just.donate.models.errors.TransferError
 import com.just.donate.notify.IEmailService
 import com.just.donate.utils.Money
 import com.just.donate.utils.RouteUtils.loadAndSaveOrganisationOps
@@ -25,18 +26,15 @@ object TransferRoute:
         case req @ POST -> Root / organisationId =>
           (for
             transfer <- req.as[RequestTransfer]
-            emailMessages <- loadAndSaveOrganisationOps(organisationId)(repository)(org =>
+            transferError <- loadAndSaveOrganisationOps(organisationId)(repository)(org =>
               org.transfer(transfer.amount, transfer.fromAccount, transfer.toAccount, config) match
-                case Left(error)                    => (org, Left(error))
-                case Right((newOrg, emailMessages)) => (newOrg, Right(emailMessages))
+                case Left(error)   => (org, Some(error))
+                case Right(newOrg) => (newOrg, None)
             )
-            response <- emailMessages match
+            response <- transferError match
               case None                      => BadRequest("Organisation not found")
-              case Some(Left(transferError)) => BadRequest(transferError.message)
-              case Some(Right(emailMessages)) =>
-                emailMessages
-                  .map(message => emailService.sendEmail(message.targetAddress, message.message, message.subject))
-                  .sequence >> Ok()
+              case Some(Some(transferError)) => BadRequest(transferError.message)
+              case Some(None)                => Ok()
           yield response).handleErrorWith {
             case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
           }

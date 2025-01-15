@@ -1,5 +1,5 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import React, { act } from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { StatusTimeline } from '../../src/components/tracking/StatusTimeline';
 import { ThemeProvider } from '../../src/contexts/ThemeContext';
 import '@testing-library/jest-dom'; // Import jest-dom
@@ -21,28 +21,32 @@ const mockStatus = [
 ];
 
 describe('StatusTimeline Component', () => {
-  it('renders status items correctly', () => {
-    render(
-      <ThemeProvider>
-        <StatusTimeline status={mockStatus} />
-      </ThemeProvider>,
-    );
+  it('renders status items correctly', async () => {
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <StatusTimeline status={mockStatus} />
+        </ThemeProvider>,
+      );
+    });
 
     // Check if the status items are rendered
-    expect(screen.getByText(/Donated/i)).toBeInTheDocument();
-    expect(screen.getByText(/July 20, 2023/i)).toBeInTheDocument();
-    expect(screen.getByText(/Donation received/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Donated/i)).toBeInTheDocument();
+      expect(screen.getByText(/July 20, 2023/i)).toBeInTheDocument();
+      expect(screen.getByText(/Donation received/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/Allocated/i)).toBeInTheDocument();
-    expect(screen.getByText(/July 21, 2023/i)).toBeInTheDocument();
-    expect(screen.getByText(/Funds sent to project/i)).toBeInTheDocument();
+      expect(screen.getByText(/Allocated/i)).toBeInTheDocument();
+      expect(screen.getByText(/July 21, 2023/i)).toBeInTheDocument();
+      expect(screen.getByText(/Funds sent to project/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/In Use/i)).toBeInTheDocument();
-    expect(screen.getByText(/July 22, 2023/i)).toBeInTheDocument();
-    expect(screen.getByText(/Funds are inuse/i)).toBeInTheDocument();
+      expect(screen.getByText(/In Use/i)).toBeInTheDocument();
+      expect(screen.getByText(/July 22, 2023/i)).toBeInTheDocument();
+      expect(screen.getByText(/Funds are inuse/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/Processed/i)).toBeInTheDocument();
-    expect(screen.getByText(/July 23, 2023/i)).toBeInTheDocument();
-    expect(screen.getByText(/Donation used by NGO/i)).toBeInTheDocument();
+      expect(screen.getByText(/Processed/i)).toBeInTheDocument();
+      expect(screen.getByText(/July 23, 2023/i)).toBeInTheDocument();
+      expect(screen.getByText(/Donation used by NGO/i)).toBeInTheDocument();
+    });
   });
 });

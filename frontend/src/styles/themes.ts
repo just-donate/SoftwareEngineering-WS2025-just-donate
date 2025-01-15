@@ -22,6 +22,11 @@ export interface Theme {
     awaiting_utilization: string;
     used: string;
   };
+  emailTemplates: {
+    donationTemplate: string;
+    withdrawalTemplate: string;
+    manualTemplate: string;
+  };
 }
 
 export const themes: Record<string, Theme> = {
@@ -48,6 +53,28 @@ export const themes: Record<string, Theme> = {
       allocated: 'bg-purple-500',
       awaiting_utilization: 'bg-yellow-500',
       used: 'bg-green-500',
+    },
+    emailTemplates: {
+      donationTemplate: `Thank you for your donation, to track your progress visit
+{{tracking-link-with-id}}
+or enter your tracking id
+{{tracking-id}}
+on our tracking page
+{{tracking-link}}`,
+      withdrawalTemplate: `Your recent donation to {{organisation-name}} has been fully utilized.
+To see more details about the status of your donation, visit the following link
+{{tracking-link-with-id}}
+or enter your tracking id
+{{tracking-id}}
+on our tracking page
+{{tracking-link}}`,
+      manualTemplate: `Your donation to {{organisation-name}} has not been forgotten.
+To track your progress visit
+{{tracking-link-with-id}}
+or enter your tracking id
+{{tracking-id}}
+on our tracking page
+{{tracking-link}}`,
     },
   },
 };

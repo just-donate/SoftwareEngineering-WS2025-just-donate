@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../api/axiosInstance';
 import axios from 'axios';
+import { config } from '@/lib/config';
 
 interface RegisterUser {
   email: string;
@@ -16,7 +17,7 @@ interface RegisterUser {
 function RegisterPage() {
   const router = useRouter();
 
-  const orgId = '591671920';
+  const orgId = config.organizationId;
 
   // Form state
   const [email, setEmail] = useState('');

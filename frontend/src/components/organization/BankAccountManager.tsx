@@ -11,12 +11,6 @@ import {
 } from '@/app/organization/bank-accounts/bank-accounts';
 import { useTheme } from '@/contexts/ThemeContext';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not set');
-}
-
 interface BankAccountManagerProps {
   initialAccounts: BankAccount[];
   organizationId: string;
@@ -94,19 +88,46 @@ export default function BankAccountManager({
           <CardTitle className={theme.text}>Existing Bank Accounts</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2">
-            {accounts.map((account) => (
-              <li
-                key={account.name}
-                className={`p-4 rounded-lg flex justify-between items-center ${theme.secondary}`}
-              >
-                <span className={theme.text}>{account.name}</span>
-                <span className={`font-medium ${theme.text}`}>
-                  {account.balance.amount}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full border-separate border-spacing-y-2">
+              <thead>
+                <tr>
+                  <th className="text-left p-2">Accounts</th>
+                  {accounts.length > 0 &&
+                    accounts[0].byEarmarking.map(([earmarkingName]) => (
+                      <th key={earmarkingName} className="text-center p-2">
+                        {earmarkingName}
+                      </th>
+                    ))}
+                  <th className="text-right p-2">Total Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {accounts.map((account) => (
+                  <tr key={account.name}>
+                    <td
+                      className={`p-4 first:rounded-l-lg ${theme.secondary} ${theme.text}`}
+                    >
+                      {account.name}
+                    </td>
+                    {account.byEarmarking.map(([earmarkingName, money]) => (
+                      <td
+                        key={earmarkingName}
+                        className={`text-center p-4 ${theme.secondary} ${theme.text}`}
+                      >
+                        {money.amount}
+                      </td>
+                    ))}
+                    <td
+                      className={`text-right p-4 last:rounded-r-lg font-medium ${theme.secondary} ${theme.text}`}
+                    >
+                      {account.balance.amount}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
     </div>

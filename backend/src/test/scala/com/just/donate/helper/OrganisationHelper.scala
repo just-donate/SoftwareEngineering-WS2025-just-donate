@@ -1,8 +1,10 @@
 package com.just.donate.helper
 
 import cats.effect.IO
+import com.just.donate.api.PaypalRoute.paypalAccountName
 import com.just.donate.db.Repository
-import com.just.donate.models.{Account, Donation, Donor, Organisation}
+import com.just.donate.mocks.config.AppConfigMock
+import com.just.donate.models.{ Account, Donation, Donor, Organisation }
 import com.just.donate.utils.Money
 
 object OrganisationHelper:
@@ -13,7 +15,7 @@ object OrganisationHelper:
   def createNewRoots(): Organisation =
     var newRoots = Organisation(NEW_ROOTS)
 
-    newRoots = newRoots.addAccount("Paypal")
+    newRoots = newRoots.addAccount(paypalAccountName)
     newRoots = newRoots.addAccount("Better Place")
     newRoots = newRoots.addAccount("Bank")
     newRoots = newRoots.addAccount("Kenya")
@@ -29,7 +31,7 @@ object OrganisationHelper:
           val org = optOrg.get
           val donor = Donor(org.getNewDonorId, "MyDonor", "mydonor@example.org")
           val (donation, donationPart) = Donation(donor.id, Money("100"))
-          org.donate(donor, donationPart, donation, "Paypal").toOption.get
+          org.donate(donor, donationPart, donation, paypalAccountName, AppConfigMock()).toOption.get
         )
       _ <- repo.save(newOrg)
     yield ()

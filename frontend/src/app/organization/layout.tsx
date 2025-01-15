@@ -10,17 +10,15 @@ export const metadata: Metadata = {
   description: '"Manage·your·organization\'s·donations·and·transactions"',
 };
 
-export default function RootLayout({
+export default function OrganizationLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <NavBar />
-        <main className="container mx-auto p-4">{children}</main>
-      </body>
-    </html>
+    <div className={inter.className}>
+      <NavBar />
+      <main className="container mx-auto p-4">{children}</main>
+    </div>
   );
 }

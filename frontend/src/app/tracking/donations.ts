@@ -1,19 +1,20 @@
 'use client';
 
 import { Donations } from '@/types/types';
+import axiosInstance from '../organization/api/axiosInstance';
+import { config } from '@/lib/config';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not set');
-}
+const organizationId = config.organizationId;
 
 export async function getDonations(id: string): Promise<Donations | null> {
   try {
-    const response = await fetch(`${API_URL}/donate/591671920/donor/${id}`);
-    if (!response.ok) return null;
-    return response.json();
-  } catch {
+    const response = await axiosInstance.get(
+      `/public/donate/${organizationId}/donor/${id}`,
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching donations:', error);
     return null;
   }
 }

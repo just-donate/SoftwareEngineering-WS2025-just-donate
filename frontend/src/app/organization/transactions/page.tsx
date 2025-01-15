@@ -7,6 +7,7 @@ import { fetchTransactions } from './transactions';
 import { useEffect, useState } from 'react';
 import { Transaction, BankAccount, Earmarking } from '@/types/types';
 import withAuth from '../api/RequiresAuth';
+import { config } from '@/lib/config';
 
 function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -14,8 +15,7 @@ function TransactionsPage() {
   const [earmarkings, setEarmarkings] = useState<Earmarking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // TODO: Get the organization ID from the session/context
-  const organizationId = '591671920';
+  const organizationId = config.organizationId;
 
   useEffect(() => {
     const fetchData = async () => {

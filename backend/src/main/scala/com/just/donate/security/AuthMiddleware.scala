@@ -4,7 +4,7 @@ import cats.data.{Kleisli, OptionT}
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.http4s.*
-import org.http4s.dsl.io.*
+import org.http4s.dsl.io.{/, *}
 import org.typelevel.vault.Key
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
 
@@ -19,21 +19,41 @@ object AuthMiddleware:
   def apply(protectedRoutes: HttpRoutes[IO]): HttpRoutes[IO] = Kleisli { req =>
     OptionT {
       // Enable themes to be loaded without authentication
-      if req.uri.toString.endsWith("theme") && req.method.eq(GET) then protectedRoutes(req).value
-      else
-        req.cookies.find(_.name == "jwtToken") match
-          case Some(cookie) =>
-            validateJwt(cookie.content) match
-              case Right(claims) =>
-                // Add claims to the request's Vault and call the protected routes
-                val updatedReq = req.withAttribute(AuthAttributes.UserClaims, claims)
-                protectedRoutes(updatedReq).value
-              case Left(error) =>
-                // Invalid token
-                Forbidden(s"Invalid token: $error").map(Some(_))
-          case None =>
-            // Missing cookie
-            Forbidden("Missing authentication cookie").map(Some(_))
+      req.cookies.find(_.name == "jwtToken") match
+        case Some(cookie) =>
+          validateJwt(cookie.content) match
+            case Right(claims) =>
+              // Add claims to the request's Vault and call the protected routes
+              val updatedReq = req.withAttribute(AuthAttributes.UserClaims, claims)
+              protectedRoutes(updatedReq).value
+            case Left(error) =>
+              // Invalid token
+              Forbidden(s"Invalid token: $error").map(Some(_))
+        case None =>
+          // Fallback to check for the Authorization header
+          req.headers.get(org.http4s.headers.Authorization.name) match {
+            case Some(nonEmptyHeaders) =>
+              // Extract the Bearer token from the NonEmptyList
+              nonEmptyHeaders.collectFirst {
+                case Header.Raw(name, value) if name.toString.equalsIgnoreCase("Authorization") && value.startsWith("Bearer ") =>
+                  value.stripPrefix("Bearer ")
+              } match {
+                case Some(token) =>
+                  validateJwt(token) match {
+                    case Right(claims) =>
+                      // Add claims to the request's Vault and call the protected routes
+                      val updatedReq = req.withAttribute(AuthAttributes.UserClaims, claims)
+                      protectedRoutes(updatedReq).value
+                    case Left(error) =>
+                      // Invalid token
+                      Forbidden(s"Invalid token: $error").map(Some(_))
+                  }
+                case None =>
+                  Forbidden("""{"error": "No valid Bearer token found in Authorization header"}""").map(Some(_))
+              }
+            case None =>
+              Forbidden("""{"error": "No authentication token provided"}""").map(Some(_))
+          }
     }
   }
 
@@ -46,10 +66,9 @@ object AuthMiddleware:
 
   private def isExpired(claim: JwtClaim): Boolean =
     claim.expiration match
-      case Some(exp) => {
+      case Some(exp) =>
         exp < Instant.now().getEpochSecond
-      }
-      case None      => true
+      case None => true
 
 private object AuthAttributes:
   val UserClaims: Key[JwtClaim] = Key.newKey[IO, JwtClaim].unsafeRunSync()

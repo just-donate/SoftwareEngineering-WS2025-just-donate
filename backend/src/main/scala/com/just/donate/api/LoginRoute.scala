@@ -45,7 +45,7 @@ object LoginRoute:
         // Verify that the user is active and the password matches
         if user.active && CryptoUtils.verifyPassword(login.password, user.password) then
           // Authentication successful
-          val expirationTimeInSeconds = 7200 // 1 hour in seconds
+          val expirationTimeInSeconds = 3600 // 1 hour in seconds
           val currentTime = Instant.now().getEpochSecond
           val expirationTime = currentTime + expirationTimeInSeconds
 
@@ -75,7 +75,7 @@ object LoginRoute:
             maxAge = Some(expirationTimeInSeconds),
             expires = Some(httpDate)
           )
-          Ok(LoginResponse("Login successful")).map(_.addCookie(jwtCookie))
+          Ok(token).map(_.addCookie(jwtCookie))
         else Forbidden("Invalid credentials")
 
       case None =>

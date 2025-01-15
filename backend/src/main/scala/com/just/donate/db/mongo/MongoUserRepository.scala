@@ -2,10 +2,8 @@ package com.just.donate.db.mongo
 
 import cats.effect.IO
 import com.just.donate.db.mongo.MongoRepository.ObservableOps
-import com.just.donate.models.paypal.PayPalIPN
-import com.just.donate.models.user.{Roles, User}
+import com.just.donate.models.user.User
 import org.mongodb.scala.*
-import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.model.*
 
 /**
@@ -42,7 +40,7 @@ class MongoUserRepository(collection: MongoCollection[Document])
     User(
       email = doc.getString("email"),
       password = doc.getString("password"),
-      role = Roles.valueOf(doc.getString("role")), // Adjust according to your Roles implementation
+      role = doc.getString("role"), // Adjust according to your Roles implementation
       active = doc.getBoolean("active"),
       orgId = doc.getString("orgId")
     )

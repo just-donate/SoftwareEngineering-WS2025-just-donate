@@ -18,10 +18,16 @@ class MongoOrganisationRepository(collection: MongoCollection[Document])
       .find(Filters.eq("_id", id))
       .first()
       .toIO
-      .map(_.headOption.flatMap(doc => parse(doc.getString("data")).flatMap(_.as[Organisation]).fold(
-        error => throw new Exception(error),
-        organisation => Some(organisation)
-      )))
+      .map(
+        _.headOption.flatMap(doc =>
+          parse(doc.getString("data"))
+            .flatMap(_.as[Organisation])
+            .fold(
+              error => throw new Exception(error),
+              organisation => Some(organisation)
+            )
+        )
+      )
 
   def findAll(): IO[Seq[Organisation]] =
     collection

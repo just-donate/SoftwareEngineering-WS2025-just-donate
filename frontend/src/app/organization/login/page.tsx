@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { useTheme } from '@/contexts/ThemeContext';
+import axiosInstance from '../api/axiosInstance';
+import { config } from '@/lib/config';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,12 +14,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { theme } = useTheme();
-  const orgId = '591671920';
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-  if (!API_URL) {
-    throw new Error('NEXT_PUBLIC_API_URL is not set');
-  }
+  const orgId = config.organizationId;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -25,27 +22,38 @@ export default function LoginPage() {
 
     try {
       // Perform the login request
-      await axios.post(
-        `${API_URL}/login`, // Replace with your login endpoint
+      const response = await axiosInstance.post(
+        '/login', // Replace with your login endpoint
         {
           username: email,
           password: password,
           orgId: orgId,
         },
         {
-          // Ensure cookies are sent and stored
-          withCredentials: true,
+          withCredentials: true, // Ensure cookies are sent and stored
           headers: {
             'Content-Type': 'application/json', // Specify JSON content type
           },
         },
       );
 
-      // On success, display a success notification (optional) and redirect to dashboard
-      toast.success('Login successful!', {
-        position: 'top-center',
-      });
-      router.push('/organization/dashboard');
+      // Retrieve the token from the response
+      const token = response.data;
+
+      if (token) {
+        // Store the token in localStorage
+        sessionStorage.setItem('token', token);
+
+        // Display a success notification (optional)
+        toast.success('Login successful!', {
+          position: 'top-center',
+        });
+
+        // Redirect to the dashboard
+        router.push('/organization/dashboard');
+      } else {
+        throw new Error('No token received from the server.');
+      }
     } catch (err) {
       console.error('Login error:', err);
 
