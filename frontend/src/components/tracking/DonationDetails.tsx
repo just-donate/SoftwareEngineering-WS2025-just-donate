@@ -19,7 +19,9 @@ export const DonationDetails: React.FC<DonationDetailsProps> = ({
   const position: [number, number] = [-3.315502, 40.016154];
 
   const [images, setImages] = useState<string[]>([]);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     fetchEarmarkingImages(donation.organisation, donation.earmarking).then(

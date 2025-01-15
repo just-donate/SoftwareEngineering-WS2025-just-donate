@@ -111,4 +111,4 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
       </button>
     </div>
   );
-}; 
+};
