@@ -77,7 +77,6 @@ function DashboardPage() {
           <CardContent>
             <Link href="/organization/manage-tracking">
               <Button className={theme.primary}>Customize Tracking Page</Button>
-              <Button>Customize Tracking Page</Button>
             </Link>
           </CardContent>
         </Card>
@@ -87,7 +86,7 @@ function DashboardPage() {
           </CardHeader>
           <CardContent>
             <Link href="/organization/users">
-              <Button>Manage Users</Button>
+              <Button className={theme.primary}>Manage Users</Button>
             </Link>
           </CardContent>
         </Card>
