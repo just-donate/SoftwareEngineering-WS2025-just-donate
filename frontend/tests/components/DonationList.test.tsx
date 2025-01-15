@@ -71,7 +71,6 @@ describe('DonationList Component', () => {
       );
     });
 
-
     await waitFor(async () => {
       // Simulate a click on the first donation item
       fireEvent.click(screen.getByText(/Test NGO 1/i));

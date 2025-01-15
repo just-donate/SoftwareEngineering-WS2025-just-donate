@@ -28,7 +28,7 @@ axiosInstance.interceptors.request.use(
   (error) => {
     // Pass errors in request configuration to the next error handler
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;
