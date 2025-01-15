@@ -18,11 +18,13 @@ import { useTheme } from '@/contexts/ThemeContext';
 interface TransferManagerProps {
   accounts: BankAccount[];
   organizationId: string;
+  onTransferSuccess?: () => void;
 }
 
 export default function TransferManager({
   accounts,
   organizationId,
+  onTransferSuccess,
 }: TransferManagerProps) {
   const { theme } = useTheme();
   const [amount, setAmount] = useState('');
@@ -52,6 +54,7 @@ export default function TransferManager({
         setSuccessMessage('Transfer created successfully!');
         setError('');
         setTimeout(() => setSuccessMessage(''), 3000);
+        onTransferSuccess?.();
       } else {
         setError(result.error || 'Failed to create transfer');
       }
