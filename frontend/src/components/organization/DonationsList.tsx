@@ -36,13 +36,16 @@ export default function DonationsList({
 
   const filteredDonations = donations.filter((donation) => {
     const matchesSearch =
-      donation.donationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.organisation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.earmarking.toLowerCase().includes(searchTerm.toLowerCase());
+      (donation.donationId?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (donation.date?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      donation.amount?.amount?.toString().includes(searchTerm) ||
+      (donation.donorEmail?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (donation.organisation?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (donation.earmarking?.toLowerCase() || '').includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       statusFilter === 'all' ||
-      donation.status[donation.status.length - 1]?.status === statusFilter;
+      donation.status?.[donation.status.length - 1]?.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
