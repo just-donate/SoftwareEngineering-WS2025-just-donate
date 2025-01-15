@@ -48,16 +48,18 @@ describe('DonationList Component', () => {
       );
     });
 
-    // Check if the donation items are rendered
-    expect(screen.getByText(/Test NGO 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/General Purpose 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
-    expect(screen.getByText(/Completed/i)).toBeInTheDocument();
+    await waitFor(async () => {
+      // Check if the donation items are rendered
+      expect(screen.getByText(/Test NGO 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/General Purpose 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/100.0 Euro/i)).toBeInTheDocument();
+      expect(screen.getByText(/Completed/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/Test NGO 2/i)).toBeInTheDocument();
-    expect(screen.getByText(/General Purpose 2/i)).toBeInTheDocument();
-    expect(screen.getByText(/200.0 Euro/i)).toBeInTheDocument();
-    expect(screen.getByText(/Pending/i)).toBeInTheDocument();
+      expect(screen.getByText(/Test NGO 2/i)).toBeInTheDocument();
+      expect(screen.getByText(/General Purpose 2/i)).toBeInTheDocument();
+      expect(screen.getByText(/200.0 Euro/i)).toBeInTheDocument();
+      expect(screen.getByText(/Pending/i)).toBeInTheDocument();
+    });
   });
 
   it('opens and closes donation details when an item is clicked', async () => {
@@ -69,8 +71,11 @@ describe('DonationList Component', () => {
       );
     });
 
-    // Simulate a click on the first donation item
-    fireEvent.click(screen.getByText(/Test NGO 1/i));
+
+    await waitFor(async () => {
+      // Simulate a click on the first donation item
+      fireEvent.click(screen.getByText(/Test NGO 1/i));
+    });
 
     // Wait for the donation details to be displayed
     await waitFor(() => {
