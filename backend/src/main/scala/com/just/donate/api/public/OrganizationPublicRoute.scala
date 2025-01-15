@@ -24,7 +24,6 @@ object OrganizationPublicRoute:
         )
 
       case GET -> Root / organisationId / "theme" =>
-        // TODO: Load organization
         for
           organisation <- repository.findById(organisationId)
           response <- organisation match

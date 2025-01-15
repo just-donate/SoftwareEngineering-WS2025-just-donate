@@ -136,5 +136,5 @@ object Server extends IOApp:
     }
 
   /** Acquire and safely release the Mongo client (using Resource). */
-  private def mongoResource(uri: String): Resource[IO, MongoClient] =
+  def mongoResource(uri: String): Resource[IO, MongoClient] =
     Resource.make(IO(MongoClient(uri)))(client => IO(client.close()))
