@@ -1,10 +1,14 @@
 package com.just.donate.api
 
 import cats.effect.IO
-import com.just.donate.api.OrganisationRoute.{RequestOrganisation, ResponseOrganisation}
+import com.just.donate.api.DonationRoute.RequestDonation
+import com.just.donate.api.OrganisationRoute.{RequestAccount, RequestEarmarking, RequestOrganisation, ResponseAccount, ResponseOrganisation}
 import com.just.donate.db.memory.MemoryOrganisationRepository
 import com.just.donate.helper.OrganisationHelper.*
 import com.just.donate.helper.TestHelper.*
+import com.just.donate.mocks.config.AppConfigMock
+import com.just.donate.mocks.notify.EmailServiceMock
+import com.just.donate.utils.Money
 import io.circe.*
 import io.circe.generic.auto.*
 import munit.CatsEffectSuite
@@ -18,6 +22,7 @@ class OrganisationApiSuite extends CatsEffectSuite:
   private val repo = MemoryOrganisationRepository()
 
   private val routes = OrganisationRoute.organisationApi(repo).orNotFound
+  private val donationRoute = DonationRoute.donationRoute(repo, AppConfigMock(), EmailServiceMock()).orNotFound
 
   override def beforeEach(context: BeforeEach): Unit = repo.clear().unsafeRunSync()
 
@@ -146,4 +151,74 @@ class OrganisationApiSuite extends CatsEffectSuite:
       assertEquals(respList.status, Status.Ok)
 
       assert(body.isEmpty)
+  }
+
+  test("GET /organisation/{id}/account/list should return Ok and all accounts split by earmarking") {
+    val orgRequest = RequestOrganisation("Org1")
+
+    val payPalAccount = RequestAccount("PayPal", Money("0.0"))
+    val bankAccount = RequestAccount("Bank", Money("0.0"))
+
+    val educationEarmarking = RequestEarmarking("Education", "For education")
+    val healthEarmarking = RequestEarmarking("Health", "For health")
+
+    val donateRequest1 = RequestDonation("Donor1", "donor1@example.org", Money("10.0"), Some(educationEarmarking.name))
+    val donateRequest2 = RequestDonation("Donor1", "donor2@example.org", Money("11.0"), Some(healthEarmarking.name))
+    val donateRequest3 = RequestDonation("Donor2", "donor2@example.org", Money("12.0"), Some(educationEarmarking.name))
+    val donateRequest4 = RequestDonation("Donor2", "donor3@example.org", Money("13.0"), Some(educationEarmarking.name))
+    val donateRequest5 = RequestDonation("Donor3", "donor3@example.org", Money("14.0"), Some(healthEarmarking.name))
+
+    val reqCreate = Request[IO](Method.POST, uri"/").withEntity(orgRequest)
+
+    val reqPayPalAccount =
+      Request[IO](Method.POST, testUri(organisationId("Org1"), "account")).withEntity(payPalAccount)
+    val reqBankAccount = Request[IO](Method.POST, testUri(organisationId("Org1"), "account")).withEntity(bankAccount)
+
+    val reqEducationEarmarking =
+      Request[IO](Method.POST, testUri(organisationId("Org1"), "earmarking")).withEntity(educationEarmarking)
+    val reqHealthEarmarking =
+      Request[IO](Method.POST, testUri(organisationId("Org1"), "earmarking")).withEntity(healthEarmarking)
+
+    val reqDonate1 = Request[IO](Method.POST, testUri(organisationId("Org1"), "account", "PayPal")).withEntity(donateRequest1)
+    val reqDonate2 = Request[IO](Method.POST, testUri(organisationId("Org1"), "account", "PayPal")).withEntity(donateRequest2)
+    val reqDonate3 = Request[IO](Method.POST, testUri(organisationId("Org1"), "account", "Bank")).withEntity(donateRequest3)
+    val reqDonate4 = Request[IO](Method.POST, testUri(organisationId("Org1"), "account", "PayPal")).withEntity(donateRequest4)
+    val reqDonate5 = Request[IO](Method.POST, testUri(organisationId("Org1"), "account", "Bank")).withEntity(donateRequest5)
+
+    val reqList = Request[IO](Method.GET, testUri(organisationId("Org1"), "account", "list"))
+
+    for
+      _ <- routes.run(reqCreate)
+      _ <- routes.run(reqPayPalAccount)
+      _ <- routes.run(reqBankAccount)
+      _ <- routes.run(reqEducationEarmarking)
+      _ <- routes.run(reqHealthEarmarking)
+      resp1 <- donationRoute.run(reqDonate1)
+      _ <- donationRoute.run(reqDonate2)
+      _ <- donationRoute.run(reqDonate3)
+      _ <- donationRoute.run(reqDonate4)
+      _ <- donationRoute.run(reqDonate5)
+      respList <- routes.run(reqList)
+      _ <- IO.println(respList)
+      body <- respList.as[List[ResponseAccount]]
+    yield
+      assertEquals(respList.status, Status.Ok)
+      assertEquals(resp1.status, Status.Ok)
+
+      assertEquals(body.size, 2)
+      assertEquals(body.head.name, "PayPal")
+      assertEquals(body.head.balance, Money("34.0"))
+      assertEquals(body.head.byEarmarking.size, 3)
+      assertEquals(body.head.byEarmarking.head._1, "Education")
+      assertEquals(body.head.byEarmarking.head._2, Money("23.0"))
+      assertEquals(body.head.byEarmarking(1)._1, "Health")
+      assertEquals(body.head.byEarmarking(1)._2, Money("11.0"))
+
+      assertEquals(body(1).name, "Bank")
+      assertEquals(body(1).balance, Money("26.0"))
+      assertEquals(body(1).byEarmarking.size, 3)
+      assertEquals(body(1).byEarmarking.head._1, "Education")
+      assertEquals(body(1).byEarmarking.head._2, Money("12.0"))
+      assertEquals(body(1).byEarmarking(1)._1, "Health")
+      assertEquals(body(1).byEarmarking(1)._2, Money("14.0"))
   }
