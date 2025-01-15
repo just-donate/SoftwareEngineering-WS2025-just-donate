@@ -6,6 +6,7 @@ import React, {
   useContext,
   ReactNode,
   useEffect,
+  useCallback,
 } from 'react';
 import { Theme, themes } from '@/styles/themes';
 import axios from 'axios';
@@ -35,7 +36,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   const [theme, setThemeState] = useState<Theme>(themes.default);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getCachedTheme = (): Theme | null => {
+  const getCachedTheme = useCallback((): Theme | null => {
     const storedData = localStorage.getItem(THEME_STORAGE_KEY);
     if (!storedData) return null;
 
@@ -43,7 +44,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
       const cached: CachedTheme = JSON.parse(storedData);
       const isExpired = Date.now() - cached.timestamp > CACHE_DURATION;
       const isValidOrg = cached.organizationId === organizationId;
-      
+
       if (isExpired || !isValidOrg || !isValidTheme(cached.theme)) {
         localStorage.removeItem(THEME_STORAGE_KEY);
         return null;
@@ -55,18 +56,18 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
       localStorage.removeItem(THEME_STORAGE_KEY);
       return null;
     }
-  };
+  }, []);
 
-  const setCachedTheme = (newTheme: Theme) => {
+  const setCachedTheme = useCallback((newTheme: Theme) => {
     const cacheData: CachedTheme = {
       theme: newTheme,
       timestamp: Date.now(),
-      organizationId
+      organizationId,
     };
     localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(cacheData));
-  };
+  }, []);
 
-  const fetchTheme = async () => {
+  const fetchTheme = useCallback(async () => {
     try {
       const savedTheme = await getTheme(organizationId);
       if (savedTheme) {
@@ -79,28 +80,31 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setCachedTheme]);
 
-  const updateTheme = async (newTheme: Theme) => {
-    setIsLoading(true);
-    try {
-      const result = await saveTheme(organizationId, newTheme);
+  const updateTheme = useCallback(
+    async (newTheme: Theme) => {
+      setIsLoading(true);
+      try {
+        const result = await saveTheme(organizationId, newTheme);
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to save theme');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to save theme');
+        }
+
+        setThemeState(newTheme);
+        setCachedTheme(newTheme);
+      } catch (error) {
+        console.error('Failed to update theme:', error);
+        throw error instanceof Error
+          ? error
+          : new Error('Failed to update theme');
+      } finally {
+        setIsLoading(false);
       }
-
-      setThemeState(newTheme);
-      setCachedTheme(newTheme);
-    } catch (error) {
-      console.error('Failed to update theme:', error);
-      throw error instanceof Error
-        ? error
-        : new Error('Failed to update theme');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [setCachedTheme],
+  );
 
   useEffect(() => {
     const initializeTheme = async () => {
@@ -116,7 +120,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
     };
 
     initializeTheme();
-  }, []);
+  }, [fetchTheme, getCachedTheme]);
 
   if (isLoading) {
     // You can replace this with a loading spinner or skeleton UI
