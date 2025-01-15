@@ -58,11 +58,6 @@ object OrganisationRoute:
       case DELETE -> Root / organisationId / "earmarking" / earmarking =>
         loadAndSaveOrganisation(organisationId)(repository)(_.removeEarmarking(earmarking))
 
-      case GET -> Root / organisationId / "earmarking" / "list" =>
-        loadOrganisation(organisationId)(repository)(
-          _.getEarmarkings.map(e => ResponseEarmarking(e.name, e.description)).toSeq
-        )
-
       case GET -> Root / organisationId / "account" / "list" =>
         loadOrganisation(organisationId)(repository)(
           _.accounts.map(a => ResponseAccount(a._1, a._2.totalBalance)).toSeq
@@ -84,17 +79,6 @@ object OrganisationRoute:
         for
           theme <- req.as[ThemeConfig]
           response <- loadAndSaveOrganisation(organisationId)(repository)(_.setTheme(theme))
-        yield response
-
-      case GET -> Root / organisationId / "theme" =>
-        for
-          organisation <- repository.findById(organisationId)
-          response <- organisation match
-            case Some(org) =>
-              org.theme match
-                case Some(value) => Ok(value)
-                case None        => NotFound()
-            case None => NotFound()
         yield response
 
   case class RequestOrganisation(name: String)

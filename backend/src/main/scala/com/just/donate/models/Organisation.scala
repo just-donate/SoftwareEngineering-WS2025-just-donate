@@ -27,6 +27,8 @@ case class Organisation(
   def getEarmarkings: Set[Earmarking] = earmarkings.toSet
 
   def getEarmarking(name: String): Option[Earmarking] = earmarkings.find(e => e.name == name || e.id == name)
+  
+  def getTheme: Option[ThemeConfig] = theme
 
   /**
    * Add a new earmarking image to the organisation.

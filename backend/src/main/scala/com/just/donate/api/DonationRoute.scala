@@ -42,19 +42,13 @@ object DonationRoute:
             case e: InvalidMessageBodyFailure => BadRequest(e.getMessage)
           }
 
-        case GET -> Root / organisationId / "donor" / donorId =>
-          loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
-            DonationListResponse(
-              organisation.getDonations(donorId).map(toResponseDonation(organisationId))
-            )
-
         case GET -> Root / organisationId / "donations" =>
           loadOrganisation[DonationListResponse](organisationId)(repository): organisation =>
             DonationListResponse(
               organisation.getDonations.map(toResponseDonation(organisationId))
             )
 
-  private def toResponseDonation(organisationId: String)(donation: Donation): DonationResponse =
+  def toResponseDonation(organisationId: String)(donation: Donation): DonationResponse =
     DonationResponse(
       donation.id,
       donation.amountTotal,
@@ -82,7 +76,12 @@ object DonationRoute:
         Donor(org.getNewDonorId, requestDonation.donorName, requestDonation.donorEmail)
       )
 
-    val earmarking = requestDonation.earmarking.flatMap(org.getEarmarking)
+    val earmarking = requestDonation.earmarking match
+      case Some(value) =>
+        org.getEarmarking(value) match
+          case Some(value) => Some(value)
+          case None        => return (org, Left(DonationError.INVALID_EARMARKING))
+      case None => None
 
     val (donation, donationPart) = earmarking match
       case Some(earmarking) => Donation(donor.id, requestDonation.amount, earmarking)
