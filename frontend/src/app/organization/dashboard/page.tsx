@@ -80,6 +80,16 @@ function DashboardPage() {
             </Link>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>User Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link href="/organization/users">
+              <Button className={theme.primary}>Manage Users</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

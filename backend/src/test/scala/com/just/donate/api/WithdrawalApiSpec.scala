@@ -1,6 +1,7 @@
 package com.just.donate.api
 
 import cats.effect.IO
+import com.just.donate.api.PaypalRoute.paypalAccountName
 import com.just.donate.api.WithdrawalRoute.RequestWithdrawal
 import com.just.donate.db.memory.MemoryOrganisationRepository
 import com.just.donate.helper.OrganisationHelper.*
@@ -31,7 +32,7 @@ class WithdrawalApiSpec extends CatsEffectSuite:
   test("POST /withdraw/organisationId/account/accountName should return OK and update the organisation") {
     val req =
       Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS)))
-        .withEntity(RequestWithdrawal("Paypal", Money("100"), "test-description", None))
+        .withEntity(RequestWithdrawal(paypalAccountName, Money("100"), "test-description", None))
     for
       _ <- addPaypalDonation(repo)
       resp <- withdrawRoute.run(req)

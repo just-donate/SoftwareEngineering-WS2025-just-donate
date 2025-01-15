@@ -46,6 +46,10 @@ const mockBankAccounts: BankAccount[] = [
   {
     name: 'Bank Account 1',
     balance: { amount: '100.0' },
+    byEarmarking: [
+      ['General Purpose', { amount: '500.0' }],
+      ['Special Purpose', { amount: '500.0' }],
+    ],
   },
 ];
 

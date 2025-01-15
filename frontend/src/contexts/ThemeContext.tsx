@@ -75,7 +75,7 @@ export const useTheme = () => {
 export async function getTheme(organizationId: string): Promise<Theme | null> {
   try {
     const response = await axiosInstance.get<Theme>(
-      `/organisation/${organizationId}/theme`,
+      `public/organisation/${organizationId}/theme`,
     );
     if (response.data) {
       return response.data;

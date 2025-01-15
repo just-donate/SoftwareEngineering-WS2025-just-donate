@@ -9,7 +9,7 @@ export async function fetchEarmarkingImages(
 ): Promise<EarmarkingImage[]> {
   try {
     const response = await axiosInstance.get(
-      `/organisation/${orgId}/earmarking/${earmarking}/image/list`,
+      `/public/organisation/${orgId}/earmarking/${earmarking}/image/list`,
     );
 
     console.log(response.data);

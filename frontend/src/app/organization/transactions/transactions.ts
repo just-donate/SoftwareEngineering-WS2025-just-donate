@@ -1,6 +1,6 @@
 'use client';
 
-import { Money, Transaction } from '@/types/types';
+import { Money, Transaction, WithdrawalList } from '@/types/types';
 import axiosInstance from '../api/axiosInstance';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -76,5 +76,18 @@ export async function createWithdrawal(
       error:
         error instanceof Error ? error.message : 'Failed to create withdrawal',
     };
+  }
+}
+
+export async function fetchWithdrawals(orgId: string): Promise<WithdrawalList> {
+  try {
+    const response = await axiosInstance.get(
+      `/withdraw/${orgId}/withdrawal/list`,
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch withdrawals:', error);
+    return { expenses: [] };
   }
 }

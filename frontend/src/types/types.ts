@@ -56,4 +56,18 @@ export interface Photo {
 export interface BankAccount {
   name: string;
   balance: Money;
+  byEarmarking: Array<[string, Money]>;
+}
+
+export interface Withdrawal {
+  id: string;
+  amount: Money;
+  time: string;
+  fromAccount: string;
+  description: string;
+  earmarking?: string;
+}
+
+export interface WithdrawalList {
+  expenses: Withdrawal[];
 }

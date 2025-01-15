@@ -1,20 +1,19 @@
 package com.just.donate.config
 
-import com.just.donate.config.AppEnvironment.DEVELOPMENT
 import com.typesafe.config.{ConfigFactory, Config as TypesafeConfig}
 
 import scala.util.Properties
 
 object AppConfig:
   def apply(): AppConfig =
-    val environment = sys.env.getOrElse("ENV", "dev") match
+    val environment = sys.env.getOrElse("ENV", "prod") match
       case "dev" | "development" => AppEnvironment.DEVELOPMENT
       case "prod" | "production" => AppEnvironment.PRODUCTION
       case env                   => throw new RuntimeException(f"Unknown environment: ${env}")
 
     AppConfig(
       environment match
-        case AppEnvironment.DEVELOPMENT => ConfigFactory.load("application.dev")
+        case AppEnvironment.DEVELOPMENT => ConfigFactory.load("application.dev.conf")
         case AppEnvironment.PRODUCTION  => ConfigFactory.load()
       ,
       environment

@@ -50,7 +50,7 @@ libraryDependencies ++= Seq(
   "org.slf4j"                    % "slf4j-simple"                  % "2.0.16",
 
   // MongoDB
-  "org.mongodb.scala"            % "mongo-scala-driver_2.13"      % "5.2.1",
+  "org.mongodb.scala"            % "mongo-scala-driver_2.13"      % "5.3.0",
 
   // Encryption
   "com.github.jwt-scala" %% "jwt-core" % "10.0.1",

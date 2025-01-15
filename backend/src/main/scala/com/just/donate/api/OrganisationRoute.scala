@@ -48,24 +48,23 @@ object OrganisationRoute:
           image <- req.as[RequestEarmarkingImage]
           response <- loadAndSaveOrganisation(organisationId)(repository)(_.addEarmarkingImage(earmarking, EarmarkingImage(image.fileUrl)))
         yield response
-
-      case GET -> Root / organisationId / "earmarking" / earmarking / "image" / "list" =>
-        // This returns an array of arrays of EarmarkingImage objects
-        // We need to flatten the array to get a single array of EarmarkingImage objects
-        loadOrganisation(organisationId)(repository)(_.getEarmarkingImages(earmarking).map(images => images.map(ResponseEarmarkingImage(_))).toSeq.flatten)
-
         
       case DELETE -> Root / organisationId / "earmarking" / earmarking =>
         loadAndSaveOrganisation(organisationId)(repository)(_.removeEarmarking(earmarking))
 
-      case GET -> Root / organisationId / "earmarking" / "list" =>
-        loadOrganisation(organisationId)(repository)(
-          _.getEarmarkings.map(e => ResponseEarmarking(e.name, e.description)).toSeq
-        )
-
       case GET -> Root / organisationId / "account" / "list" =>
-        loadOrganisation(organisationId)(repository)(
-          _.accounts.map(a => ResponseAccount(a._1, a._2.totalBalance)).toSeq
+        loadOrganisation(organisationId)(repository)(org =>
+          org.accounts
+            .map(a =>
+              ResponseAccount(
+                a._1,
+                a._2.totalBalance,
+                org.getEarmarkings
+                  .map(e => (e.name, a._2.totalEarmarkedBalance(e)))
+                  .toSeq :+ ("Frei", a._2.unboundDonations.totalBalance)
+              )
+            )
+            .toSeq
         )
 
       case req @ POST -> Root / organisationId / "account" =>
@@ -86,17 +85,6 @@ object OrganisationRoute:
           response <- loadAndSaveOrganisation(organisationId)(repository)(_.setTheme(theme))
         yield response
 
-      case GET -> Root / organisationId / "theme" =>
-        for
-          organisation <- repository.findById(organisationId)
-          response <- organisation match
-            case Some(org) =>
-              org.theme match
-                case Some(value) => Ok(value)
-                case None        => NotFound()
-            case None => NotFound()
-        yield response
-
   case class RequestOrganisation(name: String)
 
   private[api] case class ResponseOrganisation(organisationId: String, name: String)
@@ -111,6 +99,4 @@ object OrganisationRoute:
 
   private[api] case class RequestAccount(name: String, balance: Money)
 
-  private[api] case class ResponseAccount(name: String, balance: Money)
-
-  private[api] case class RequestDonation(donor: String, amount: Money, earmarking: Option[String])
+  private[api] case class ResponseAccount(name: String, balance: Money, byEarmarking: Seq[(String, Money)])
