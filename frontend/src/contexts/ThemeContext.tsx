@@ -14,9 +14,18 @@ import axiosInstance from '@/app/organization/api/axiosInstance';
 interface ThemeContextType {
   theme: Theme;
   updateTheme: (newTheme: Theme) => Promise<void>;
+  isLoading: boolean;
+}
+
+interface CachedTheme {
+  theme: Theme;
+  timestamp: number;
+  organizationId: string;
 }
 
 const organizationId = '591671920';
+const THEME_STORAGE_KEY = `theme_${organizationId}`;
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
@@ -24,19 +33,56 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [theme, setThemeState] = useState<Theme>(themes.default);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const getCachedTheme = (): Theme | null => {
+    const storedData = localStorage.getItem(THEME_STORAGE_KEY);
+    if (!storedData) return null;
+
+    try {
+      const cached: CachedTheme = JSON.parse(storedData);
+      const isExpired = Date.now() - cached.timestamp > CACHE_DURATION;
+      const isValidOrg = cached.organizationId === organizationId;
+      
+      if (isExpired || !isValidOrg || !isValidTheme(cached.theme)) {
+        localStorage.removeItem(THEME_STORAGE_KEY);
+        return null;
+      }
+
+      return cached.theme;
+    } catch (e) {
+      console.error('Failed to parse stored theme:', e);
+      localStorage.removeItem(THEME_STORAGE_KEY);
+      return null;
+    }
+  };
+
+  const setCachedTheme = (newTheme: Theme) => {
+    const cacheData: CachedTheme = {
+      theme: newTheme,
+      timestamp: Date.now(),
+      organizationId
+    };
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(cacheData));
+  };
 
   const fetchTheme = async () => {
     try {
       const savedTheme = await getTheme(organizationId);
       if (savedTheme) {
         setThemeState(savedTheme);
+        setCachedTheme(savedTheme);
       }
     } catch (error) {
       console.error('Failed to fetch theme:', error);
+      // Keep using cached theme if fetch fails
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const updateTheme = async (newTheme: Theme) => {
+    setIsLoading(true);
     try {
       const result = await saveTheme(organizationId, newTheme);
 
@@ -45,20 +91,40 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       setThemeState(newTheme);
+      setCachedTheme(newTheme);
     } catch (error) {
       console.error('Failed to update theme:', error);
       throw error instanceof Error
         ? error
         : new Error('Failed to update theme');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTheme();
+    const initializeTheme = async () => {
+      const cachedTheme = getCachedTheme();
+      if (cachedTheme) {
+        setThemeState(cachedTheme);
+        setIsLoading(false);
+        // Fetch in background to update cache
+        fetchTheme();
+      } else {
+        await fetchTheme();
+      }
+    };
+
+    initializeTheme();
   }, []);
 
+  if (isLoading) {
+    // You can replace this with a loading spinner or skeleton UI
+    return null;
+  }
+
   return (
-    <ThemeContext.Provider value={{ theme, updateTheme }}>
+    <ThemeContext.Provider value={{ theme, updateTheme, isLoading }}>
       {children}
     </ThemeContext.Provider>
   );
