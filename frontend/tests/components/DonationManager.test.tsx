@@ -74,6 +74,7 @@ describe('DonationManager Component', () => {
     (fetchDonations as jest.Mock).mockResolvedValue(mockInitialDonations);
     (fetchBankAccounts as jest.Mock).mockResolvedValue(mockBankAccounts);
     (fetchEarmarkings as jest.Mock).mockResolvedValue(mockEarmarkings);
+    window.HTMLElement.prototype.scrollIntoView = jest.fn();
   });
 
   const renderWithThemeProvider = (component: React.ReactNode) => {
@@ -129,7 +130,7 @@ describe('DonationManager Component', () => {
     }, { timeout: 10000 });
   });
 
-  /*it('creates a new donation', async () => {
+  it('creates a new donation', async () => {
     (createDonation as jest.Mock).mockResolvedValueOnce({ success: true });
 
     await act(async () => {
@@ -172,7 +173,7 @@ describe('DonationManager Component', () => {
         screen.getByText(/Donation created successfully/i),
       ).toBeInTheDocument();
     }, { timeout: 10000 });
-  }, 20000);*/
+  }, 20000);
 
   it('creates a new donation with empty fields', async () => {
     (createDonation as jest.Mock).mockResolvedValueOnce({
@@ -200,7 +201,7 @@ describe('DonationManager Component', () => {
     }, { timeout: 10000 });
   }, 10000);
 
-  /*it('creates a new donation with error', async () => {
+  it('creates a new donation with error', async () => {
     (createDonation as jest.Mock).mockResolvedValueOnce({
       success: false,
       error: 'Error',
@@ -240,7 +241,7 @@ describe('DonationManager Component', () => {
     }, { timeout: 10000 });
 
     await waitFor(() => {
-      expect(screen.getByText(/Donation created successfully/i)).toBeInTheDocument();
+      expect(screen.getByText(/Error/i)).toBeInTheDocument();
     }, { timeout: 10000 });
-  }, 20000); */
+  }, 20000); 
 });
