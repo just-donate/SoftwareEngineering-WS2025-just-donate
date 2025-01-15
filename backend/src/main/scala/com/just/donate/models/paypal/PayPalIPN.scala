@@ -18,6 +18,7 @@ case class PayPalIPN(
                       payerStatus: String,
                       firstName: String,
                       lastName: String,
+                      notificationEmail: String,
 
                       // Business / Receiver info
                       receiverId: String,

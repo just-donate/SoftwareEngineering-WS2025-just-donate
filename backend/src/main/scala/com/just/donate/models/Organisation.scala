@@ -2,6 +2,7 @@ package com.just.donate.models
 
 import com.just.donate.config.Config
 import com.just.donate.models.Types.DonationGetter
+import com.just.donate.models.EarmarkingImage
 import com.just.donate.models.errors.{ DonationError, TransferError, WithdrawError }
 import com.just.donate.notify.EmailMessage
 import com.just.donate.notify.messages.{ TransferMessage, WithdrawalMessage }
@@ -18,7 +19,8 @@ case class Organisation(
   expenses: Seq[Expense] = Seq.empty,
   donors: Map[String, Donor] = Map.empty,
   earmarkings: Seq[Earmarking] = Seq.empty,
-  theme: Option[ThemeConfig] = None
+  theme: Option[ThemeConfig] = None,
+  earmarkingImages: Map[String, Seq[EarmarkingImage]] = Map.empty
 ):
 
   def id: String = math.abs(name.hashCode).toString
@@ -26,6 +28,21 @@ case class Organisation(
   def getEarmarkings: Set[Earmarking] = earmarkings.toSet
 
   def getEarmarking(name: String): Option[Earmarking] = earmarkings.find(e => e.name == name || e.id == name)
+
+  def getTheme: Option[ThemeConfig] = theme
+
+  /**
+   * Add a new earmarking image to the organisation.
+   * @param earmarking the name of the earmarking.
+   * @param image the image to add.
+   * @return a new organisation with the earmarking image added.
+   */
+  def addEarmarkingImage(earmarking: String, image: EarmarkingImage): Organisation =
+    copy(earmarkingImages =
+      earmarkingImages.updated(earmarking, earmarkingImages.getOrElse(earmarking, Seq.empty).appended(image))
+    )
+
+  def getEarmarkingImages(earmarking: String): Option[Seq[EarmarkingImage]] = earmarkingImages.get(earmarking)
 
   def setTheme(theme: ThemeConfig): Organisation = copy(theme = Some(theme))
 
@@ -198,7 +215,7 @@ case class Organisation(
       case Left(value) => Left(value)
       case Right((donationParts, updatedAccount)) =>
         val newAccounts = accounts.updated(account.name, updatedAccount)
-        val expense = Expense(description, amount, earmarking, donationParts)
+        val expense = Expense(description, amount, earmarking, donationParts, account.name)
         val newDonations = getDonationsAfterWithdrawal(donationParts) match
           case Left(error)  => return Left(error)
           case Right(value) => value
@@ -337,4 +354,3 @@ case class Organisation(
         case None =>
 
     Right(emailMessages)
-

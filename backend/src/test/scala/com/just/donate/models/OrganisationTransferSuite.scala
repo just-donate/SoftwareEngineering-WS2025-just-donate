@@ -1,5 +1,6 @@
 package com.just.donate.models
 
+import com.just.donate.api.PaypalRoute.paypalAccountName
 import com.just.donate.helper.OrganisationHelper.createNewRoots
 import com.just.donate.mocks.config.AppConfigMock
 import com.just.donate.models.errors.TransferError
@@ -17,10 +18,10 @@ class OrganisationTransferSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
-    newRoots = newRoots.transfer(Money("50.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
+    newRoots = newRoots.transfer(Money("50.00"), paypalAccountName, "Bank", AppConfigMock()).toOption.get._1
 
-    assertEquals(newRoots.getAccount("Paypal").get.totalBalance, Money("50.00"))
+    assertEquals(newRoots.getAccount(paypalAccountName).get.totalBalance, Money("50.00"))
     assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money("50.00"))
   }
 
@@ -29,10 +30,10 @@ class OrganisationTransferSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
 
     assertEquals(
-      newRoots.transfer(Money(amountOneFifty), "Paypal", "Bank", AppConfigMock()),
+      newRoots.transfer(Money(amountOneFifty), paypalAccountName, "Bank", AppConfigMock()),
       Left(TransferError.INSUFFICIENT_ACCOUNT_FUNDS)
     )
   }
@@ -42,7 +43,7 @@ class OrganisationTransferSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
 
     assertEquals(
       newRoots.transfer(Money("50.00"), "NoExists", "Bank", AppConfigMock()),
@@ -55,10 +56,10 @@ class OrganisationTransferSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
 
     assertEquals(
-      newRoots.transfer(Money("50.00"), "Paypal", "NoExists", AppConfigMock()),
+      newRoots.transfer(Money("50.00"), paypalAccountName, "NoExists", AppConfigMock()),
       Left(TransferError.INVALID_ACCOUNT)
     )
   }
@@ -68,10 +69,10 @@ class OrganisationTransferSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
 
     assertEquals(
-      newRoots.transfer(Money("-50.00"), "Paypal", "Bank", AppConfigMock()),
+      newRoots.transfer(Money("-50.00"), paypalAccountName, "Bank", AppConfigMock()),
       Left(TransferError.NON_POSITIVE_AMOUNT)
     )
   }
@@ -81,10 +82,10 @@ class OrganisationTransferSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
 
     assertEquals(
-      newRoots.transfer(Money("0.00"), "Paypal", "Bank", AppConfigMock()),
+      newRoots.transfer(Money("0.00"), paypalAccountName, "Bank", AppConfigMock()),
       Left(TransferError.NON_POSITIVE_AMOUNT)
     )
   }
@@ -94,10 +95,10 @@ class OrganisationTransferSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred))
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
 
     assertEquals(
-      newRoots.transfer(Money("50.00"), "Paypal", "Paypal", AppConfigMock()),
+      newRoots.transfer(Money("50.00"), paypalAccountName, paypalAccountName, AppConfigMock()),
       Left(TransferError.SAME_SOURCE_AND_DESTINATION_ACCOUNT)
     )
   }
@@ -110,14 +111,14 @@ class OrganisationTransferSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money("200.00"), educationEarmarking)
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
-    newRoots = newRoots.transfer(Money(amountHundred), "Paypal", "Bank", AppConfigMock()).toOption.get._1
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
+    newRoots = newRoots.transfer(Money(amountHundred), paypalAccountName, "Bank", AppConfigMock()).toOption.get._1
 
-    assertEquals(newRoots.getAccount("Paypal").get.totalBalance, Money(amountHundred))
+    assertEquals(newRoots.getAccount(paypalAccountName).get.totalBalance, Money(amountHundred))
     assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money(amountHundred))
 
     assertEquals(
-      newRoots.getAccount("Paypal").get.totalEarmarkedBalance(educationEarmarking),
+      newRoots.getAccount(paypalAccountName).get.totalEarmarkedBalance(educationEarmarking),
       Money(amountHundred)
     )
     assertEquals(
@@ -137,23 +138,23 @@ class OrganisationTransferSuite extends FunSuite:
 
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred), educationEarmarking)
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
     val donor2 = Donor(newRoots.getNewDonorId, "Donor2", "donor2@example.org")
     val (donation2, donationPart2) = Donation(donor2.id, Money(amountOneFifty), healthEarmarking)
-    newRoots = newRoots.donate(donor2, donationPart2, donation2, "Paypal").toOption.get
+    newRoots = newRoots.donate(donor2, donationPart2, donation2, paypalAccountName).toOption.get
 
-    newRoots = newRoots.transfer(Money("50.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
+    newRoots = newRoots.transfer(Money("50.00"), paypalAccountName, "Bank", AppConfigMock()).toOption.get._1
 
-    assertEquals(newRoots.getAccount("Paypal").get.totalBalance, Money("200.00"))
+    assertEquals(newRoots.getAccount(paypalAccountName).get.totalBalance, Money("200.00"))
     assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money("50.00"))
 
     // Earmarked balances after partial transfer
     assertEquals(
-      newRoots.getAccount("Paypal").get.totalEarmarkedBalance(educationEarmarking),
+      newRoots.getAccount(paypalAccountName).get.totalEarmarkedBalance(educationEarmarking),
       Money("50.00")
     )
     assertEquals(
-      newRoots.getAccount("Paypal").get.totalEarmarkedBalance(healthEarmarking),
+      newRoots.getAccount(paypalAccountName).get.totalEarmarkedBalance(healthEarmarking),
       Money(amountOneFifty)
     )
 
@@ -174,22 +175,19 @@ class OrganisationTransferSuite extends FunSuite:
     val educationEarmarking = Earmarking("Health", "Supporting education in Kenya")
     val healthEarmarking = Earmarking("Health", "Supporting health in Kenya")
 
-    newRoots = newRoots.addEarmarking(educationEarmarking)
-    newRoots = newRoots.addEarmarking(healthEarmarking)
-
     val donor = Donor(newRoots.getNewDonorId, "Donor1", donor1Email)
     val (donation, donationPart) = Donation(donor.id, Money(amountHundred), educationEarmarking)
     val (donation2, donationPart2) = Donation(donor.id, Money(amountOneFifty), educationEarmarking)
-    newRoots = newRoots.donate(donor, donationPart, donation, "Paypal").toOption.get
-    newRoots = newRoots.donate(donor, donationPart2, donation2, "Paypal").toOption.get
+    newRoots = newRoots.donate(donor, donationPart, donation, paypalAccountName).toOption.get
+    newRoots = newRoots.donate(donor, donationPart2, donation2, paypalAccountName).toOption.get
 
-    newRoots = newRoots.transfer(Money("120.00"), "Paypal", "Bank", AppConfigMock()).toOption.get._1
+    newRoots = newRoots.transfer(Money("120.00"), paypalAccountName, "Bank", AppConfigMock()).toOption.get._1
 
-    assertEquals(newRoots.getAccount("Paypal").get.totalBalance, Money("130.00"))
+    assertEquals(newRoots.getAccount(paypalAccountName).get.totalBalance, Money("130.00"))
     assertEquals(newRoots.getAccount("Bank").get.totalBalance, Money("120.00"))
 
     assertEquals(
-      newRoots.getAccount("Paypal").get.totalEarmarkedBalance(educationEarmarking),
+      newRoots.getAccount(paypalAccountName).get.totalEarmarkedBalance(educationEarmarking),
       Money("130.00")
     )
     assertEquals(

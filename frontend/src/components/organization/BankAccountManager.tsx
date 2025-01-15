@@ -9,6 +9,7 @@ import {
   fetchBankAccounts,
   postBankAccount,
 } from '@/app/organization/bank-accounts/bank-accounts';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -25,6 +26,7 @@ export default function BankAccountManager({
   initialAccounts,
   organizationId,
 }: BankAccountManagerProps) {
+  const { theme } = useTheme();
   const [accounts, setAccounts] = useState<BankAccount[]>(initialAccounts);
 
   useEffect(() => {
@@ -51,9 +53,9 @@ export default function BankAccountManager({
 
   return (
     <div>
-      <Card className="mb-4">
+      <Card className={`mb-4 ${theme.card}`}>
         <CardHeader>
-          <CardTitle>Add New Bank Account</CardTitle>
+          <CardTitle className={theme.text}>Add New Bank Account</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -62,7 +64,7 @@ export default function BankAccountManager({
                 value={newAccountName}
                 onChange={(e) => setNewAccountName(e.target.value)}
                 placeholder="Account name"
-                className="mb-2"
+                className={`mb-2 ${theme.background} ${theme.text}`}
               />
               <Input
                 value={newAccountAmount}
@@ -70,8 +72,12 @@ export default function BankAccountManager({
                 placeholder="Initial balance"
                 type="number"
                 step="0.01"
+                className={`${theme.background} ${theme.text}`}
               />
-              <Button onClick={addBankAccount} className="mt-2">
+              <Button
+                onClick={addBankAccount}
+                className={`mt-2 ${theme.primary}`}
+              >
                 Add Account
               </Button>
             </div>
@@ -83,22 +89,51 @@ export default function BankAccountManager({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className={theme.card}>
         <CardHeader>
-          <CardTitle>Existing Bank Accounts</CardTitle>
+          <CardTitle className={theme.text}>Existing Bank Accounts</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2">
-            {accounts.map((account) => (
-              <li
-                key={account.name}
-                className="p-4 bg-secondary rounded-lg flex justify-between items-center"
-              >
-                <span>{account.name}</span>
-                <span className="font-medium">{account.balance.amount}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full border-separate border-spacing-y-2">
+              <thead>
+                <tr>
+                  <th className="text-left p-2">Accounts</th>
+                  {accounts.length > 0 &&
+                    accounts[0].byEarmarking.map(([earmarkingName]) => (
+                      <th key={earmarkingName} className="text-center p-2">
+                        {earmarkingName}
+                      </th>
+                    ))}
+                  <th className="text-right p-2">Total Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {accounts.map((account) => (
+                  <tr key={account.name}>
+                    <td
+                      className={`p-4 first:rounded-l-lg ${theme.secondary} ${theme.text}`}
+                    >
+                      {account.name}
+                    </td>
+                    {account.byEarmarking.map(([earmarkingName, money]) => (
+                      <td
+                        key={earmarkingName}
+                        className={`text-center p-4 ${theme.secondary} ${theme.text}`}
+                      >
+                        {money.amount}
+                      </td>
+                    ))}
+                    <td
+                      className={`text-right p-4 last:rounded-r-lg font-medium ${theme.secondary} ${theme.text}`}
+                    >
+                      {account.balance.amount}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
     </div>

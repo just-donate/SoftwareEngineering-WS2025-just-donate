@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { act } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import DonationManager from '../../src/components/organization/DonationManager';
 import { BankAccount, Donation, Earmarking } from '../../src/types/types';
@@ -8,6 +8,7 @@ import {
 } from '../../src/app/organization/donations/donations';
 import { fetchEarmarkings } from '../../src/app/organization/earmarkings/earmarkings';
 import { fetchBankAccounts } from '../../src/app/organization/bank-accounts/bank-accounts';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import '@testing-library/jest-dom';
 
 jest.mock('../../src/app/organization/donations/donations', () => ({
@@ -45,15 +46,21 @@ const mockBankAccounts: BankAccount[] = [
   {
     name: 'Bank Account 1',
     balance: { amount: '100.0' },
+    byEarmarking: [
+      ['General Purpose', { amount: '500.0' }],
+      ['Special Purpose', { amount: '500.0' }],
+    ],
   },
 ];
 
 const mockEarmarkings: Earmarking[] = [
   {
     name: 'General Purpose',
+    description: 'General purpose earmarking',
   },
   {
     name: 'Special Purpose',
+    description: 'Special purpose earmarking',
   },
 ];
 
@@ -64,15 +71,22 @@ describe('DonationManager Component', () => {
     (fetchDonations as jest.Mock).mockResolvedValue(mockInitialDonations);
     (fetchBankAccounts as jest.Mock).mockResolvedValue(mockBankAccounts);
     (fetchEarmarkings as jest.Mock).mockResolvedValue(mockEarmarkings);
-    render(
-      <DonationManager
-        initialDonations={mockInitialDonations}
-        organizationId={organizationId}
-      />,
-    );
   });
 
-  it('renders initial donations', () => {
+  const renderWithThemeProvider = (component: React.ReactNode) => {
+    return render(<ThemeProvider>{component}</ThemeProvider>);
+  };
+
+  it('renders initial donations', async () => {
+    await act(async () => {
+      renderWithThemeProvider(
+        <DonationManager
+          initialDonations={mockInitialDonations}
+          organizationId={organizationId}
+        />,
+      );
+    });
+
     expect(screen.getByText(/Donations/i)).toBeInTheDocument();
     expect(screen.getByText(/Organization 1/i)).toBeInTheDocument();
     expect(screen.getByText(/100.0/i)).toBeInTheDocument();
@@ -81,13 +95,22 @@ describe('DonationManager Component', () => {
   it('creates a new donation', async () => {
     (createDonation as jest.Mock).mockResolvedValueOnce({ success: true });
 
-    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), {
+    await act(async () => {
+      renderWithThemeProvider(
+        <DonationManager
+          initialDonations={mockInitialDonations}
+          organizationId={organizationId}
+        />,
+      );
+    });
+
+    fireEvent.change(screen.getByTestId('donor-name-input'), {
       target: { value: 'Jane Doe' },
     });
-    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), {
+    fireEvent.change(screen.getByTestId('donor-email-input'), {
       target: { value: 'jane@example.com' },
     });
-    fireEvent.change(screen.getByPlaceholderText(/Amount/i), {
+    fireEvent.change(screen.getByTestId('amount-input'), {
       target: { value: '50.0' },
     });
 
@@ -105,6 +128,9 @@ describe('DonationManager Component', () => {
       expect(
         screen.getByText(/Donation created successfully/i),
       ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Donation created successfully/i),
+      ).toBeInTheDocument();
     });
   });
 
@@ -114,9 +140,21 @@ describe('DonationManager Component', () => {
       error: 'Error',
     });
 
+    await act(async () => {
+      renderWithThemeProvider(
+        <DonationManager
+          initialDonations={mockInitialDonations}
+          organizationId={organizationId}
+        />,
+      );
+    });
+
     fireEvent.click(screen.getByText(/Create Donation/i));
 
     await waitFor(() => {
+      expect(
+        screen.getByText(/Please fill in all fields/i),
+      ).toBeInTheDocument();
       expect(
         screen.getByText(/Please fill in all fields/i),
       ).toBeInTheDocument();
@@ -129,13 +167,22 @@ describe('DonationManager Component', () => {
       error: 'Error',
     });
 
-    fireEvent.change(screen.getByPlaceholderText(/Donor Name/i), {
+    await act(async () => {
+      renderWithThemeProvider(
+        <DonationManager
+          initialDonations={mockInitialDonations}
+          organizationId={organizationId}
+        />,
+      );
+    });
+
+    fireEvent.change(screen.getByTestId('donor-name-input'), {
       target: { value: 'Jane Doe' },
     });
-    fireEvent.change(screen.getByPlaceholderText(/Donor Email/i), {
+    fireEvent.change(screen.getByTestId('donor-email-input'), {
       target: { value: 'jane@example.com' },
     });
-    fireEvent.change(screen.getByPlaceholderText(/Amount/i), {
+    fireEvent.change(screen.getByTestId('amount-input'), {
       target: { value: '50.0' },
     });
 
@@ -155,9 +202,21 @@ describe('DonationManager Component', () => {
   });
 
   it('shows an error message when fields are missing', async () => {
+    await act(async () => {
+      renderWithThemeProvider(
+        <DonationManager
+          initialDonations={mockInitialDonations}
+          organizationId={organizationId}
+        />,
+      );
+    });
+
     fireEvent.click(screen.getByText(/Create Donation/i));
 
     await waitFor(() => {
+      expect(
+        screen.getByText(/Please fill in all fields/i),
+      ).toBeInTheDocument();
       expect(
         screen.getByText(/Please fill in all fields/i),
       ).toBeInTheDocument();

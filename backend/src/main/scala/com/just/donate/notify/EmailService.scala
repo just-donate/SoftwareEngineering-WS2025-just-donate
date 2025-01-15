@@ -14,6 +14,7 @@ class EmailService(val config: Config) extends IEmailService:
     properties.put("mail.smtp.port", config.mailSmtpPort)
     properties.put("mail.smtp.auth", "true")
     properties.put("mail.smtp.starttls.enable", "true")
+    properties.put("mail.debug", "true")
     properties
 
   def sendEmail(

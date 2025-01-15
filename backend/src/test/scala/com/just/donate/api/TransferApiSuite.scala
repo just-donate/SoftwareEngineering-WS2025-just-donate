@@ -1,6 +1,7 @@
 package com.just.donate.api
 
 import cats.effect.IO
+import com.just.donate.api.PaypalRoute.paypalAccountName
 import com.just.donate.api.TransferRoute.RequestTransfer
 import com.just.donate.db.memory.MemoryOrganisationRepository
 import com.just.donate.helper.OrganisationHelper.*
@@ -30,7 +31,7 @@ class TransferApiSuite extends CatsEffectSuite:
   test("POST /transfer/organisationId should return OK and update the organisation") {
     val req =
       Request[IO](Method.POST, testUri(organisationId(NEW_ROOTS)))
-        .withEntity(RequestTransfer("Paypal", "Bank", Money("100")))
+        .withEntity(RequestTransfer(paypalAccountName, "Bank", Money("100")))
     for
       _ <- addPaypalDonation(repo)
       resp <- transferRoute.run(req)
@@ -40,6 +41,6 @@ class TransferApiSuite extends CatsEffectSuite:
       val updatedOrg = repo.findById(organisationId(NEW_ROOTS)).unsafeRunSync().get
       println(updatedOrg)
       assert(updatedOrg.totalBalance == Money("100"))
-      assert(updatedOrg.getAccount("Paypal").get.totalBalance == Money.ZERO)
+      assert(updatedOrg.getAccount(paypalAccountName).get.totalBalance == Money.ZERO)
       assert(updatedOrg.getAccount("Bank").get.totalBalance == Money("100"))
   }
