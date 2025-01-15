@@ -24,8 +24,8 @@ export interface Theme {
   };
   emailTemplates: {
     donationTemplate: string;
-    transferTemplate: string;
     withdrawalTemplate: string;
+    manualTemplate: string;
   };
 }
 
@@ -61,13 +61,6 @@ or enter your tracking id
 {{tracking-id}}
 on our tracking page
 {{tracking-link}}`,
-      transferTemplate: `Your recent donation to {{organisation-name}} has been fully transferred away from the account {{from-account-name}}.
-To see more details about the status of your donation, visit the following link
-{{tracking-link-with-id}}
-or enter your tracking id
-{{tracking-id}}
-on our tracking page
-{{tracking-url}}`,
       withdrawalTemplate: `Your recent donation to {{organisation-name}} has been fully utilized.
 To see more details about the status of your donation, visit the following link
 {{tracking-link-with-id}}
@@ -75,6 +68,13 @@ or enter your tracking id
 {{tracking-id}}
 on our tracking page
 {{tracking-url}}`,
+      manualTemplate: `Your donation to {{organisation-name}} has not been forgotten.
+To track your progress visit
+{{tracking-link-with-id}}
+or enter your tracking id
+{{tracking-id}}
+on our tracking page
+{{tracking-link}}`,
     },
   },
 };
