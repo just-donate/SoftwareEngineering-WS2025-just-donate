@@ -10,18 +10,20 @@ import {
   SelectValue,
 } from './ui/select';
 import DonationDetails from './DonationDetails';
-import { Donation } from '@/types/types';
+import { DonationWithDonor } from '@/types/types';
 import { useTheme } from '@/contexts/ThemeContext';
+import { formatStatus } from '@/lib/status';
 
 interface DonationsListProps {
-  initialDonations: Donation[];
+  initialDonations: DonationWithDonor[];
 }
 
 export default function DonationsList({
   initialDonations,
 }: DonationsListProps) {
   const { theme } = useTheme();
-  const [donations, setDonations] = useState<Donation[]>(initialDonations);
+  const [donations, setDonations] =
+    useState<DonationWithDonor[]>(initialDonations);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -36,13 +38,27 @@ export default function DonationsList({
 
   const filteredDonations = donations.filter((donation) => {
     const matchesSearch =
-      donation.donationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.organisation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.earmarking.toLowerCase().includes(searchTerm.toLowerCase());
+      (donation.donationId?.toLowerCase() || '').includes(
+        searchTerm.toLowerCase(),
+      ) ||
+      (donation.date?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      donation.amount?.amount?.toString().includes(searchTerm) ||
+      (donation.donor.name?.toLowerCase() || '').includes(
+        searchTerm.toLowerCase(),
+      ) ||
+      (donation.donor.email?.toLowerCase() || '').includes(
+        searchTerm.toLowerCase(),
+      ) ||
+      (donation.organisation?.toLowerCase() || '').includes(
+        searchTerm.toLowerCase(),
+      ) ||
+      (donation.earmarking?.toLowerCase() || '').includes(
+        searchTerm.toLowerCase(),
+      );
 
     const matchesStatus =
       statusFilter === 'all' ||
-      donation.status[donation.status.length - 1]?.status === statusFilter;
+      donation.status?.[donation.status.length - 1]?.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -66,7 +82,7 @@ export default function DonationsList({
             <SelectItem value="all">All Statuses</SelectItem>
             {uniqueStatuses.map((status) => (
               <SelectItem key={status} value={status}>
-                {status}
+                {formatStatus(status)}
               </SelectItem>
             ))}
           </SelectContent>

@@ -2,9 +2,10 @@
 
 import GalleryManager from '../../../components/organization/GalleryManager';
 import withAuth from '../api/RequiresAuth';
+import { config } from '@/lib/config';
 
 function GalleryPage() {
-  const organisationId = '591671920';
+  const organisationId = config.organizationId;
 
   return (
     <div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import { DonationDetails } from '../../src/components/tracking/DonationDetails';
 import { ThemeProvider } from '../../src/contexts/ThemeContext';
 import '@testing-library/jest-dom'; // Import jest-dom
@@ -24,7 +24,7 @@ describe('DonationDetails Component', () => {
     date: '2023-01-01',
     status: [
       {
-        status: 'Completed',
+        status: 'received',
         date: '2023-01-01',
         description: 'Donation completed successfully',
       },
@@ -48,11 +48,15 @@ describe('DonationDetails Component', () => {
     });
 
     // Check if the DonationDetails component is displayed
-    const element = screen.getByText(/Donation Details/i);
-    expect(element).toBeInTheDocument();
+    await waitFor(() => {
+      const element = screen.getByText(/Donation Details/i);
+      expect(element).toBeInTheDocument();
+    });
 
     // Check if the StatusTimeline is rendered
-    const statusTimeline = screen.getByTestId('mock-status-timeline');
-    expect(statusTimeline).toBeInTheDocument();
+    await waitFor(() => {
+      const statusTimeline = screen.getByTestId('mock-status-timeline');
+      expect(statusTimeline).toBeInTheDocument();
+    });
   });
 });

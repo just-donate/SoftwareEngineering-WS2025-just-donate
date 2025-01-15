@@ -9,7 +9,7 @@ import {
   CardContent,
 } from '../../../components/organization/ui/card';
 import { Theme } from '../../../styles/themes';
-import { useTheme } from '@/contexts/ThemeContext';
+import { isValidTheme, useTheme } from '@/contexts/ThemeContext';
 import withAuth from '../api/RequiresAuth';
 
 function ManageTrackingPage() {
@@ -47,33 +47,6 @@ function ManageTrackingPage() {
       setError('Invalid theme format. Please enter a valid JSON string.');
       setSuccessMessage('');
     }
-  };
-
-  const isValidTheme = (theme: Partial<Theme>): theme is Theme => {
-    return (
-      typeof theme.primary === 'string' &&
-      typeof theme.secondary === 'string' &&
-      typeof theme.accent === 'string' &&
-      typeof theme.background === 'string' &&
-      typeof theme.card === 'string' &&
-      typeof theme.text === 'string' &&
-      typeof theme.textLight === 'string' &&
-      typeof theme.font === 'string' &&
-      typeof theme.icon === 'string' &&
-      typeof theme.ngoName === 'string' &&
-      typeof theme.ngoUrl === 'string' &&
-      typeof theme.helpUrl === 'string' &&
-      typeof theme.statusColors === 'object' &&
-      typeof theme.statusColors.announced === 'string' &&
-      typeof theme.statusColors.pending_confirmation === 'string' &&
-      typeof theme.statusColors.confirmed === 'string' &&
-      typeof theme.statusColors.received === 'string' &&
-      typeof theme.statusColors.in_transfer === 'string' &&
-      typeof theme.statusColors.processing === 'string' &&
-      typeof theme.statusColors.allocated === 'string' &&
-      typeof theme.statusColors.awaiting_utilization === 'string' &&
-      typeof theme.statusColors.used === 'string'
-    );
   };
 
   return (

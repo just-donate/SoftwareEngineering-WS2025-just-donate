@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Earmarking } from '@/types/types';
 import { useTheme } from '@/contexts/ThemeContext';
 import axiosInstance from '@/app/organization/api/axiosInstance';
+import axios from 'axios';
 
 interface EarmarkingManagerProps {
   initialEarmarkings: Earmarking[];
@@ -59,9 +60,18 @@ export default function EarmarkingManager({
       setError('');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : 'Failed to create earmarking',
-      );
+      let errorMessage = 'Failed to create earmarking';
+
+      if (axios.isAxiosError(error)) {
+        // Narrowed type: AxiosError
+        errorMessage =
+          error.response?.data?.error || error.message || errorMessage;
+      } else if (error instanceof Error) {
+        // Standard JS Error
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
       setSuccessMessage('');
     }
   };

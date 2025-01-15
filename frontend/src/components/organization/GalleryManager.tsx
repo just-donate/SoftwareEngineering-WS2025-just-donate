@@ -148,7 +148,7 @@ export default function GalleryManager({
           ))}
         </SelectContent>
       </Select>
-      <Card>
+      <Card className="mt-4">
         <CardHeader>
           <CardTitle>Photos</CardTitle>
         </CardHeader>
