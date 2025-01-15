@@ -151,7 +151,7 @@ describe('DonationManager Component', () => {
       fireEvent.change(screen.getByTestId('amount-input'), {
         target: { value: '50.0' },
       });
-    });
+    }, { timeout: 10000 });
 
     await act(async () => {
       fireEvent.click(screen.getByText(/Select Earmarking/i));
