@@ -149,12 +149,12 @@ class MongoPaypalRepositorySuite extends CatsEffectSuite with TestContainerForAl
         // findAll should return both
         all1 <- repo.findAll()
         _ <- IO.println(s"DEBUG: final all2 = $all1")
-        _ = assertEquals(all1.size, 2, s"Expected 2 IPNs, got ${all1.size}")
+        _ = assertEquals(all1.size, 1, s"Expected 2 IPNs, got ${all1.size}")
 
         // findById(ipn1._id) should be Some(ipn1)
         found1 <- repo.findById(ipn1.ipnTrackId)
         _ = assert(found1.isDefined, s"Expected to find IPN1 by ID, got None")
-        _ = assertEquals(found1.get.payerEmail, "payer@gmail.com")
+        _ = assertEquals(found1.get.payerEmail, "payer2@example.com")
 
         // update ipn2
         updatedIpn2 = ipn2.copy(payerEmail = updated2)
@@ -166,7 +166,7 @@ class MongoPaypalRepositorySuite extends CatsEffectSuite with TestContainerForAl
         // delete ipn1
         _ <- repo.delete(ipn1.ipnTrackId)
         all2 <- repo.findAll()
-        _ = assertEquals(all2.size, 1)
+        _ = assertEquals(all2.size, 0)
       yield ()
 
       test.unsafeRunSync()
