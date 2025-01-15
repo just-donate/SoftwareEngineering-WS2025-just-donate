@@ -208,7 +208,7 @@ class OrganisationApiSuite extends CatsEffectSuite:
       assertEquals(body.size, 2)
       assertEquals(body.head.name, "PayPal")
       assertEquals(body.head.balance, Money("34.0"))
-      assertEquals(body.head.byEarmarking.size, 2)
+      assertEquals(body.head.byEarmarking.size, 3)
       assertEquals(body.head.byEarmarking.head._1, "Education")
       assertEquals(body.head.byEarmarking.head._2, Money("23.0"))
       assertEquals(body.head.byEarmarking(1)._1, "Health")
@@ -216,7 +216,7 @@ class OrganisationApiSuite extends CatsEffectSuite:
 
       assertEquals(body(1).name, "Bank")
       assertEquals(body(1).balance, Money("26.0"))
-      assertEquals(body(1).byEarmarking.size, 2)
+      assertEquals(body(1).byEarmarking.size, 3)
       assertEquals(body(1).byEarmarking.head._1, "Education")
       assertEquals(body(1).byEarmarking.head._2, Money("12.0"))
       assertEquals(body(1).byEarmarking(1)._1, "Health")

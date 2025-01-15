@@ -44,3 +44,4 @@ class DonationApiSuite extends CatsEffectSuite:
       println(">>>> ORG: " + updatedOrg)
       assert(updatedOrg.totalBalance == Money("100"))
   }
+
