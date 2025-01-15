@@ -48,7 +48,7 @@ object DonationRoute:
                   )
                 ) >> Ok()
           yield response).handleErrorWith {
-            case e: InvalidMessageBodyFailure =>
+            case e: (InvalidMessageBodyFailure | MalformedMessageBodyFailure) =>
               BadRequest(e.getMessage)
           }
 
