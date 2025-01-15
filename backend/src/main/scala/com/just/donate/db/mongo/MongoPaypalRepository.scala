@@ -22,10 +22,8 @@ class MongoPaypalRepository(collection: org.mongodb.scala.MongoCollection[Docume
       "data" -> ipn.asJson.noSpaces
     )
     collection
-      .replaceOne(
-        Filters.eq("_id", ipn.ipnTrackId),
-        doc,
-        ReplaceOptions().upsert(true)
+      .insertOne(
+        doc
       )
       .toIO
       .map(_ => ipn)

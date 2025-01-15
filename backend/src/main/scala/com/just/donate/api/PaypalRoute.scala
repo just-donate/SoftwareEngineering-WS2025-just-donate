@@ -62,17 +62,6 @@ object PaypalRoute:
                   IO.raiseError(new IllegalArgumentException("Invalid payment status"))
               }
 
-              // Check for duplicate IPN
-              existingIpn <- paypalRepo.findById(newIpn.ipnTrackId)
-              _ <- existingIpn match {
-                case Some(_) =>
-                  val errMsg = s"Duplicate IPN detected for IPN track ID: ${newIpn.ipnTrackId}"
-                  IO.println(errMsg) >>
-                    errorLogger.logError("IPN", errMsg, rawBody) >>
-                    IO.raiseError(new IllegalStateException("Duplicate IPN detected"))
-                case None => IO.unit
-              }
-
               // Save the IPN if all checks pass
               _ <- paypalRepo.save(newIpn).handleErrorWith { error =>
                 val errMsg = s"Failed to save IPN: $error"
