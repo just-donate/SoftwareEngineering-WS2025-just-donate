@@ -141,7 +141,7 @@ describe('DonationManager Component', () => {
       );
     });
 
-    await waitFor(() => {
+    await act(async () => {
       fireEvent.change(screen.getByTestId('donor-name-input'), {
         target: { value: 'Jane Doe' },
       });
@@ -161,7 +161,7 @@ describe('DonationManager Component', () => {
       fireEvent.click(screen.getByText(/Bank Account 1/i)); // Select the option
 
       fireEvent.click(screen.getByText(/Create Donation/i));
-    }, { timeout: 10000 });
+    });
 
     await waitFor(() => {
       expect(
@@ -217,7 +217,7 @@ describe('DonationManager Component', () => {
       );
     });
 
-    await waitFor(() => {
+    await act(async () => {
       fireEvent.change(screen.getByTestId('donor-name-input'), {
         target: { value: 'Jane Doe' },
       });
